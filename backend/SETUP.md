@@ -145,8 +145,6 @@ python test_email_verification.py
 Verifies: Auto-sync from Firebase Auth to Firestore
 
 ### Test Google OAuth
-**Note:** First update `test_google_auth.html` line 72 with your Google Client ID from `.env`
-
 ```bash
 # Open in browser (easiest):
 http://localhost:8000/test-google-auth
