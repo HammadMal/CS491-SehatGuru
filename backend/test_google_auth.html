@@ -68,8 +68,11 @@
         <div class="step">
             <h3>Step 1: Sign in with Google</h3>
             <p>Click the button below to sign in with your Google account:</p>
+            <p style="color: #f44336; font-size: 14px; margin-bottom: 10px;">
+                ⚠️ <strong>Before testing:</strong> Replace <code>YOUR-GOOGLE-CLIENT-ID</code> below (line 72) with your actual Google Client ID from <code>.env</code>
+            </p>
             <div id="g_id_onload"
-                 data-client_id="307789075876-vdkvseo25qc1uqbq2j90gu6rl13dblqu.apps.googleusercontent.com"
+                 data-client_id="YOUR-GOOGLE-CLIENT-ID.apps.googleusercontent.com"
                  data-callback="handleCredentialResponse">
             </div>
             <div class="g_id_signin" data-type="standard"></div>
