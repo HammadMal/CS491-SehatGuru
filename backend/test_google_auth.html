@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Google OAuth - SehatGuru</title>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #4CAF50;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f9f9f9;
+            border-left: 4px solid #4CAF50;
+            border-radius: 4px;
+            word-wrap: break-word;
+        }
+        .error {
+            border-left-color: #f44336;
+            background: #ffebee;
+        }
+        pre {
+            background: #263238;
+            color: #aed581;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+        .step {
+            margin: 20px 0;
+            padding: 15px;
+            background: #e3f2fd;
+            border-radius: 4px;
+        }
+        .button {
+            background: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .button:hover {
+            background: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 Test Google OAuth - SehatGuru</h1>
+
+        <div class="step">
+            <h3>Step 1: Sign in with Google</h3>
+            <p>Click the button below to sign in with your Google account:</p>
+            <div id="g_id_onload"
+                 data-client_id="YOUR-GOOGLE-CLIENT-ID.apps.googleusercontent.com"
+                 data-callback="handleCredentialResponse">
+            </div>
+            <p style="color: #f44336; font-size: 14px; margin-top: 10px;">
+                ⚠️ Replace <code>YOUR-GOOGLE-CLIENT-ID</code> above with your actual Google Client ID from .env
+            </p>
+            <div class="g_id_signin" data-type="standard"></div>
+        </div>
+
+        <div id="result"></div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:8000/api/auth';
+
+        function handleCredentialResponse(response) {
+            const resultDiv = document.getElementById('result');
+
+            // Display Google ID Token
+            resultDiv.innerHTML = `
+                <div class="result">
+                    <h3>✅ Step 2: Google ID Token Received</h3>
+                    <p><strong>ID Token:</strong></p>
+                    <pre>${response.credential.substring(0, 100)}...</pre>
+                    <p>Now sending to backend...</p>
+                </div>
+            `;
+
+            // Send to backend
+            fetch(`${API_URL}/google`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    id_token: response.credential
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.access_token) {
+                    // Success
+                    resultDiv.innerHTML += `
+                        <div class="result">
+                            <h3>✅ Step 3: Backend Authentication Successful!</h3>
+                            <p><strong>Access Token:</strong></p>
+                            <pre>${data.access_token.substring(0, 100)}...</pre>
+                            <p><strong>Refresh Token:</strong></p>
+                            <pre>${data.refresh_token.substring(0, 100)}...</pre>
+                            <p><strong>Token Type:</strong> ${data.token_type}</p>
+                            <p><strong>Expires In:</strong> ${data.expires_in} seconds</p>
+                        </div>
+                    `;
+
+                    // Test /me endpoint
+                    testMeEndpoint(data.access_token);
+                } else {
+                    // Error
+                    resultDiv.innerHTML += `
+                        <div class="result error">
+                            <h3>❌ Backend Authentication Failed</h3>
+                            <pre>${JSON.stringify(data, null, 2)}</pre>
+                        </div>
+                    `;
+                }
+            })
+            .catch(error => {
+                resultDiv.innerHTML += `
+                    <div class="result error">
+                        <h3>❌ Error Connecting to Backend</h3>
+                        <p>${error.message}</p>
+                        <p>Make sure the backend is running at: ${API_URL}</p>
+                    </div>
+                `;
+            });
+        }
+
+        function testMeEndpoint(accessToken) {
+            fetch(`${API_URL}/me`, {
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('result').innerHTML += `
+                    <div class="result">
+                        <h3>✅ Step 4: User Profile Retrieved</h3>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    </div>
+                `;
+            })
+            .catch(error => {
+                document.getElementById('result').innerHTML += `
+                    <div class="result error">
+                        <h3>❌ Error Getting User Profile</h3>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            });
+        }
+    </script>
+</body>
+</html>
