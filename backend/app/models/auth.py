@@ -35,6 +35,7 @@ class TokenData(BaseModel):
     uid: str
     email: Optional[str] = None
     token_type: str  # "access" or "refresh"
+    iat: Optional[int] = None  # Issued at timestamp (for session invalidation)
 
 
 class GoogleAuthRequest(BaseModel):

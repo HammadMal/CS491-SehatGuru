@@ -10,6 +10,7 @@ FastAPI backend for SehatGuru - An intelligent nutrition tracking and advisory s
 - ✅ Google OAuth Authentication
 - ✅ Email Verification with auto-sync
 - ✅ Password Reset Flow (Forgot/Reset)
+- ✅ Session Invalidation on Password Reset
 - ✅ JWT Access & Refresh Tokens
 - ✅ Token Refresh Endpoint
 - ✅ Token Blacklist & Logout
@@ -291,14 +292,17 @@ Opens an HTML page to test Google OAuth flow in the browser.
 3. User clicks link, frontend extracts token
 4. User submits new password with token to `/api/auth/reset-password`
 5. Backend verifies token and updates password
+6. **All existing sessions are invalidated** - user must login again with new password
 
 ## Security Features
 
 - ✅ Password hashing with bcrypt
 - ✅ JWT tokens with expiration
 - ✅ Separate access and refresh tokens
+- ✅ Session invalidation on password reset
 - ✅ Email verification
 - ✅ Secure password reset with time-limited tokens
+- ✅ Token blacklist for logout
 - ✅ CORS configuration
 - ✅ HTTPS/TLS ready
 - ✅ Input validation with Pydantic
@@ -321,6 +325,17 @@ Tests: Register → Login → /me → Refresh → Logout
 python test_password_reset.py
 ```
 Tests: Reset flow, old password rejection, new password works
+
+#### Test Session Invalidation
+```bash
+python test_session_invalidation.py
+```
+Tests: Session invalidation when password is reset
+- Old session works before reset ✓
+- Old session fails after reset ✓
+- Old password rejected ✓
+- New password works ✓
+- New session works ✓
 
 #### Test Email Verification
 ```bash
@@ -402,6 +417,18 @@ pip install -r requirements.txt
 - After reset, old password should NOT work
 - If old password still works, check server logs for errors
 - Ensure `hashed_password` field is being updated in Firestore
+
+### Session Not Invalidated After Password Reset
+- All existing tokens should fail with "Your password was changed" message
+- Check that `password_changed_at` field exists and is being updated in Firestore
+- Verify token includes `iat` (issued at) timestamp
+- Run `python test_session_invalidation.py` to verify functionality
+
+### Datetime Comparison Errors
+If you see `"can't compare offset-naive and offset-aware datetimes"`:
+- This has been fixed in `app/middleware/auth.py`
+- Ensure you have the latest code that handles timezone conversion
+- The fix strips timezone info before comparing timestamps
 
 ### User Already Exists Error
 - User might exist in Firebase Auth but not Firestore (or vice versa)

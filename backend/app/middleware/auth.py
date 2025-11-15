@@ -100,6 +100,26 @@ async def get_current_active_user(
         user_data = user_doc.to_dict()
         user_data["uid"] = current_user.uid
 
+        # Check if token was issued before password was changed (session invalidation)
+        if current_user.iat and user_data.get("password_changed_at"):
+            from datetime import datetime
+
+            # Convert iat (unix timestamp) to datetime (naive UTC)
+            token_issued_at = datetime.utcfromtimestamp(current_user.iat)
+            password_changed_at = user_data.get("password_changed_at")
+
+            # Convert password_changed_at to naive datetime if it's timezone-aware
+            if hasattr(password_changed_at, 'tzinfo') and password_changed_at.tzinfo is not None:
+                password_changed_at = password_changed_at.replace(tzinfo=None)
+
+            # If password was changed after token was issued, invalidate the session
+            if password_changed_at > token_issued_at:
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Your password was changed. Please login again with your new password.",
+                    headers={"WWW-Authenticate": "Bearer"},
+                )
+
         # Sync email_verified status from Firebase Auth
         try:
             from datetime import datetime

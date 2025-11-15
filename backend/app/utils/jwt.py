@@ -95,6 +95,7 @@ def verify_token(token: str, token_type: str = "access") -> TokenData:
         uid: str = payload.get("sub")
         email: str = payload.get("email")
         payload_token_type: str = payload.get("token_type")
+        iat: int = payload.get("iat")  # Issued at timestamp
 
         if uid is None:
             raise JWTError("Token missing subject (uid)")
@@ -102,7 +103,7 @@ def verify_token(token: str, token_type: str = "access") -> TokenData:
         if payload_token_type != token_type:
             raise JWTError(f"Invalid token type. Expected {token_type}, got {payload_token_type}")
 
-        return TokenData(uid=uid, email=email, token_type=payload_token_type)
+        return TokenData(uid=uid, email=email, token_type=payload_token_type, iat=iat)
 
     except JWTError as e:
         raise JWTError(f"Could not validate token: {str(e)}")

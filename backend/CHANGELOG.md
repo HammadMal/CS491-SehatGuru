@@ -18,11 +18,13 @@
 - **Email Verification Sync** - Auto-sync verified status from Firebase Auth to Firestore
 - **Forgot Password** - Sends password reset email with time-limited token
 - **Reset Password** - Updates password in both Firebase Auth and Firestore
+- **Session Invalidation** - All existing tokens invalidated when password is reset
 - **Password Validation** - Minimum 6 characters, properly hashed with bcrypt
 
 #### Security Features
 - ✅ Bcrypt password hashing (server-side)
 - ✅ JWT access & refresh tokens with expiration
+- ✅ Session invalidation on password reset (timestamp-based)
 - ✅ Token blacklist for logout
 - ✅ HTTPS-ready configuration
 - ✅ CORS protection (configurable)
@@ -38,6 +40,7 @@
 4. **Email Verification Sync** - Auto-syncs `email_verified` from Firebase Auth to Firestore
 5. **Google OAuth** - Fixed `create_user` to work without password parameter
 6. **CORS Issues** - Added wildcard CORS for development testing
+7. **Timezone Comparison** - Fixed datetime comparison error in session invalidation (naive vs aware)
 
 ### 📁 Project Structure
 
@@ -67,6 +70,7 @@ backend/
 ├── firebase-credentials.json    # Firebase service account key
 ├── test_auth.py                 # Test all auth flows
 ├── test_password_reset.py       # Test password reset
+├── test_session_invalidation.py # Test session invalidation on password reset
 ├── test_email_verification.py   # Test email sync
 ├── test_google_oauth.py         # Test Google OAuth
 ├── test_google_auth.html        # Browser-based Google OAuth test
@@ -98,6 +102,7 @@ backend/
 #### Automated Test Scripts
 - `test_auth.py` - Complete auth flow test
 - `test_password_reset.py` - Password reset verification
+- `test_session_invalidation.py` - Session invalidation on password reset
 - `test_email_verification.py` - Email sync test
 - `test_google_oauth.py` - Google OAuth test
 
@@ -157,6 +162,7 @@ python test_auth.py
 
 - **Production Ready**: Remove `ALLOWED_ORIGINS=*` and admin endpoints before deploying
 - **Token Blacklist**: Currently in-memory (use Redis for production multi-server setup)
+- **Session Invalidation**: Timestamp-based using `password_changed_at` field and JWT `iat` claim
 - **Email Sync**: Happens automatically on first `/me` call after verification
 - **Password Storage**: Hashed in Firestore for server-side verification (not relying on Firebase Auth password verification)
 

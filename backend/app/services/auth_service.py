@@ -55,14 +55,16 @@ class AuthService:
             hashed_password = hash_password(user_data.password)
 
             # Create user document in Firestore
+            now = datetime.utcnow()
             user_doc_data = {
                 "email": user_data.email,
                 "full_name": user_data.full_name,
                 "email_verified": False,
-                "created_at": datetime.utcnow(),
-                "updated_at": datetime.utcnow(),
+                "created_at": now,
+                "updated_at": now,
                 "auth_provider": "email",
                 "hashed_password": hashed_password,  # Store for server-side verification
+                "password_changed_at": now,  # Track when password was set/changed
             }
 
             users_ref.document(firebase_user.uid).set(user_doc_data)
@@ -380,10 +382,13 @@ class AuthService:
             firebase_client.update_user(uid, password=new_password)
 
             # Hash new password and update in Firestore
+            # Also update password_changed_at to invalidate all existing sessions
+            now = datetime.utcnow()
             new_hashed_password = hash_password(new_password)
             users_ref.document(uid).update({
                 "hashed_password": new_hashed_password,
-                "updated_at": datetime.utcnow()
+                "password_changed_at": now,  # This will invalidate all existing tokens
+                "updated_at": now
             })
 
             return True
