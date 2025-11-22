@@ -3,7 +3,9 @@
     "allow": [
       "Bash(npx create-expo-app@latest app --template blank-typescript)",
       "Bash(npm install:*)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(tree:*)",
+      "Bash(find:*)"
     ],
     "deny": [],
     "ask": []
