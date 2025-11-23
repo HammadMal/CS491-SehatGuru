@@ -6,10 +6,17 @@ from contextlib import asynccontextmanager
 from fastapi.staticfiles import StaticFiles
 import uvicorn
 import os
+import logging
 
 from app.config.settings import settings
 from app.config.firebase import firebase_client
-from app.routes import auth
+from app.routes import auth, food
+from app.ml.food_detector import initialize_detector
+
+# Configure logging for ML module
+logging.basicConfig(level=logging.INFO)
+ml_logger = logging.getLogger('app.ml.food_detector')
+ml_logger.setLevel(logging.DEBUG)
 
 
 @asynccontextmanager
@@ -27,6 +34,20 @@ async def lifespan(app: FastAPI):
         print("Firebase initialized successfully")
     except Exception as e:
         print(f"Warning: Firebase initialization issue: {str(e)}")
+
+    # Initialize Food Detection Model
+    try:
+        model_path = os.path.join(
+            os.path.dirname(os.path.dirname(__file__)),
+            "model",
+            "final_effnet_enhanced.pth"
+        )
+        print(f"Loading food detection model from: {model_path}")
+        initialize_detector(model_path)
+        print("Food detection model initialized successfully")
+    except Exception as e:
+        print(f"Warning: Food detection model initialization failed: {str(e)}")
+        print("Food detection endpoints will not be available")
 
     yield
 
@@ -94,6 +115,7 @@ async def general_exception_handler(request: Request, exc: Exception):
 
 # Include routers
 app.include_router(auth.router, prefix="/api")
+app.include_router(food.router)
 
 
 # Root endpoint
