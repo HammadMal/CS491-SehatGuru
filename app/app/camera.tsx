@@ -1,15 +1,43 @@
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { useState } from 'react';
-import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import {
+  Image,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+  Alert,
+  ScrollView,
+} from 'react-native';
+import { SafeAreaView } from "react-native-safe-area-context";
+import apiClient from '../services/api';
 
-export default function CameraScreen() {
+interface Nutrition {
+  calories: number;
+  carbs: number;
+  protein: number;
+  fat: number;
+}
+
+interface FoodDetectionResult {
+  food_name: string;
+  confidence: number;
+  is_low_confidence: boolean;
+  nutrients?: Nutrition;
+}
+
+export default function CameraScreen({ navigation }: any) {
   const [image, setImage] = useState<string | null>(null);
+  const [detection, setDetection] = useState<FoodDetectionResult | null>(null);
+  const [nutrients, setNutrients] = useState<Nutrition | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const openCamera = async () => {
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
-    if (status !== 'granted') {
-      alert('Camera permission is required!');
+    if (status !== "granted") {
+      alert("Camera permission is required!");
       return;
     }
 
@@ -20,64 +48,256 @@ export default function CameraScreen() {
     });
 
     if (!result.canceled) {
-      setImage(result.assets[0].uri);
+      const imageUri = result.assets[0].uri;
+      setImage(imageUri);
+      setDetection(null);
+      setNutrients(null);
+      setError(null);
+
+      await detectFood(imageUri);
+    }
+  };
+
+  const detectFood = async (imageUri: string) => {
+    setLoading(true);
+    try {
+      const formData = new FormData();
+      const filename = imageUri.split('/').pop() || 'food.jpg';
+      const match = /\.(\w+)$/.exec(filename);
+      const type = match ? `image/${match[1]}` : 'image/jpeg';
+
+      formData.append("file", {
+        uri: imageUri,
+        name: filename,
+        type,
+      } as any);
+
+      const response = await apiClient.post("/api/food/detect", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
+      setDetection(response.data);
+      setNutrients(response.data.nutrients || null);
+
+    } catch (err: any) {
+      const errorMsg =
+        err.response?.data?.detail || err.message || "Failed to detect food.";
+      setError(errorMsg);
+      Alert.alert("Error", errorMsg);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Add a Meal</Text>
+    <SafeAreaView style={styles.safeArea}>
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
 
-      <TouchableOpacity style={styles.button} onPress={openCamera}>
-        <Ionicons name="camera" size={24} color="white" />
-        <Text style={styles.buttonText}>Open Camera</Text>
-      </TouchableOpacity>
+        {/* HEADER */}
+        <Text style={styles.title}>Add a Meal</Text>
 
-      {image && (
-        <Image
-          source={{ uri: image }}
-          style={styles.preview}
-        />
-      )}
-    </View>
+        {/* MAIN MENU (no image yet) */}
+        {!image && (
+          <View style={styles.menuContainer}>
+            <TouchableOpacity style={styles.cameraMainBtn} onPress={openCamera}>
+              <Ionicons name="camera" size={22} color="white" />
+              <Text style={styles.cameraMainBtnText}>Add Meal with Camera</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.manualBtn}>
+              <Ionicons name="create-outline" size={18} color="#374151" />
+              <Text style={styles.manualBtnText}>Log Meal Manually</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {/* IMAGE + DETECTION UI */}
+        {image && (
+          <>
+            <Image source={{ uri: image }} style={styles.preview} />
+
+            {detection && (
+              <View style={styles.resultCard}>
+                <Text style={styles.resultTitle}>Detected Food</Text>
+                <Text style={styles.foodName}>{detection.food_name}</Text>
+
+                <TouchableOpacity style={styles.retakeBtn} onPress={openCamera}>
+                  <Text style={styles.retakeBtnText}>Retake Photo</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+
+            {nutrients && (
+              <View style={styles.nutritionCard}>
+                <Text style={styles.nutritionTitle}>Nutritional Breakdown</Text>
+                <Text style={styles.nutritionItem}>
+                  Calories: {nutrients.calories} kcal
+                </Text>
+                <Text style={styles.nutritionItem}>
+                  Carbs: {nutrients.carbs} g
+                </Text>
+                <Text style={styles.nutritionItem}>
+                  Protein: {nutrients.protein} g
+                </Text>
+                <Text style={styles.nutritionItem}>
+                  Fat: {nutrients.fat} g
+                </Text>
+              </View>
+            )}
+          </>
+        )}
+
+        {/* ERROR */}
+        {error && (
+          <View style={styles.errorCard}>
+            <Text style={styles.errorText}>{error}</Text>
+          </View>
+        )}
+
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  safeArea: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
+    backgroundColor: "#f3f4f6",
   },
+
+  scrollContainer: {
+    paddingHorizontal: 20,
+    paddingBottom: 40,
+    alignItems: "center",
+  },
+
   title: {
-    fontSize: 22,
-    fontWeight: '600',
-    marginBottom: 30,
+    fontSize: 24,
+    fontWeight: "700",
+    marginTop: 10,
+    marginBottom: 20,
+    color: "#1f2937",
+    textAlign: "center",
   },
-  button: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#22c55e',
+
+  menuContainer: {
+    marginTop: 40,
+    width: "100%",
+    alignItems: "center",
+  },
+
+  cameraMainBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#22c55e",
     paddingVertical: 14,
     paddingHorizontal: 22,
     borderRadius: 14,
-    elevation: 3,              // Android shadow
-    shadowColor: '#000',       // iOS shadow
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 2 },
+    width: "90%",
+    justifyContent: "center",
   },
-  buttonText: {
-    color: 'white',
+
+  cameraMainBtnText: {
+    color: "white",
     marginLeft: 10,
     fontSize: 17,
-    fontWeight: '600',
+    fontWeight: "600",
   },
+
+  manualBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#e5e7eb",
+    paddingVertical: 12,
+    paddingHorizontal: 18,
+    borderRadius: 12,
+    width: "75%",
+    justifyContent: "center",
+    marginTop: 15,
+  },
+
+  manualBtnText: {
+    fontSize: 15,
+    color: "#374151",
+    marginLeft: 8,
+    fontWeight: "500",
+  },
+
   preview: {
-    width: 260,
+    width: "95%",
     height: 260,
     borderRadius: 16,
-    marginTop: 25,
+    marginTop: 20,
+  },
+
+  resultCard: {
+    width: "95%",
+    backgroundColor: "#ecfdf5",
+    padding: 16,
+    borderRadius: 12,
+    borderLeftWidth: 4,
+    borderLeftColor: "#22c55e",
+    marginTop: 20,
+  },
+
+  resultTitle: {
+    fontSize: 13,
+    color: "#059669",
+    fontWeight: "600",
+    marginBottom: 6,
+  },
+
+  foodName: {
+    fontSize: 22,
+    fontWeight: "700",
+    color: "#1f2937",
+    marginBottom: 12,
+  },
+
+  retakeBtn: {
+    backgroundColor: "#22c55e",
+    paddingVertical: 10,
+    borderRadius: 10,
+    alignItems: "center",
+  },
+
+  retakeBtnText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+
+  nutritionCard: {
+    width: "95%",
+    marginTop: 20,
+    padding: 18,
+    backgroundColor: "white",
+    borderRadius: 12,
+  },
+
+  nutritionTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    marginBottom: 10,
+  },
+
+  nutritionItem: {
+    fontSize: 15,
+    marginBottom: 4,
+    color: "#374151",
+  },
+
+  errorCard: {
+    width: "95%",
+    backgroundColor: "#fee2e2",
+    borderRadius: 12,
+    padding: 16,
+    marginTop: 20,
+  },
+
+  errorText: {
+    color: "#b91c1c",
+    fontSize: 15,
+    fontWeight: "600",
   },
 });

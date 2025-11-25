@@ -1,6 +1,7 @@
 """Food detection API endpoints"""
 from fastapi import APIRouter, UploadFile, File, HTTPException
 from pydantic import BaseModel
+from app.utils.nutrition import get_macros
 from typing import Optional
 import logging
 
@@ -11,11 +12,19 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/food", tags=["food"])
 
 
+class Nutrition(BaseModel):
+    "Nutrients information model"
+    calories: float
+    carbs: float
+    protein: float
+    fat: float
+
 class FoodDetectionResponse(BaseModel):
     """Response model for food detection"""
     food_name: str
     confidence: float
     is_low_confidence: bool
+    nutrients: Optional[Nutrition]
 
 
 class FoodDetectionDetailedResponse(BaseModel):
@@ -75,11 +84,16 @@ async def detect_food(
             f"(confidence: {confidence:.2%}, low: {is_low_confidence})"
         )
 
+        # Look up nutrients from CSV
+        nutrients = get_macros(food_name)
+
         return FoodDetectionResponse(
             food_name=food_name,
             confidence=confidence,
-            is_low_confidence=is_low_confidence
+            is_low_confidence=is_low_confidence,
+            nutrients=nutrients
         )
+
 
     except Exception as e:
         logger.error(f"Error during food detection: {str(e)}")
