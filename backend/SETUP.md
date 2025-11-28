@@ -1,5 +1,74 @@
 # Quick Setup Guide - SehatGuru Backend
 
+## 🐳 Docker Setup (Recommended for Development)
+
+### Prerequisites
+- Docker and Docker Compose installed
+- Firebase credentials and .env file configured (see steps 2-6 below for details)
+
+### Quick Start with Docker
+
+1. **Configure environment files** (follow steps 2-6 in the manual setup section below to get your credentials)
+
+2. **First time setup - Build and run:**
+```bash
+# From project root (first time only)
+docker-compose up --build
+
+# View logs
+docker-compose logs -f backend
+
+# Stop services (Ctrl+C or in another terminal)
+docker-compose down
+```
+
+3. **Daily usage - Just start the container:**
+```bash
+# After first build, just use (much faster!)
+docker-compose up
+
+# Or run in detached mode
+docker-compose up -d
+```
+
+4. **Access the API:**
+- API Docs: http://localhost:8000/docs
+- Health Check: http://localhost:8000/health
+
+### Docker Development Workflow
+
+**Hot Reload**: The docker-compose setup mounts your local `backend/` directory, so code changes are automatically reflected without restarting.
+
+**When to rebuild:**
+```bash
+# ONLY rebuild when you modify requirements.txt
+docker-compose up --build
+
+# Normal restarts (code changes) - just use:
+docker-compose restart
+```
+
+**Pip Cache**: Docker now caches downloaded packages (like PyTorch ~700MB), so rebuilds are much faster after the first time.
+
+**Run commands inside container:**
+```bash
+# Execute shell in running container
+docker-compose exec backend bash
+
+# Run tests
+docker-compose exec backend python test_auth.py
+```
+
+**Troubleshooting Docker:**
+- If port 8000 is in use, modify the port mapping in `docker-compose.yml`
+- For permission issues on Linux, ensure Docker has proper access to mounted volumes
+- To completely rebuild from scratch: `docker-compose down && docker-compose up --build`
+- To clean everything including cache: `docker-compose down --volumes && docker-compose up --build`
+
+---
+
+## 📦 Manual Setup (Alternative to Docker)
+
 ## ⚡ Quick Start (5 minutes)
 
 ### 1. Install Dependencies

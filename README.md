@@ -20,6 +20,42 @@ This is a Kaavish capstone project at Habib University's Dhanani School of Scien
 - **Sameer Kamani**
 - **Arsal Jangda**
 
+## Quick Start
+
+### Using Docker (Recommended)
+
+1. **Setup environment:**
+   - Copy `backend/.env.example` to `backend/.env` and configure required credentials
+   - Place Firebase credentials in `backend/firebase-credentials.json`
+   - See [backend/SETUP.md](backend/SETUP.md) for detailed configuration instructions
+
+2. **First time - Build and run:**
+```bash
+# First build (downloads PyTorch ~700MB, takes a few minutes)
+docker-compose up --build
+```
+
+3. **Daily usage - Just start:**
+```bash
+# After first build, start containers (much faster!)
+docker-compose up
+
+# Stop with Ctrl+C, or:
+docker-compose down
+```
+
+4. **Access the API:**
+   - API Documentation: http://localhost:8000/docs
+   - Health Check: http://localhost:8000/health
+
+**Note:** Docker caches pip packages automatically. Only use `--build` when modifying `requirements.txt`. Code changes hot-reload automatically.
+
+### Manual Setup
+
+For detailed manual setup instructions without Docker, see:
+- [Backend Setup Guide](backend/SETUP.md)
+- [App Setup Guide](app/README.md)
+
 ## Documentation
 
 - [Project Proposal](Docs/SehatGuru-ProjectProposal.pdf) - Initial project proposal (under review)

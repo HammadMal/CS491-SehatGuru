@@ -1,37 +1,58 @@
 # Food Detection Model - Setup & Testing Guide
 
 ## Overview
-The food detection model has been integrated into the backend API. This guide will help you test the model with local images before integrating with the React Native app.
+The food detection model has been integrated into the backend API. This guide will help you test the model using Swagger UI.
 
 ## Prerequisites
-- Python 3.8+
-- pip
+- Docker and Docker Compose installed (recommended)
+- OR Python 3.8+ and pip (manual setup)
 - Food images to test with
 
 ## Setup Instructions
 
-### 1. Install Dependencies
+### Option 1: Using Docker (Recommended)
 
-Navigate to the backend directory and install the required packages:
+1. **Configure environment:**
+```bash
+# Copy environment template
+cp backend/.env.example backend/.env
 
+# Edit .env and configure your credentials
+# Place firebase-credentials.json in backend/
+```
+
+2. **Start the API server:**
+```bash
+# From project root (first time)
+docker-compose up --build
+
+# Daily usage (after first build)
+docker-compose up
+```
+**Note:** First build downloads PyTorch (~700MB). Subsequent runs are much faster as packages are cached.
+
+3. **Verify the model loaded:**
+Check the logs for:
+```
+Loading food detection model from: /app/model/final_effnet_enhanced.pth
+Food detection model initialized successfully
+```
+
+### Option 2: Manual Setup
+
+1. **Install dependencies:**
 ```bash
 cd backend
 pip install -r requirements.txt
 ```
-
 **Note:** PyTorch installation might take a few minutes as it's a large package (~2GB).
 
-### 2. Verify Model File
-
-Make sure the model file exists at:
+2. **Verify model file exists:**
 ```
 model/final_effnet_enhanced.pth
 ```
 
-### 3. Start the API Server
-
-Run the FastAPI server:
-
+3. **Start the API server:**
 ```bash
 python main.py
 ```
@@ -48,66 +69,40 @@ INFO:     Uvicorn running on http://localhost:8000
 
 ## Testing the Model
 
-### Method 1: Using the Python Test Script (Recommended)
+### Using Swagger UI (Interactive API Documentation)
 
-The easiest way to test is using the provided test script:
+1. **Open Swagger UI in your browser:**
+   ```
+   http://localhost:8000/docs
+   ```
 
-```bash
-# Basic test
-python test_food_detection.py path/to/your/food_image.jpg
+2. **Test the Health Check:**
+   - Find the `GET /api/food/health` endpoint
+   - Click "Try it out"
+   - Click "Execute"
+   - You should see:
+   ```json
+   {
+     "status": "healthy",
+     "service": "food_detection",
+     "model_loaded": true
+   }
+   ```
 
-# Detailed test with top-3 predictions
-python test_food_detection.py path/to/your/food_image.jpg --detailed
+3. **Test Simple Detection (single prediction):**
+   - Find the `POST /api/food/detect` endpoint
+   - Click "Try it out"
+   - Click "Choose File" and select a food image
+   - Click "Execute"
+   - Review the prediction result
 
-# Test with custom API URL
-python test_food_detection.py path/to/your/food_image.jpg --url http://localhost:8000
-
-# Health check only
-python test_food_detection.py --health
-```
-
-**Example Output:**
-```
-============================================================
-   SehatGuru Food Detection API Test
-============================================================
-
-🏥 Checking service health...
-✅ Food detection service is healthy
-
-🔍 Testing Food Detection
-   Image: pizza.jpg
-   Endpoint: http://localhost:8000/api/food/detect
-   Mode: Simple
-------------------------------------------------------------
-
-⏳ Uploading image and running detection...
-
-✅ Detection Successful!
-============================================================
-
-   ✅ Food: pizza
-   📊 Confidence: 95.34%
-
-============================================================
-```
-
-### Method 2: Using curl
-
-```bash
-curl -X POST "http://localhost:8000/api/food/detect" \
-  -H "accept: application/json" \
-  -H "Content-Type: multipart/form-data" \
-  -F "file=@path/to/your/food_image.jpg"
-```
-
-### Method 3: Using Postman or Thunder Client
-
-1. Create a new POST request
-2. URL: `http://localhost:8000/api/food/detect`
-3. Body type: `form-data`
-4. Add a file field named `file` and select your food image
-5. Send the request
+4. **Test Detailed Detection (multiple predictions):**
+   - Find the `POST /api/food/detect/detailed` endpoint
+   - Click "Try it out"
+   - Optionally adjust `top_k` parameter (default: 3)
+   - Click "Choose File" and select a food image
+   - Click "Execute"
+   - Review the top-K predictions
 
 ## API Endpoints
 
@@ -240,16 +235,25 @@ Once you've verified the model is working correctly:
 4. **Add Meal Logging:** Allow users to save detected foods to their meal history
 5. **Add Logging:** Track predictions for model improvement
 
+## Testing Tips
+
+- **Use clear, well-lit photos** for best results
+- **Center the food item** in the frame
+- **Test with Pakistani dishes** from the supported list above
+- **Try different images** of the same food to see consistency
+- **Check confidence scores** - low confidence may indicate poor image quality
+
 ## Support
 
 If you encounter any issues:
 1. Check the server logs for error messages
+   - Docker: `docker-compose logs -f backend`
+   - Manual: Check terminal output
 2. Verify all dependencies are installed correctly
-3. Ensure the model file is not corrupted
-4. Test with different food images
+3. Ensure the model file exists and is not corrupted
+4. Test with different food images from the supported list
 
-## API Documentation
+## Interactive API Documentation
 
-For interactive API documentation, visit:
-- Swagger UI: http://localhost:8000/docs
-- ReDoc: http://localhost:8000/redoc
+- **Swagger UI (Recommended):** http://localhost:8000/docs
+- **ReDoc:** http://localhost:8000/redoc

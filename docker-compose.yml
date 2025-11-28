@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: sehatguru-backend
+    ports:
+      - "8000:8000"
+    volumes:
+      # Mount source code for hot reload during development
+      - ./backend:/app
+      # Mount model directory
+      - ./model:/model
+      # Prevent cache from being overwritten
+      - /app/__pycache__
+      # Persist pip cache to avoid re-downloading packages
+      - pip-cache:/root/.cache/pip
+    env_file:
+      - ./backend/.env
+    environment:
+      - PYTHONUNBUFFERED=1
+      - HOST=0.0.0.0
+      - PORT=8000
+    command: python main.py
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+volumes:
+  pip-cache:

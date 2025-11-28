@@ -1,0 +1,60 @@
+# Python
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+*.egg
+*.egg-info
+dist
+build
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+
+# Environment files (will be mounted separately)
+.env
+.env.*
+
+# Git
+.git
+.gitignore
+
+# Documentation
+*.md
+CHANGELOG.md
+TESTING_QUICKSTART.md
+FOOD_DETECTION_SETUP.md
+
+# Test files
+test_*.py
+*_test.py
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# SQLite
+*.db
+*.sqlite3
+
+# Logs
+*.log
