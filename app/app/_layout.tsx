@@ -1,54 +1,49 @@
-import { Ionicons } from '@expo/vector-icons';
-import { Tabs } from 'expo-router';
+import { Stack, Redirect, useSegments, useRouter } from 'expo-router';
+import { AuthProvider } from '../context/AuthContext';
+import { OnboardingProvider } from '../context/OnboardingContext';
+import { useAuth } from '../hooks/useAuth';
+import { useEffect } from 'react';
 
-export default function Layout() {
+function RootLayoutNav() {
+  const { isAuthenticated, isLoading, hasCompletedOnboarding } = useAuth();
+  const segments = useSegments();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (isLoading) return;
+
+    const inAuthGroup = segments[0] === '(auth)';
+    const inOnboardingGroup = segments[0] === '(onboarding)';
+    const inTabsGroup = segments[0] === '(tabs)';
+
+    if (!isAuthenticated && !inAuthGroup) {
+      // Redirect to auth if not authenticated
+      router.replace('/(auth)/splash');
+    } else if (isAuthenticated && !hasCompletedOnboarding && !inOnboardingGroup && !inAuthGroup) {
+      // Redirect to onboarding if authenticated but not completed onboarding
+      // BUT only if not still in auth group (e.g., important-info screen)
+      router.replace('/(onboarding)/basic-info');
+    } else if (isAuthenticated && hasCompletedOnboarding && !inTabsGroup) {
+      // Redirect to main app if authenticated and completed onboarding
+      router.replace('/(tabs)');
+    }
+  }, [isAuthenticated, hasCompletedOnboarding, isLoading, segments, router]);
+
   return (
-    <Tabs
-      screenOptions={{
-        headerShown: false,
-        tabBarActiveTintColor: '#22c55e',
-        tabBarInactiveTintColor: '#888',
-      }}
-    >
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: 'Dashboard',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="home-outline" size={size} color={color} />
-          ),
-        }}
-      />
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="(auth)" />
+      <Stack.Screen name="(onboarding)" />
+      <Stack.Screen name="(tabs)" />
+    </Stack>
+  );
+}
 
-      <Tabs.Screen
-        name="camera"
-        options={{
-          title: 'Add Meal',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="camera-outline" size={size} color={color} />
-          ),
-        }}
-      />
-
-      <Tabs.Screen
-        name="chatbot"
-        options={{
-          title: 'SehatGuru',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="chatbubble-ellipses-outline" size={size} color={color} />
-          ),
-        }}
-      />
-
-      <Tabs.Screen
-        name="profile"
-        options={{
-          title: 'Profile',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="person-circle-outline" size={size} color={color} />
-          ),
-        }}
-      />
-    </Tabs>
+export default function RootLayout() {
+  return (
+    <AuthProvider>
+      <OnboardingProvider>
+        <RootLayoutNav />
+      </OnboardingProvider>
+    </AuthProvider>
   );
 }

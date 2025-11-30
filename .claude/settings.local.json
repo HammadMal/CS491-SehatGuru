@@ -5,7 +5,8 @@
       "Bash(npm install:*)",
       "Bash(cat:*)",
       "Bash(tree:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(npx expo install:*)"
     ],
     "deny": [],
     "ask": []
