@@ -1,0 +1,1228 @@
+Rank,Dish Name,Frequency (Votes),Consensus (Popularity %)
+1,nihari,45,39.82%
+2,biryani,42,37.17%
+3,chicken karahi,31,27.43%
+4,haleem,29,25.66%
+5,gulab jamun,27,23.89%
+6,chapli kebab,27,23.89%
+7,seekh kabab,27,23.89%
+8,sindhi biryani,26,23.01%
+9,kheer,25,22.12%
+10,mutton karahi,18,15.93%
+11,chicken biryani,18,15.93%
+12,sajji,18,15.93%
+13,chicken tikka,17,15.04%
+14,samosas,16,14.16%
+15,halwa puri,16,14.16%
+16,pakoras,16,14.16%
+17,pulao,14,12.39%
+18,jalebi,14,12.39%
+19,paratha,13,11.50%
+20,sarson ka saag,13,11.50%
+21,zarda,12,10.62%
+22,chaat,12,10.62%
+23,karahi,12,10.62%
+24,gajar ka halwa,12,10.62%
+25,aloo gosht,11,9.73%
+26,kebabs,11,9.73%
+27,ras malai,11,9.73%
+28,gol gappay,11,9.73%
+29,dahi baray,11,9.73%
+30,shami kabab,11,9.73%
+31,paaye,10,8.85%
+32,dahi bhalla,10,8.85%
+33,saag,9,7.96%
+34,kulfi,9,7.96%
+35,chicken malai boti,9,7.96%
+36,chicken salan,9,7.96%
+37,aloo gobi,8,7.08%
+38,chicken pulao,8,7.08%
+39,korma,8,7.08%
+40,bhindi masala,8,7.08%
+41,paya,8,7.08%
+42,falooda,8,7.08%
+43,naan,8,7.08%
+44,chicken pakora,8,7.08%
+45,chicken broast,8,7.08%
+46,mutton biryani,7,6.19%
+47,malai boti,7,6.19%
+48,fried fish,7,6.19%
+49,mutton pulao,7,6.19%
+50,sohan halwa,7,6.19%
+51,daal chawal,7,6.19%
+52,chargha,7,6.19%
+53,shahi tukray,7,6.19%
+54,sheer khurma,7,6.19%
+55,chapshuro,7,6.19%
+56,kabuli pulao,7,6.19%
+57,bun kabab,7,6.19%
+58,tikka,7,6.19%
+59,chana chaat,7,6.19%
+60,barfi,6,5.31%
+61,raita,6,5.31%
+62,roti,6,5.31%
+63,rabri,6,5.31%
+64,katakat,6,5.31%
+65,harissa,6,5.31%
+66,kashmiri chai,6,5.31%
+67,suji ka halwa,6,5.31%
+68,gajrela,6,5.31%
+69,achari gosht,6,5.31%
+70,palak paneer,5,4.42%
+71,lahori fried fish,5,4.42%
+72,bhindi,5,4.42%
+73,karela,5,4.42%
+74,chicken seekh kabab,5,4.42%
+75,firni,5,4.42%
+76,lamb karahi,5,4.42%
+77,aloo palak,5,4.42%
+78,karachi biryani,5,4.42%
+79,pani puri,5,4.42%
+80,matar pulao,5,4.42%
+81,dum pukht,5,4.42%
+82,aloo tikki,5,4.42%
+83,palak gosht,5,4.42%
+84,daal mash,5,4.42%
+85,aloo pakora,5,4.42%
+86,dahi phulkiyan,5,4.42%
+87,anda shami burger,5,4.42%
+88,tandoori roti,5,4.42%
+89,aloo bukhara chutney,5,4.42%
+90,chicken steak,4,3.54%
+91,noodles,4,3.54%
+92,aloo baingan,4,3.54%
+93,kofta,4,3.54%
+94,lassi,4,3.54%
+95,chicken curry,4,3.54%
+96,mutton seekh kabab,4,3.54%
+97,daal,4,3.54%
+98,kofta curry,4,3.54%
+99,chicken chargha,4,3.54%
+100,beef keema,4,3.54%
+101,kulcha,4,3.54%
+102,chicken haleem,4,3.54%
+103,kadhi,4,3.54%
+104,siri paye,4,3.54%
+105,dhal,4,3.54%
+106,beef haleem,4,3.54%
+107,beef biryani,4,3.54%
+108,chicken nihari,4,3.54%
+109,qeema,4,3.54%
+110,roghni naan,4,3.54%
+111,taftan,4,3.54%
+112,chicken wings,4,3.54%
+113,karahi gosht,4,3.54%
+114,murgh musallam,4,3.54%
+115,chicken pizza,4,3.54%
+116,keema,4,3.54%
+117,chicken jalfrezi,4,3.54%
+118,peshawari chicken karahi,4,3.54%
+119,chai,4,3.54%
+120,seviyan,4,3.54%
+121,chicken handi,4,3.54%
+122,aloo sabzi,4,3.54%
+123,chana pulao,4,3.54%
+124,halwa,4,3.54%
+125,tarka daal,4,3.54%
+126,baingan bharta,4,3.54%
+127,diram fitti,4,3.54%
+128,makki di roti,4,3.54%
+129,mutton salan,4,3.54%
+130,chicken multani,4,3.54%
+131,mutton gosht,4,3.54%
+132,grilled chicken,4,3.54%
+133,fish kabab,4,3.54%
+134,mutton burra,4,3.54%
+135,sheermaal,4,3.54%
+136,daal makhani,4,3.54%
+137,anda paratha,4,3.54%
+138,kadi pakora,4,3.54%
+139,vegetable salad,3,2.65%
+140,fish pulao,3,2.65%
+141,baingan masala,3,2.65%
+142,chinese fish,3,2.65%
+143,aloo methi,3,2.65%
+144,masoor dal,3,2.65%
+145,chicken soup,3,2.65%
+146,fish steam,3,2.65%
+147,chinese chicken,3,2.65%
+148,chicken pasta,3,2.65%
+149,beef steak,3,2.65%
+150,shopan,3,2.65%
+151,fish curry,3,2.65%
+152,qorma,3,2.65%
+153,fish fillet,3,2.65%
+154,beef karahi,3,2.65%
+155,besan ki roti,3,2.65%
+156,chicken burgers,3,2.65%
+157,nargisi kofta,3,2.65%
+158,chicken kofta,3,2.65%
+159,jheenga,3,2.65%
+160,baingan,3,2.65%
+161,fish,3,2.65%
+162,kashmiri pulao,3,2.65%
+163,chicken samosa,3,2.65%
+164,mix sabzi,3,2.65%
+165,zeera rice,3,2.65%
+166,peshawari ice cream,3,2.65%
+167,murgh karahi,3,2.65%
+168,mutton tikka,3,2.65%
+169,doodh patti,3,2.65%
+170,tahri,3,2.65%
+171,white karahi,3,2.65%
+172,palak chicken,3,2.65%
+173,fruit chaat,3,2.65%
+174,chicken reshmi kabab,3,2.65%
+175,white mutton biryani,3,2.65%
+176,matka kulfi,3,2.65%
+177,butter chicken,3,2.65%
+178,dampukht,3,2.65%
+179,hareesa,3,2.65%
+180,dumba karahi,3,2.65%
+181,chicken sajji,3,2.65%
+182,mithai,3,2.65%
+183,barbeque,3,2.65%
+184,karachi chicken,3,2.65%
+185,chicken rolls,3,2.65%
+186,roll,3,2.65%
+187,pakistani chicken,3,2.65%
+188,grill fish,3,2.65%
+189,chicken kebab,3,2.65%
+190,chicken peshawari,3,2.65%
+191,machli ka salan,3,2.65%
+192,kabab,3,2.65%
+193,moong ki dal,3,2.65%
+194,pakistani meat,3,2.65%
+195,chicken sandwichs,3,2.65%
+196,poori paratha,3,2.65%
+197,pasanda,3,2.65%
+198,gurda kapoora,3,2.65%
+199,khichdi,3,2.65%
+200,aloo keema,3,2.65%
+201,gola kabab,3,2.65%
+202,mutton korma,3,2.65%
+203,zesty ginger chicken,3,2.65%
+204,gosht karahi,3,2.65%
+205,khatchauri,3,2.65%
+206,kunna gosht,3,2.65%
+207,bakarkhani,3,2.65%
+208,beef kabab,3,2.65%
+209,balochi sajji,3,2.65%
+210,nan khatai,3,2.65%
+211,peshawari chapli kabab,3,2.65%
+212,lahori mutton karahi,3,2.65%
+213,pathorae,3,2.65%
+214,bihari kebab,3,2.65%
+215,kadak chai,3,2.65%
+216,chanp masala,3,2.65%
+217,punjabi dal,2,1.77%
+218,keema matar,2,1.77%
+219,mix daal,2,1.77%
+220,chinese rice,2,1.77%
+221,daal moong,2,1.77%
+222,daal ka soup,2,1.77%
+223,chinese chow mein,2,1.77%
+224,french fries,2,1.77%
+225,katlama,2,1.77%
+226,omelette,2,1.77%
+227,sabzi pulao,2,1.77%
+228,pizza,2,1.77%
+229,dal khichdi,2,1.77%
+230,fry fish,2,1.77%
+231,lamb biryani,2,1.77%
+232,chole,2,1.77%
+233,kurkuri bhindi,2,1.77%
+234,giyaling,2,1.77%
+235,go-lee,2,1.77%
+236,sai bhaji,2,1.77%
+237,chicken tandoori,2,1.77%
+238,namkeen tikka,2,1.77%
+239,beef stew,2,1.77%
+240,boneless chicken,2,1.77%
+241,pakistani bread,2,1.77%
+242,diet chicken,2,1.77%
+243,beef kaleji,2,1.77%
+244,kashmiri chicken korma,2,1.77%
+245,chicken peshawari karahi,2,1.77%
+246,beef burger,2,1.77%
+247,tamatar,2,1.77%
+248,pai recipes,2,1.77%
+249,chicken rice,2,1.77%
+250,lemon chicken,2,1.77%
+251,maghaz,2,1.77%
+252,masala fish,2,1.77%
+253,steam fish,2,1.77%
+254,daleem,2,1.77%
+255,matar,2,1.77%
+256,peshawari chicken,2,1.77%
+257,pakistani vegetable,2,1.77%
+258,chicken macaroni,2,1.77%
+259,beef namkeen gosht,2,1.77%
+260,achari chicken,2,1.77%
+261,achari baingan,2,1.77%
+262,chicken nuggets,2,1.77%
+263,fish rolls,2,1.77%
+264,anda aur sabzi,2,1.77%
+265,matka biryani,2,1.77%
+266,bbq,2,1.77%
+267,chicken almond,2,1.77%
+268,hyderabadi chicken,2,1.77%
+269,beef tikka,2,1.77%
+270,beef gosht,2,1.77%
+271,karchi beef biryani,2,1.77%
+272,aloo,2,1.77%
+273,chicken vegetables,2,1.77%
+274,peshawari karahi gosht,2,1.77%
+275,vegetables in oven,2,1.77%
+276,dum pukht biryani,2,1.77%
+277,chicken sticks,2,1.77%
+278,tandoori fish,2,1.77%
+279,shahi chicken,2,1.77%
+280,asian lantil soup,2,1.77%
+281,fish tikka,2,1.77%
+282,palak paneer kofta,2,1.77%
+283,gosht ke kabab,2,1.77%
+284,tali hui fish,2,1.77%
+285,pakistani rice,2,1.77%
+286,dal peshawari,2,1.77%
+287,tinda,2,1.77%
+288,chicken cashew nut,2,1.77%
+289,makhni handi,2,1.77%
+290,sabzi gosht,2,1.77%
+291,keema spaghetti,2,1.77%
+292,baked meat,2,1.77%
+293,chinese vegetable dishes,2,1.77%
+294,mutton champ,2,1.77%
+295,sabzi dishes,2,1.77%
+296,dum pukht machli,2,1.77%
+297,paneer pasanda,2,1.77%
+298,chicken khichdi,2,1.77%
+299,fish and vegetables,2,1.77%
+300,band gobhi,2,1.77%
+301,gajar,2,1.77%
+302,gobi,2,1.77%
+303,baked fish,2,1.77%
+304,fish karahi,2,1.77%
+305,balochi rosh,2,1.77%
+306,saag aur palak,2,1.77%
+307,makhandi halwa,2,1.77%
+308,kaddu,2,1.77%
+309,fish cutlets,2,1.77%
+310,kofta in palak gravy,2,1.77%
+311,fish with rice,2,1.77%
+312,dum pukht chicken,2,1.77%
+313,fish korma,2,1.77%
+314,mutton kaleji,2,1.77%
+315,chicken schezwan rice,2,1.77%
+316,gosht rice,2,1.77%
+317,prawns,2,1.77%
+318,roast fish,2,1.77%
+319,steam chicken,2,1.77%
+320,tarkay walay chawal,2,1.77%
+321,international chicken,2,1.77%
+322,paneer makhani,2,1.77%
+323,badami chicken,2,1.77%
+324,sabziyon ka achar,2,1.77%
+325,chicken gravy,2,1.77%
+326,puri,2,1.77%
+327,afghani namkeen gosht,2,1.77%
+328,punjabi salad,2,1.77%
+329,kashmiri kofta,2,1.77%
+330,malai kofta,2,1.77%
+331,peshawari namkeen gosht,2,1.77%
+332,gajrela kheer,2,1.77%
+333,breaded chicken,2,1.77%
+334,peshawari karahi chicken,2,1.77%
+335,biryani and pulao,2,1.77%
+336,mutton keema,2,1.77%
+337,shinwari chicken,2,1.77%
+338,beef raan,2,1.77%
+339,beef roast,2,1.77%
+340,chicken chawal,2,1.77%
+341,white chicken,2,1.77%
+342,vegetable soup,2,1.77%
+343,gosht ke kofte,2,1.77%
+344,fish masala,2,1.77%
+345,mutton roast,2,1.77%
+346,lahori chana,2,1.77%
+347,mutton kofta curry,2,1.77%
+348,moong ki dal palak,2,1.77%
+349,chicken cutlets,2,1.77%
+350,barbecue chicken,2,1.77%
+351,beef champ,2,1.77%
+352,persian biryani,2,1.77%
+353,fish kofta,2,1.77%
+354,fish soup,2,1.77%
+355,aloo baingan ki sabzi,2,1.77%
+356,mushroom dish,2,1.77%
+357,doodh patti chai,2,1.77%
+358,sindhi lamb biryani,2,1.77%
+359,mutanjan,2,1.77%
+360,chicken pilau,2,1.77%
+361,mutton yakhni pulao,2,1.77%
+362,kaleji,2,1.77%
+363,kahwa,2,1.77%
+364,lab-e-shireen,2,1.77%
+365,patisa,2,1.77%
+366,kalakand,2,1.77%
+367,gola ganda,2,1.77%
+368,aloo chaat,2,1.77%
+369,fish fry,2,1.77%
+370,masoor ki daal,2,1.77%
+371,kaali daal,2,1.77%
+372,russian salad,2,1.77%
+373,green salad,2,1.77%
+374,finger fish,2,1.77%
+375,lahori chargha,2,1.77%
+376,chicken tikka boti,2,1.77%
+377,brain masala,2,1.77%
+378,kalonji naan,2,1.77%
+379,mughlai handi,2,1.77%
+380,mixed vegetable curry,2,1.77%
+381,tandoori chicken,2,1.77%
+382,lamb pulao,2,1.77%
+383,kabuli palaw,2,1.77%
+384,mutton handi,2,1.77%
+385,charsi tikka,2,1.77%
+386,nehari,2,1.77%
+387,namkeen gosht,2,1.77%
+388,malai kulfi,2,1.77%
+389,halva,2,1.77%
+390,yakhni pulao,2,1.77%
+391,royal whole stuffed lamb,2,1.77%
+392,pink kashmiri chai,2,1.77%
+393,mughlai beef qorma,2,1.77%
+394,mughlai shami kabab,2,1.77%
+395,seasonal mixed vegetable medley,2,1.77%
+396,rich lotus seed halwa,2,1.77%
+397,mini kachori,2,1.77%
+398,bottle gourd halwa,2,1.77%
+399,chenak-style spiced tea,2,1.77%
+400,fish and chips,2,1.77%
+401,lebanese chicken boti,2,1.77%
+402,chicken yakhni pulao,2,1.77%
+403,slow-cooked beef haleem,2,1.77%
+404,crunchy kulfi falooda,2,1.77%
+405,spicy aloo bhujia,2,1.77%
+406,balochi sajji roast,2,1.77%
+407,cottage cheese in creamed spinach,2,1.77%
+408,creamy doodh dulari,2,1.77%
+409,signature mutton chops,2,1.77%
+410,frontier-style chapli kabab,2,1.77%
+411,tempered yellow lentils,2,1.77%
+412,bbq fish tikka,2,1.77%
+413,classic prawn sizzlers,2,1.77%
+414,traditional mutton karahi,2,1.77%
+415,whole pomfret fry,2,1.77%
+416,white chicken qorma,2,1.77%
+417,prawn tempura,2,1.77%
+418,spiced paneer karahi,2,1.77%
+419,spinach and potato curry,2,1.77%
+420,pathan-style chai,2,1.77%
+421,aromatic vegetable biryani,2,1.77%
+422,mustard greens with corn roti,2,1.77%
+423,royal mutton pulao,2,1.77%
+424,spiced potato bhujia,2,1.77%
+425,lab-e-shireen delight,2,1.77%
+426,handi-style creamy chicken,2,1.77%
+427,cherry crunch dessert,2,1.77%
+428,golden gulab jamun,2,1.77%
+429,golden fish fingers,2,1.77%
+430,mini samosas,2,1.77%
+431,bbq-grilled beef boti,2,1.77%
+432,creamy malai kofta curry,2,1.77%
+433,chicken spring rolls,2,1.77%
+434,signature chicken karahi,2,1.77%
+435,royal rice kheer,2,1.77%
+436,veggie spring rolls,2,1.77%
+437,traditional delhi-style mutton qorma,2,1.77%
+438,mutton bombay biryani royale,2,1.77%
+439,flaky chicken puff pastries,2,1.77%
+440,creamy handi mutton,2,1.77%
+441,stuffed chicken kiev,2,1.77%
+442,mughlai gola kabab,2,1.77%
+443,chicken bombay biryani,2,1.77%
+444,chicken shawarma wraps,2,1.77%
+445,cheese-filled samosas,2,1.77%
+446,classic beef seekh kabab,2,1.77%
+447,beef tawa kabab,2,1.77%
+448,choco-biscuit fusion,2,1.77%
+449,green pea pulao,2,1.77%
+450,mini bun kabab sliders,2,1.77%
+451,chicken dynamite bites,2,1.77%
+452,rustic mutton kunna curry,2,1.77%
+453,falooda fusion shake,2,1.77%
+454,sweet kashmiri pulao,2,1.77%
+455,chicken croquettes,2,1.77%
+456,spiced behari strip kabab,2,1.77%
+457,pumpkin halwa,2,1.77%
+458,basmati rice,2,1.77%
+459,yakhni,2,1.77%
+460,murgh tikka,2,1.77%
+461,siri-payay,2,1.77%
+462,bannu pulao,2,1.77%
+463,maakai ki roti,2,1.77%
+464,bong,2,1.77%
+465,mango lassi,2,1.77%
+466,vegetable biryani,2,1.77%
+467,mutton chops,2,1.77%
+468,murgh cholay,2,1.77%
+469,rogan josh,2,1.77%
+470,papar,2,1.77%
+471,tikka boti,2,1.77%
+472,sohbat,2,1.77%
+473,mumtu,2,1.77%
+474,thukpa,2,1.77%
+475,daal pakwan,2,1.77%
+476,murgh pulao,2,1.77%
+477,tandoori paratha,2,1.77%
+478,aloo paratha,2,1.77%
+479,taka tak,2,1.77%
+480,beef seekh kabab,2,1.77%
+481,zeera aloo,2,1.77%
+482,aloo gobi dry,2,1.77%
+483,namak paray,2,1.77%
+484,palak curry,2,1.77%
+485,aloo masala,2,1.77%
+486,kala chana,2,1.77%
+487,achari bhindi,2,1.77%
+488,samosa chat,2,1.77%
+489,shabdeg,2,1.77%
+490,chicken chapli kabab,2,1.77%
+491,landhi,2,1.77%
+492,achar,2,1.77%
+493,murgh lahori,2,1.77%
+494,paneer lahori,2,1.77%
+495,chana,2,1.77%
+496,balushahi,2,1.77%
+497,hoi lo garma,2,1.77%
+498,mutton and beef bbq,2,1.77%
+499,keema naan,2,1.77%
+500,paratha rolls,2,1.77%
+501,chicken dahi,2,1.77%
+502,mix platter b.b.q-2,2,1.77%
+503,maash ki dal,2,1.77%
+504,chana dal,2,1.77%
+505,boneless chicken karahi,2,1.77%
+506,chapati,2,1.77%
+507,khadi kabab,2,1.77%
+508,indian chinese chicken fried rice,2,1.77%
+509,chicken karahi qeema,2,1.77%
+510,dal gosht,2,1.77%
+511,prawn karhai,2,1.77%
+512,kaari chawal,2,1.77%
+513,gurdh waly chawal,2,1.77%
+514,luki ka halwa,2,1.77%
+515,kofty anday,2,1.77%
+516,reshmi kebab,2,1.77%
+517,mutton gola kabab,2,1.77%
+518,spice bazaar mix grill -2,2,1.77%
+519,bhari hui mirchon ka saalan,1,0.88%
+520,dal chana,1,0.88%
+521,chinese soup,1,0.88%
+522,khattay aloo,1,0.88%
+523,spaghetti,1,0.88%
+524,kids soup,1,0.88%
+525,stuffed bhindi,1,0.88%
+526,keema karela,1,0.88%
+527,kfc fried chicken,1,0.88%
+528,dry aloo recipe,1,0.88%
+529,shalgam recipe,1,0.88%
+530,beef salad,1,0.88%
+531,khatta meetha baingan ka bharta,1,0.88%
+532,palak kofta,1,0.88%
+533,stuffed baingan,1,0.88%
+534,palak saag,1,0.88%
+535,manchurian,1,0.88%
+536,aloo matar keema,1,0.88%
+537,puff,1,0.88%
+538,paneer matar masala,1,0.88%
+539,bhindi recipe,1,0.88%
+540,shashlik,1,0.88%
+541,shimla mirch recipe,1,0.88%
+542,pie,1,0.88%
+543,bhindi do pyaza,1,0.88%
+544,baingan ka bhurta,1,0.88%
+545,sandwich,1,0.88%
+546,aloo gobi masala,1,0.88%
+547,aalo pyaaz timatar ki sabzi,1,0.88%
+548,aloo ki kachoriyan,1,0.88%
+549,shimla mirch gravy,1,0.88%
+550,cutlets,1,0.88%
+551,bhindi recipes with gravy,1,0.88%
+552,saag recipe,1,0.88%
+553,palaak aur cheez ke koftay,1,0.88%
+554,quick sarson ka saag,1,0.88%
+555,punjabi dry aloo sabzi,1,0.88%
+556,lauki curry,1,0.88%
+557,keema bhari shimla mirch,1,0.88%
+558,hot and sour soup,1,0.88%
+559,keema stuffed capsicum,1,0.88%
+560,shimla mirch keema,1,0.88%
+561,aloo masala curry,1,0.88%
+562,macaroni,1,0.88%
+563,aloo jeera,1,0.88%
+564,burgers,1,0.88%
+565,aloo masala gravy,1,0.88%
+566,beef soup,1,0.88%
+567,keema aloo,1,0.88%
+568,aloo gravy,1,0.88%
+569,mughlai aloo matar,1,0.88%
+570,bhari hoi bhindiya,1,0.88%
+571,spicy ladyfingers,1,0.88%
+572,seafood salad,1,0.88%
+573,anday aloo ka salan,1,0.88%
+574,lauki ki sabzi,1,0.88%
+575,aloo ke salad,1,0.88%
+576,shawarma,1,0.88%
+577,vegetable stew,1,0.88%
+578,sabzi mix,1,0.88%
+579,brinjal gravy,1,0.88%
+580,sabziyon k chapli kabab,1,0.88%
+581,aloo matar paneer,1,0.88%
+582,palak daal,1,0.88%
+583,lauki bahar,1,0.88%
+584,palak cauliflower chicken,1,0.88%
+585,pasta,1,0.88%
+586,aloo masala for dosa,1,0.88%
+587,corn soup,1,0.88%
+588,gehya recipe,1,0.88%
+589,aloo gobi matar,1,0.88%
+590,sabzion ki karahi,1,0.88%
+591,mooli ki bhujia,1,0.88%
+592,mutton soup,1,0.88%
+593,drum sticks,1,0.88%
+594,brinjal fry,1,0.88%
+595,aloo matar gobi,1,0.88%
+596,bombay mix chicken sabzi,1,0.88%
+597,kabab karahi,1,0.88%
+598,dam pukh bakra,1,0.88%
+599,namkeen mutten karahi,1,0.88%
+600,lahori karahi,1,0.88%
+601,potato curry,1,0.88%
+602,aloo shimla mirch,1,0.88%
+603,achari aloo,1,0.88%
+604,aloo chana masala,1,0.88%
+605,bhindi ki sabzi,1,0.88%
+606,chana palak,1,0.88%
+607,soya aloo,1,0.88%
+608,chholay palak,1,0.88%
+609,poori aloo,1,0.88%
+610,sabzi raita,1,0.88%
+611,aalu shorba,1,0.88%
+612,aloo gajar,1,0.88%
+613,handi,1,0.88%
+614,goat haleem,1,0.88%
+615,multani sohan halwa,1,0.88%
+616,karachi haleem,1,0.88%
+617,khushab dhoda,1,0.88%
+618,kacha golla,1,0.88%
+619,joqes,1,0.88%
+620,gittey,1,0.88%
+621,mamtu,1,0.88%
+622,peshawari kebab,1,0.88%
+623,bali soup,1,0.88%
+624,murgh balti,1,0.88%
+625,vegetable samosa,1,0.88%
+626,jhinga masala,1,0.88%
+627,bakray ki champ,1,0.88%
+628,mulligatawny,1,0.88%
+629,murgh malai kabab,1,0.88%
+630,zafrani malai boti,1,0.88%
+631,jhinga til tinka,1,0.88%
+632,paneer pakora,1,0.88%
+633,the pakistani platter,1,0.88%
+634,tawa fry machhli,1,0.88%
+635,murgh masala yakhni,1,0.88%
+636,paneer tikka,1,0.88%
+637,chicken ginger masala,1,0.88%
+638,machhli tikka,1,0.88%
+639,bbq boti,1,0.88%
+640,tawa hara piyaz qeema,1,0.88%
+641,chicken khopra soup,1,0.88%
+642,jhinga seekh,1,0.88%
+643,kadin kebab,1,0.88%
+644,roast mutton,1,0.88%
+645,chicken paratha rolls,1,0.88%
+646,rosh,1,0.88%
+647,chola chaat,1,0.88%
+648,chicken reshmi handi,1,0.88%
+649,singaporean rice,1,0.88%
+650,sabzi,1,0.88%
+651,khowsuey,1,0.88%
+652,chutney,1,0.88%
+653,bhuna salan,1,0.88%
+654,chinese gosht,1,0.88%
+655,gajrela with khoya,1,0.88%
+656,bbq fish,1,0.88%
+657,punjabi biryani,1,0.88%
+658,punjabi breakfast,1,0.88%
+659,jheenga and prawns,1,0.88%
+660,meethe chawal,1,0.88%
+661,fried gosht recipes,1,0.88%
+662,chinese food,1,0.88%
+663,chinese beef,1,0.88%
+664,beef nihari,1,0.88%
+665,beef korma,1,0.88%
+666,beef chili dry,1,0.88%
+667,bbq beef bites,1,0.88%
+668,boondi,1,0.88%
+669,chopshoro,1,0.88%
+670,garma,1,0.88%
+671,kachumber salad,1,0.88%
+672,pilau,1,0.88%
+673,yakhni pilau,1,0.88%
+674,peas pilau,1,0.88%
+675,prawn pilau biryani,1,0.88%
+676,green tea,1,0.88%
+677,mutton chanay,1,0.88%
+678,pakistani bbq,1,0.88%
+679,pasandon ka korma,1,0.88%
+680,punjabi malai kofta,1,0.88%
+681,fried gosht,1,0.88%
+682,koftay aur maash ki daal,1,0.88%
+683,handi pasanday,1,0.88%
+684,dosa,1,0.88%
+685,chicken palak paneer,1,0.88%
+686,murgh dal chana curry,1,0.88%
+687,lal qila haleem,1,0.88%
+688,peshawari chana masala,1,0.88%
+689,daal murgh,1,0.88%
+690,pakistani chicken biryani,1,0.88%
+691,hara masala anday cholay,1,0.88%
+692,kari,1,0.88%
+693,white pasanda karahi,1,0.88%
+694,tea,1,0.88%
+695,pakistani keema,1,0.88%
+696,hyderabadi meethi dal,1,0.88%
+697,chatpati haleem,1,0.88%
+698,kaju pasande,1,0.88%
+699,gola kabab karahi,1,0.88%
+700,peshawari tikka,1,0.88%
+701,different chicken,1,0.88%
+702,fish bbq,1,0.88%
+703,dal gosht gravy,1,0.88%
+704,egg,1,0.88%
+705,chole samose,1,0.88%
+706,avocado in pakistan taste,1,0.88%
+707,sabzi kabab,1,0.88%
+708,badami pasanda,1,0.88%
+709,kaleji maghaz fry,1,0.88%
+710,dal anday wala bun kabab,1,0.88%
+711,khasta kachori,1,0.88%
+712,shahi chicken korma,1,0.88%
+713,kachori,1,0.88%
+714,fry keema,1,0.88%
+715,kacha keema kabab,1,0.88%
+716,tawa gola kabab,1,0.88%
+717,pyaz ke pakoray,1,0.88%
+718,eid wali kachori,1,0.88%
+719,laccha pakora,1,0.88%
+720,kulfa,1,0.88%
+721,karachi halwa,1,0.88%
+722,sohan papdi,1,0.88%
+723,shikanjabeen,1,0.88%
+724,shikanjvi,1,0.88%
+725,chicken boti,1,0.88%
+726,kebab paratha,1,0.88%
+727,tandoori naan,1,0.88%
+728,pakistani style kali dal,1,0.88%
+729,mooli,1,0.88%
+730,paan,1,0.88%
+731,kashmoor salad,1,0.88%
+732,dal mix fry,1,0.88%
+733,pakistani trotters curry,1,0.88%
+734,mutton shanwari,1,0.88%
+735,anda kofta,1,0.88%
+736,pakistani kalmi tikka,1,0.88%
+737,pakistani mix grill,1,0.88%
+738,mutton boti,1,0.88%
+739,aloo chicken,1,0.88%
+740,chicken tikka piece,1,0.88%
+741,dal mash fry,1,0.88%
+742,aloo arbi,1,0.88%
+743,mutton paya,1,0.88%
+744,beak karahi,1,0.88%
+745,aloo begin,1,0.88%
+746,mutton white,1,0.88%
+747,vegetable mix,1,0.88%
+748,dal channa fry,1,0.88%
+749,aloo anda,1,0.88%
+750,shahi daal,1,0.88%
+751,mix veg pulao,1,0.88%
+752,garlic naan,1,0.88%
+753,mutton dum pukh,1,0.88%
+754,chicken 65,1,0.88%
+755,tandoori champ masala gravy,1,0.88%
+756,kabab masala,1,0.88%
+757,masala kaleji,1,0.88%
+758,hyderabadi khatti daal with gosht,1,0.88%
+759,rezala chicken,1,0.88%
+760,afghani keema,1,0.88%
+761,kalmi tikka,1,0.88%
+762,kali mirch mutton karahi,1,0.88%
+763,karelay gosht,1,0.88%
+764,hunzai handi,1,0.88%
+765,smoky tandoori chicken biryani,1,0.88%
+766,mutton do pyaza,1,0.88%
+767,shaljam gosht,1,0.88%
+768,daal chana pulao,1,0.88%
+769,kadhi phulki,1,0.88%
+770,masala bhindi fry,1,0.88%
+771,panjeeri,1,0.88%
+772,saag paneer,1,0.88%
+773,ishto,1,0.88%
+774,goat and bell pepper curry,1,0.88%
+775,yakhni chicken pulao,1,0.88%
+776,matar paneer,1,0.88%
+777,panjiri,1,0.88%
+778,chicken mayo sandwich,1,0.88%
+779,beef curry,1,0.88%
+780,chicken manchurian,1,0.88%
+781,beef kofta curry,1,0.88%
+782,rajma masala,1,0.88%
+783,goat korma,1,0.88%
+784,torai ki sabzi,1,0.88%
+785,istu,1,0.88%
+786,goat pulao,1,0.88%
+787,toriyan,1,0.88%
+788,bhindi fry,1,0.88%
+789,vegetable raita,1,0.88%
+790,fried rice,1,0.88%
+791,keema samosa,1,0.88%
+792,chilli chicken,1,0.88%
+793,lamb korma,1,0.88%
+794,chicken shashlik,1,0.88%
+795,keema curry,1,0.88%
+796,shinwari lamb karahi,1,0.88%
+797,rice haleem,1,0.88%
+798,shinwari mutton karahi,1,0.88%
+799,lamb handi,1,0.88%
+800,curries,1,0.88%
+801,buttering doudo,1,0.88%
+802,molida,1,0.88%
+803,buroshapik/ghilmindi,1,0.88%
+804,gyaling/gral,1,0.88%
+805,tumoro tea,1,0.88%
+806,naran style fried trout,1,0.88%
+807,anarkali ka falooda,1,0.88%
+808,channae,1,0.88%
+809,hunzai cuisine,1,0.88%
+810,hui garma,1,0.88%
+811,kpk cuisine,1,0.88%
+812,dumplings,1,0.88%
+813,lentils,1,0.88%
+814,hunzai street food,1,0.88%
+815,hunzai breakfast,1,0.88%
+816,hunzai pancakes,1,0.88%
+817,makki ki roti tart,1,0.88%
+818,keema paratha,1,0.88%
+819,missi roti,1,0.88%
+820,palak pakora,1,0.88%
+821,beef boti kebab,1,0.88%
+822,charsi karahi,1,0.88%
+823,peach chutney,1,0.88%
+824,lahori fish,1,0.88%
+825,spinach pakora,1,0.88%
+826,paya soup,1,0.88%
+827,kaak,1,0.88%
+828,special qorma,1,0.88%
+829,samosa shots,1,0.88%
+830,tandoori bbq platters,1,0.88%
+831,milk barfi,1,0.88%
+832,almond cake,1,0.88%
+833,chicken methi qeema,1,0.88%
+834,white chicken curry,1,0.88%
+835,chicken qeema,1,0.88%
+836,baingan gosht,1,0.88%
+837,bhuna gosht masala,1,0.88%
+838,bhuna chana masala,1,0.88%
+839,punjabi prawn masala curry,1,0.88%
+840,egg halwa,1,0.88%
+841,pabda fish bhuna curry,1,0.88%
+842,achari aloo ki bhujia,1,0.88%
+843,phali gosht,1,0.88%
+844,hariyali chicken,1,0.88%
+845,tadka dal,1,0.88%
+846,leftover rice kheer,1,0.88%
+847,cholay,1,0.88%
+848,chicken bhuna masala,1,0.88%
+849,pakistani karahi keema,1,0.88%
+850,pakistani kofta curry,1,0.88%
+851,aloo chana curry,1,0.88%
+852,vegetable fried rice,1,0.88%
+853,coconut rice pilaf,1,0.88%
+854,beef rice bowl,1,0.88%
+855,saffron infused pulao,1,0.88%
+856,lentil biryani,1,0.88%
+857,mushroom rice casserole,1,0.88%
+858,sagudana kheer,1,0.88%
+859,sewaiyan,1,0.88%
+860,pilaf,1,0.88%
+861,spiced malaysian rice bowl,1,0.88%
+862,live kunafa,1,0.88%
+863,layered singaporean fusion rice,1,0.88%
+864,assorted swiss rolls,1,0.88%
+865,fudge brownie,1,0.88%
+866,velvety cream caramel,1,0.88%
+867,live jalebi,1,0.88%
+868,gourmet cake medley,1,0.88%
+869,daal palak,1,0.88%
+870,kashmiri tea,1,0.88%
+871,gulabi chai,1,0.88%
+872,mooli paratha,1,0.88%
+873,fish pakoras,1,0.88%
+874,lobia daal,1,0.88%
+875,peas pulao,1,0.88%
+876,chicken tikka biryani,1,0.88%
+877,fish tahiri,1,0.88%
+878,dates lassi,1,0.88%
+879,peach lassi,1,0.88%
+880,namkeen lassi,1,0.88%
+881,strawberry lassi,1,0.88%
+882,naan kabab,1,0.88%
+883,lahori harisa,1,0.88%
+884,kadoo,1,0.88%
+885,gajar aaloo matar sabzi,1,0.88%
+886,kachnaar,1,0.88%
+887,aloo vala naan,1,0.88%
+888,shakar vala parontha,1,0.88%
+889,vaysan vala naan,1,0.88%
+890,curry pakora,1,0.88%
+891,bhoora,1,0.88%
+892,masala stuffed karaylay,1,0.88%
+893,masla stuffed tinday,1,0.88%
+894,chatpati vegetables,1,0.88%
+895,masoor daal pulao,1,0.88%
+896,loki gosht,1,0.88%
+897,lentils and rice,1,0.88%
+898,mutton curry,1,0.88%
+899,mix vegetable pulao,1,0.88%
+900,tawa qeema,1,0.88%
+901,tori sabzi,1,0.88%
+902,meat stew,1,0.88%
+903,vegetable pakora curry,1,0.88%
+904,daal tadka,1,0.88%
+905,trout fish,1,0.88%
+906,kachi lassi,1,0.88%
+907,basen ki roti,1,0.88%
+908,prawns masala,1,0.88%
+909,chiray,1,0.88%
+910,sarsun ka saag & makki ki roti,1,0.88%
+911,romali roti,1,0.88%
+912,anday wala burger,1,0.88%
+913,lukum dany,1,0.88%
+914,warqi,1,0.88%
+915,andrasa,1,0.88%
+916,gil-e-firdaus,1,0.88%
+917,pan pera,1,0.88%
+918,paplet fish fry,1,0.88%
+919,berckuzh / chapshoro,1,0.88%
+920,masalay bhare tinday,1,0.88%
+921,pheniyan,1,0.88%
+922,aush,1,0.88%
+923,shurukut ulak,1,0.88%
+924,badam ka sharbat,1,0.88%
+925,thandai / sardai,1,0.88%
+926,chikar cholay,1,0.88%
+927,rizala,1,0.88%
+928,aushak,1,0.88%
+929,phitti,1,0.88%
+930,metha paan,1,0.88%
+931,lemon soda,1,0.88%
+932,khalis dahi,1,0.88%
+933,gol gappay or pani puri,1,0.88%
+934,satu,1,0.88%
+935,rabri doodh,1,0.88%
+936,pan ice cream,1,0.88%
+937,nimco,1,0.88%
+938,meethi seviyan,1,0.88%
+939,soup,1,0.88%
+940,basen wala naan,1,0.88%
+941,falsa juice,1,0.88%
+942,imartis,1,0.88%
+943,pamir cuisine,1,0.88%
+944,neembu pani / squenjbeen,1,0.88%
+945,khopra pak,1,0.88%
+946,imli alo bukhara sharbat,1,0.88%
+947,shakarkandi,1,0.88%
+948,sultani daal,1,0.88%
+949,arvi gosht,1,0.88%
+950,raan roast,1,0.88%
+951,macchli,1,0.88%
+952,ravri,1,0.88%
+953,gyaling or go-lee,1,0.88%
+954,anda ghotala,1,0.88%
+955,phirni,1,0.88%
+956,kaleji kabab,1,0.88%
+957,modur palao,1,0.88%
+958,khoya khajoor,1,0.88%
+959,tarbooz e afza,1,0.88%
+960,tud tud bhata,1,0.88%
+961,gachak,1,0.88%
+962,bhutta,1,0.88%
+963,ladu peethi,1,0.88%
+964,roth,1,0.88%
+965,zeera sharbat,1,0.88%
+966,mantu,1,0.88%
+967,gulabi chai / kashmiri chai,1,0.88%
+968,palao,1,0.88%
+969,mircho ka salan,1,0.88%
+970,crab claw,1,0.88%
+971,sabaz chai,1,0.88%
+972,batair,1,0.88%
+973,ganay ki roh,1,0.88%
+974,qeema bhare karelay,1,0.88%
+975,khubani ki chutney,1,0.88%
+976,pakora kadhi,1,0.88%
+977,meethi tikkiyan,1,0.88%
+978,twist puff pastry,1,0.88%
+979,shopan / joqes,1,0.88%
+980,pathay ka halwa,1,0.88%
+981,chaanp,1,0.88%
+982,cream fruit chaat,1,0.88%
+983,murabba,1,0.88%
+984,qehwa,1,0.88%
+985,shakes,1,0.88%
+986,dalcha,1,0.88%
+987,zamin doz machhli,1,0.88%
+988,cham cham,1,0.88%
+989,shab-daig,1,0.88%
+990,lukhmi,1,0.88%
+991,ghiya kadu,1,0.88%
+992,raho machli,1,0.88%
+993,teetar,1,0.88%
+994,tamatar ki chutney,1,0.88%
+995,daal ka halwa,1,0.88%
+996,ladu,1,0.88%
+997,khoya kulfi,1,0.88%
+998,bun sheermaal,1,0.88%
+999,tawa piece,1,0.88%
+1000,kulfa falooda,1,0.88%
+1001,kachori with aloo ki bhujiya,1,0.88%
+1002,loki ka raita,1,0.88%
+1003,chicken makhni,1,0.88%
+1004,tandoori chargha,1,0.88%
+1005,methi lassi,1,0.88%
+1006,aloo ki tarkari,1,0.88%
+1007,bong paye,1,0.88%
+1008,bolani,1,0.88%
+1009,shakar pary,1,0.88%
+1010,hari chutney,1,0.88%
+1011,gatta candy,1,0.88%
+1012,murgh-e-musalam,1,0.88%
+1013,dhaagywale kabab,1,0.88%
+1014,ojri curry,1,0.88%
+1015,imli ki chutney,1,0.88%
+1016,dowdo soup,1,0.88%
+1017,habshi halwa,1,0.88%
+1018,samosa aloo,1,0.88%
+1019,doodh soda,1,0.88%
+1020,rasgulla,1,0.88%
+1021,chikki mraunda,1,0.88%
+1022,maal pura,1,0.88%
+1023,braised beef,1,0.88%
+1024,mutton masala sajji,1,0.88%
+1025,mutton,1,0.88%
+1026,chicken namkeen karahi,1,0.88%
+1027,lamb handi boneless,1,0.88%
+1028,chicken,1,0.88%
+1029,curry,1,0.88%
+1030,mutton cuts,1,0.88%
+1031,chicken makhani sajji,1,0.88%
+1032,pakistani beef nihari,1,0.88%
+1033,strawberry cake,1,0.88%
+1034,date pudding,1,0.88%
+1035,gobi ghost,1,0.88%
+1036,muttor qeema,1,0.88%
+1037,chicken bbq pieces,1,0.88%
+1038,chicken malai handi,1,0.88%
+1039,potato salad,1,0.88%
+1040,mutton nihari,1,0.88%
+1041,bread pudding,1,0.88%
+1042,chargha biryani,1,0.88%
+1043,vegetarian patties,1,0.88%
+1044,chana bhaji,1,0.88%
+1045,oreo delight,1,0.88%
+1046,beef chappal kabab,1,0.88%
+1047,afghani pulao,1,0.88%
+1048,chicken qorma,1,0.88%
+1049,macaroni salad,1,0.88%
+1050,samosy,1,0.88%
+1051,mutton chanp masala,1,0.88%
+1052,banana bread,1,0.88%
+1053,chappal kabab,1,0.88%
+1054,ice cream,1,0.88%
+1055,tuscon chicken pasta,1,0.88%
+1056,white chicken karahi,1,0.88%
+1057,chicken murgh musalam,1,0.88%
+1058,chicken steam roast,1,0.88%
+1059,chocolate fudge cake with ice cream,1,0.88%
+1060,fruit salad,1,0.88%
+1061,mint chutni,1,0.88%
+1062,chicken steaks in white sauce,1,0.88%
+1063,chicken and vegetable noodles,1,0.88%
+1064,vegetable cutluts,1,0.88%
+1065,baked pasta,1,0.88%
+1066,chicken kofty anday,1,0.88%
+1067,boondi raita,1,0.88%
+1068,fries,1,0.88%
+1069,beef boti,1,0.88%
+1070,desi chicken roast,1,0.88%
+1071,handi sekh kabab,1,0.88%
+1072,chicken broast with fries,1,0.88%
+1073,cream salad,1,0.88%
+1074,boneless handi,1,0.88%
+1075,cheese cake,1,0.88%
+1076,fruit trifle,1,0.88%
+1077,warm bread pudding,1,0.88%
+1078,chicken roast with steamed vegetables,1,0.88%
+1079,aloo bhaji,1,0.88%
+1080,chicken shwarma,1,0.88%
+1081,rabri kheer,1,0.88%
+1082,kari gravy,1,0.88%
+1083,thadal,1,0.88%
+1084,camel pulao,1,0.88%
+1085,pallo machi,1,0.88%
+1086,noon chai,1,0.88%
+1087,apricot stew,1,0.88%
+1088,bannu beef pulao,1,0.88%
+1089,lahore biryani,1,0.88%
+1090,walnut cake,1,0.88%
+1091,bun kebabs,1,0.88%
+1092,arabian paratha,1,0.88%
+1093,bone marrow biryani,1,0.88%
+1094,fish kata-kat,1,0.88%
+1095,mixed grill,1,0.88%
+1096,nalli nihari,1,0.88%
+1097,green chutney,1,0.88%
+1098,salin,1,0.88%
+1099,qeema gobhi,1,0.88%
+1100,desi chicken yakhni,1,0.88%
+1101,mutton neck yakhni,1,0.88%
+1102,pakistani sweets,1,0.88%
+1103,handi-style karahi,1,0.88%
+1104,bihari boti,1,0.88%
+1105,special zarda,1,0.88%
+1106,aloo biryani,1,0.88%
+1107,tikka biryani,1,0.88%
+1108,desi murgh yakhni,1,0.88%
+1109,raan tandoori,1,0.88%
+1110,mutton kunna,1,0.88%
+1111,murgh kashmiri,1,0.88%
+1112,mutton nalli,1,0.88%
+1113,family platter,1,0.88%
+1114,mutton joint roast,1,0.88%
+1115,murgh makhni,1,0.88%
+1116,mutton ribs,1,0.88%
+1117,tawa chicken qeema,1,0.88%
+1118,balochi namkeen gosht,1,0.88%
+1119,mutton shank rogan-e-josh,1,0.88%
+1120,beef khoya kabab,1,0.88%
+1121,landi kotal karahi,1,0.88%
+1122,peshawari qehwa,1,0.88%
+1123,masala chai,1,0.88%
+1124,murgh handi,1,0.88%
+1125,tawa mutton qeema,1,0.88%
+1126,behari kabab,1,0.88%
+1127,maghaz masala,1,0.88%
+1128,desi murgh karahi,1,0.88%
+1129,kulfi & faluda,1,0.88%
+1130,qandhari roti,1,0.88%
+1131,butter rice,1,0.88%
+1132,chicken cheese kabab,1,0.88%
+1133,shahi kheer,1,0.88%
+1134,mutton chilman biryani,1,0.88%
+1135,tawa champ,1,0.88%
+1136,haryali boti,1,0.88%
+1137,sindhi matka biryani,1,0.88%
+1138,murgh multani white karahi,1,0.88%
+1139,shahi raan,1,0.88%
+1140,multani mutton white karahi,1,0.88%
+1141,chicken tangdri kabab,1,0.88%
+1142,cholistani pulao,1,0.88%
+1143,rusks,1,0.88%
+1144,daal seu,1,0.88%
+1145,golgappe,1,0.88%
+1146,moringa flowerbud curry,1,0.88%
+1147,kelawo,1,0.88%
+1148,ghalmandi,1,0.88%
+1149,rosehip oil bread,1,0.88%
+1150,beef pulao,1,0.88%
+1151,kalli,1,0.88%
+1152,qulfi,1,0.88%
+1153,phikka khoya,1,0.88%
+1154,kofte,1,0.88%
+1155,makai da sitta,1,0.88%
+1156,nāshtā,1,0.88%
+1157,palo fish,1,0.88%
+1158,bhail puri,1,0.88%
+1159,masala stews,1,0.88%
+1160,kharoray,1,0.88%
+1161,malai tikka kebab,1,0.88%
+1162,makai roti,1,0.88%
+1163,bhugal gosht,1,0.88%
+1164,buckwheat bread,1,0.88%
+1165,cutlass,1,0.88%
+1166,multani halwa,1,0.88%
+1167,gajraila,1,0.88%
+1168,almond bread,1,0.88%
+1169,shorba,1,0.88%
+1170,egg rolls,1,0.88%
+1171,lab e shireen,1,0.88%
+1172,zarda rice,1,0.88%
+1173,doodh dulari,1,0.88%
+1174,beef behari boti,1,0.88%
+1175,mutton kunna paya,1,0.88%
+1176,fish tikka boti,1,0.88%
+1177,masala biryani,1,0.88%
+1178,chicken red sauce,1,0.88%
+1179,chicken fillet,1,0.88%
+1180,shahi batair,1,0.88%
+1181,chicken labnese kabab,1,0.88%
+1182,beef chulu kabab,1,0.88%
+1183,beef shami kabab,1,0.88%
+1184,desi chicken karahi,1,0.88%
+1185,murgh channay,1,0.88%
+1186,qeema wala naan,1,0.88%
+1187,tawa chicken,1,0.88%
+1188,phajjay ke paye,1,0.88%
+1189,deep-fried fish,1,0.88%
+1190,beef fry nihari,1,0.88%
+1191,desi mutton chops,1,0.88%
+1192,mughlai biryani,1,0.88%
+1193,kashmiri daal chawal,1,0.88%
+1194,tandoori chicken skewers,1,0.88%
+1195,palak,1,0.88%
+1196,methi aloo,1,0.88%
+1197,aloo samosas,1,0.88%
+1198,lobia paratha,1,0.88%
+1199,mixed vegetable,1,0.88%
+1200,khitcheri,1,0.88%
+1201,naan channa,1,0.88%
+1202,ande aloo,1,0.88%
+1203,aloo mutter,1,0.88%
+1204,arvi bengan,1,0.88%
+1205,ladoo,1,0.88%
+1206,palak bhindi,1,0.88%
+1207,khatti moong daal,1,0.88%
+1208,karela sabzi,1,0.88%
+1209,lobia masala,1,0.88%
+1210,apricot juice,1,0.88%
+1211,spiced lamb skewers,1,0.88%
+1212,tandoori,1,0.88%
+1213,balti gosht,1,0.88%
+1214,zafrani kulfi,1,0.88%
+1215,dahi bhalla chaat,1,0.88%
+1216,chicken spaghetti,1,0.88%
+1217,pakistani chicken shorba,1,0.88%
+1218,waheed k fry kabab,1,0.88%
+1219,degchi kabab,1,0.88%
+1220,kidneys,1,0.88%
+1221,resha kabab,1,0.88%
+1222,chicken bihari boti,1,0.88%
+1223,tikka masala,1,0.88%
+1224,tamatar gosht,1,0.88%
+1225,petha halwa,1,0.88%
+1226,fruit trifle dessert,1,0.88%
+1227,mutanjan chawal,1,0.88%
