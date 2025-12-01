@@ -1,12 +1,14 @@
 import { Ionicons } from "@expo/vector-icons";
 import { StyleSheet, Text, TouchableOpacity, View, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useRouter } from "expo-router";
 import { useAuth } from "../../hooks/useAuth";
-import { clearAll } from "../../utils/storage";
+import { authAPI } from "../../services/auth.api";
 import { Colors } from "../../constants/colors";
 
 export default function ProfileScreen() {
   const { user, logout } = useAuth();
+  const router = useRouter();
 
   const handleLogout = async () => {
     Alert.alert(
@@ -28,15 +30,36 @@ export default function ProfileScreen() {
   const handleClearData = async () => {
     Alert.alert(
       "Clear All Data",
-      "This will clear all app data and log you out. Are you sure?",
+      "This will permanently delete your account and all data. This action cannot be undone. Are you sure?",
       [
         { text: "Cancel", style: "cancel" },
         {
-          text: "Clear",
+          text: "Delete Account",
           style: "destructive",
           onPress: async () => {
-            await clearAll();
-            Alert.alert("Success", "All data cleared. Please restart the app.");
+            try {
+              if (!user?.email) {
+                Alert.alert("Error", "User email not found");
+                return;
+              }
+
+              // Delete user account from backend
+              await authAPI.deleteUserByEmail(user.email);
+
+              // Logout to clear auth state and storage (this will trigger navigation to login)
+              await logout();
+
+              // Show success message
+              Alert.alert(
+                "Account Deleted",
+                "Your account and all data have been permanently deleted."
+              );
+            } catch (error: any) {
+              Alert.alert(
+                "Error",
+                error.response?.data?.detail || "Failed to delete account. Please try again."
+              );
+            }
           },
         },
       ]

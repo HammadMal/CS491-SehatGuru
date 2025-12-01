@@ -10,6 +10,7 @@ import {
 } from '../types/onboarding.types';
 import { setObject, setItem, STORAGE_KEYS } from '../utils/storage';
 import { AuthContext } from './AuthContext';
+import { userAPI } from '../services/user.api';
 
 export const OnboardingContext = createContext<OnboardingContextType | undefined>(undefined);
 
@@ -85,7 +86,17 @@ export const OnboardingProvider: React.FC<OnboardingProviderProps> = ({ children
 
   const completeOnboarding = async () => {
     try {
-      // Save onboarding data
+      // Save onboarding data to backend
+      try {
+        await userAPI.saveProfile(onboardingData);
+        console.log('Onboarding data saved to backend successfully');
+      } catch (apiError) {
+        console.error('Error saving to backend:', apiError);
+        // Continue with local save even if backend fails
+        // This allows offline onboarding completion
+      }
+
+      // Save onboarding data locally (as backup)
       await setObject(STORAGE_KEYS.ONBOARDING_DATA, onboardingData);
       await setItem(STORAGE_KEYS.ONBOARDING_COMPLETE, 'true');
 

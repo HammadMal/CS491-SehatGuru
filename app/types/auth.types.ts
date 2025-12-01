@@ -12,6 +12,7 @@ export interface AuthContextType {
   isLoading: boolean;
   user: User | null;
   hasCompletedOnboarding: boolean;
+  hasAcceptedConsent: boolean;
 
   // Actions
   login: (email: string, password: string) => Promise<void>;
@@ -21,8 +22,11 @@ export interface AuthContextType {
   resetPassword: (email: string) => Promise<void>;
   setNewPassword: (password: string) => Promise<void>;
   refreshOnboardingStatus: () => Promise<void>;
+  verifyOTP: (email: string, otp: string) => Promise<boolean>;
+  resetPasswordWithOTP: (email: string, otp: string, newPassword: string) => Promise<void>;
+  setConsentAccepted: () => Promise<void>;
 
-  // Temporary state (before backend)
+  // Temporary state
   tempEmail: string | null;
   tempPassword: string | null;
   setTempEmail: (email: string | null) => void;

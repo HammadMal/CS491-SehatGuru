@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { PasswordInput } from '../../components/auth/PasswordInput';
@@ -11,12 +11,17 @@ import { Colors } from '../../constants/colors';
 
 export default function SetNewPasswordScreen() {
   const router = useRouter();
-  const { setNewPassword } = useAuth();
+  const params = useLocalSearchParams();
+  const { resetPasswordWithOTP } = useAuth();
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [passwordError, setPasswordError] = useState<string | null>(null);
   const [confirmPasswordError, setConfirmPasswordError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  // Get OTP and email from navigation params
+  const otp = params.otp as string;
+  const email = params.email as string;
 
   const requirements = getPasswordRequirements(password);
 
@@ -31,9 +36,17 @@ export default function SetNewPasswordScreen() {
       return;
     }
 
+    if (!otp || !email) {
+      Alert.alert('Error', 'Missing verification information. Please start the password reset process again.');
+      router.replace('/(auth)/forgot-password');
+      return;
+    }
+
     setLoading(true);
     try {
-      await setNewPassword(password);
+      // Use the new resetPasswordWithOTP function
+      await resetPasswordWithOTP(email, otp, password);
+
       // Show success message and redirect to login
       Alert.alert(
         'Success',

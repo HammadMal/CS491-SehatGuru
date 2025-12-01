@@ -4,14 +4,18 @@ import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Checkbox } from '../../components/auth/Checkbox';
 import { CustomButton } from '../../components/auth/CustomButton';
+import { useAuth } from '../../hooks/useAuth';
 import { Colors } from '../../constants/colors';
 
 export default function ImportantInfoScreen() {
   const router = useRouter();
+  const { setConsentAccepted } = useAuth();
   const [privacyAccepted, setPrivacyAccepted] = useState(false);
   const [healthDataAccepted, setHealthDataAccepted] = useState(false);
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
+    // Mark consent as accepted before navigating
+    await setConsentAccepted();
     router.replace('/(onboarding)/basic-info');
   };
 

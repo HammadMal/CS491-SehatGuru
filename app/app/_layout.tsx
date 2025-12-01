@@ -5,7 +5,7 @@ import { useAuth } from '../hooks/useAuth';
 import { useEffect } from 'react';
 
 function RootLayoutNav() {
-  const { isAuthenticated, isLoading, hasCompletedOnboarding } = useAuth();
+  const { isAuthenticated, isLoading, hasCompletedOnboarding, hasAcceptedConsent } = useAuth();
   const segments = useSegments();
   const router = useRouter();
 
@@ -15,19 +15,38 @@ function RootLayoutNav() {
     const inAuthGroup = segments[0] === '(auth)';
     const inOnboardingGroup = segments[0] === '(onboarding)';
     const inTabsGroup = segments[0] === '(tabs)';
+    const onImportantInfo = segments[1] === 'important-info';
+
+    console.log('Navigation check:', {
+      isAuthenticated,
+      hasAcceptedConsent,
+      hasCompletedOnboarding,
+      currentSegment: segments[0],
+      currentScreen: segments[1],
+      inAuthGroup,
+      inOnboardingGroup,
+      inTabsGroup,
+      onImportantInfo
+    });
 
     if (!isAuthenticated && !inAuthGroup) {
       // Redirect to auth if not authenticated
+      console.log('Redirecting to auth/splash');
       router.replace('/(auth)/splash');
-    } else if (isAuthenticated && !hasCompletedOnboarding && !inOnboardingGroup && !inAuthGroup) {
-      // Redirect to onboarding if authenticated but not completed onboarding
-      // BUT only if not still in auth group (e.g., important-info screen)
-      router.replace('/(onboarding)/basic-info');
     } else if (isAuthenticated && hasCompletedOnboarding && !inTabsGroup) {
-      // Redirect to main app if authenticated and completed onboarding
+      // If onboarding is complete, go straight to tabs (skip consent check)
+      console.log('Redirecting to tabs (onboarding complete)');
       router.replace('/(tabs)');
+    } else if (isAuthenticated && !hasCompletedOnboarding && !hasAcceptedConsent && !onImportantInfo) {
+      // Only show consent screen for new users who haven't completed onboarding
+      console.log('Redirecting to important-info (new user, no consent)');
+      router.replace('/(auth)/important-info');
+    } else if (isAuthenticated && !hasCompletedOnboarding && hasAcceptedConsent && !inOnboardingGroup) {
+      // Redirect to onboarding if consent accepted but onboarding not completed
+      console.log('Redirecting to onboarding/basic-info');
+      router.replace('/(onboarding)/basic-info');
     }
-  }, [isAuthenticated, hasCompletedOnboarding, isLoading, segments, router]);
+  }, [isAuthenticated, hasAcceptedConsent, hasCompletedOnboarding, isLoading, segments, router]);
 
   return (
     <Stack screenOptions={{ headerShown: false }}>

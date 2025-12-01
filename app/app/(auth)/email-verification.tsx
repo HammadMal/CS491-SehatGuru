@@ -1,97 +1,95 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { VerificationCodeInput } from '../../components/auth/VerificationCodeInput';
 import { CustomButton } from '../../components/auth/CustomButton';
 import { useAuth } from '../../hooks/useAuth';
-import { validateVerificationCode } from '../../utils/validation';
 import { Colors } from '../../constants/colors';
+import { Ionicons } from '@expo/vector-icons';
+import { authAPI } from '../../services/auth.api';
 
 export default function EmailVerificationScreen() {
   const router = useRouter();
-  const { verifyEmail, tempEmail } = useAuth();
-  const [code, setCode] = useState(['', '', '', '', '', '']);
+  const { tempEmail } = useAuth();
   const [loading, setLoading] = useState(false);
-  const [countdown, setCountdown] = useState(60);
-  const [canResend, setCanResend] = useState(false);
 
-  useEffect(() => {
-    if (countdown > 0) {
-      const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
-      return () => clearTimeout(timer);
-    } else {
-      setCanResend(true);
-    }
-  }, [countdown]);
-
-  // Auto-submit when all 6 digits are entered
-  useEffect(() => {
-    if (code.every((digit) => digit !== '')) {
-      handleVerify();
-    }
-  }, [code]);
-
-  const handleVerify = async () => {
-    const error = validateVerificationCode(code);
-    if (error) {
-      Alert.alert('Invalid Code', error);
+  const handleResendEmail = async () => {
+    if (!tempEmail) {
+      Alert.alert('Error', 'Email address not found');
       return;
     }
 
     setLoading(true);
     try {
-      const fullCode = code.join('');
-      const success = await verifyEmail(fullCode);
-      if (success) {
-        router.replace('/(auth)/important-info');
-      } else {
-        Alert.alert('Verification Failed', 'Invalid verification code');
-        setCode(['', '', '', '', '', '']);
-      }
+      await authAPI.requestEmailVerification(tempEmail);
+      Alert.alert('Email Sent', 'A new verification email has been sent. Please check your inbox.');
     } catch (error: any) {
-      Alert.alert('Error', error.message || 'Verification failed');
-      setCode(['', '', '', '', '', '']);
+      Alert.alert('Error', error.message || 'Failed to resend verification email');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleResend = () => {
-    setCountdown(60);
-    setCanResend(false);
-    Alert.alert('Code Sent', 'A new verification code has been sent to your email');
+  const handleGoToLogin = () => {
+    router.replace('/(auth)/login');
   };
 
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
-        <Text style={styles.title}>Verify Your Email</Text>
+        <View style={styles.iconContainer}>
+          <Ionicons name="mail-outline" size={80} color={Colors.primary} />
+        </View>
+
+        <Text style={styles.title}>Check Your Email</Text>
+
         <Text style={styles.subtitle}>
-          We sent a code to{'\n'}
+          We've sent a verification link to{'\n'}
           <Text style={styles.email}>{tempEmail || 'your email'}</Text>
         </Text>
 
-        <VerificationCodeInput code={code} setCode={setCode} />
+        <View style={styles.instructionsContainer}>
+          <View style={styles.instructionItem}>
+            <Ionicons name="checkmark-circle" size={20} color={Colors.primary} />
+            <Text style={styles.instructionText}>Open your email inbox</Text>
+          </View>
+
+          <View style={styles.instructionItem}>
+            <Ionicons name="checkmark-circle" size={20} color={Colors.primary} />
+            <Text style={styles.instructionText}>Click the verification link in the email</Text>
+          </View>
+
+          <View style={styles.instructionItem}>
+            <Ionicons name="checkmark-circle" size={20} color={Colors.primary} />
+            <Text style={styles.instructionText}>Return to the app and log in</Text>
+          </View>
+        </View>
+
+        <Text style={styles.noteText}>
+          Note: The verification link will expire in 24 hours
+        </Text>
 
         <CustomButton
-          title="Verify"
-          onPress={handleVerify}
-          loading={loading}
-          disabled={loading || code.some((digit) => digit === '')}
-          style={styles.verifyButton}
+          title="Go to Login"
+          onPress={handleGoToLogin}
+          style={styles.loginButton}
         />
 
         <View style={styles.resendContainer}>
-          <Text style={styles.resendText}>Didn't receive the code? </Text>
-          {canResend ? (
-            <TouchableOpacity onPress={handleResend}>
-              <Text style={styles.resendLink}>Resend</Text>
-            </TouchableOpacity>
-          ) : (
-            <Text style={styles.countdown}>Resend in {countdown}s</Text>
-          )}
+          <Text style={styles.resendText}>Didn't receive the email? </Text>
+          <CustomButton
+            title="Resend Email"
+            onPress={handleResendEmail}
+            loading={loading}
+            disabled={loading}
+            variant="outline"
+            style={styles.resendButton}
+          />
         </View>
+
+        <Text style={styles.helpText}>
+          Check your spam folder if you don't see the email
+        </Text>
       </View>
     </SafeAreaView>
   );
@@ -105,7 +103,11 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     paddingHorizontal: 20,
-    paddingTop: 60,
+    paddingTop: 40,
+  },
+  iconContainer: {
+    alignItems: 'center',
+    marginBottom: 24,
   },
   title: {
     fontSize: 28,
@@ -118,33 +120,56 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: Colors.textSecondary,
     textAlign: 'center',
-    marginBottom: 40,
+    marginBottom: 32,
     lineHeight: 22,
   },
   email: {
     fontWeight: '600',
     color: Colors.textPrimary,
   },
-  verifyButton: {
-    marginTop: 20,
+  instructionsContainer: {
+    backgroundColor: Colors.backgroundLight,
+    borderRadius: 12,
+    padding: 20,
+    marginBottom: 16,
+  },
+  instructionItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  instructionText: {
+    fontSize: 14,
+    color: Colors.textPrimary,
+    marginLeft: 12,
+    flex: 1,
+  },
+  noteText: {
+    fontSize: 13,
+    color: Colors.textLight,
+    textAlign: 'center',
     marginBottom: 24,
+    fontStyle: 'italic',
+  },
+  loginButton: {
+    marginBottom: 20,
   },
   resendContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
     alignItems: 'center',
+    marginBottom: 16,
   },
   resendText: {
     fontSize: 14,
     color: Colors.textSecondary,
+    marginBottom: 12,
   },
-  resendLink: {
-    fontSize: 14,
-    color: Colors.primary,
-    fontWeight: '600',
+  resendButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 20,
   },
-  countdown: {
-    fontSize: 14,
+  helpText: {
+    fontSize: 12,
     color: Colors.textLight,
+    textAlign: 'center',
   },
 });

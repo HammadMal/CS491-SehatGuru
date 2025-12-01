@@ -2,13 +2,13 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Storage keys
 export const STORAGE_KEYS = {
-  AUTH_TOKEN: 'auth_token',
-  MOCK_USER: 'mock_user',
-  ONBOARDING_DATA: 'onboarding_data',
-  ONBOARDING_COMPLETE: 'onboarding_complete',
-  TEMP_EMAIL: 'temp_email',
-  TEMP_PASSWORD: 'temp_password',
-  USER_PROFILE: 'user_profile',
+  AUTH_TOKEN: 'access_token',           // JWT access token
+  REFRESH_TOKEN: 'refresh_token',       // JWT refresh token
+  USER_PROFILE: 'user_profile',         // User profile data
+  ONBOARDING_DATA: 'onboarding_data',   // Onboarding data (local backup)
+  ONBOARDING_COMPLETE: 'onboarding_complete', // Onboarding completion flag
+  CONSENT_ACCEPTED: 'consent_accepted', // Privacy policy and terms acceptance
+  TEMP_EMAIL: 'temp_email',             // Temporary email for password reset flow
 };
 
 // Get item from storage

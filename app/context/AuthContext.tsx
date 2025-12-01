@@ -1,6 +1,8 @@
 import React, { createContext, useState, useEffect, ReactNode } from 'react';
 import { User, AuthContextType } from '../types/auth.types';
 import { getItem, setItem, removeItem, getObject, setObject, STORAGE_KEYS } from '../utils/storage';
+import { authAPI } from '../services/auth.api';
+import { userAPI } from '../services/user.api';
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -13,6 +15,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState<User | null>(null);
   const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState(false);
+  const [hasAcceptedConsent, setHasAcceptedConsent] = useState(false);
   const [tempEmail, setTempEmail] = useState<string | null>(null);
   const [tempPassword, setTempPassword] = useState<string | null>(null);
 
@@ -26,11 +29,32 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const token = await getItem(STORAGE_KEYS.AUTH_TOKEN);
       const userData = await getObject<User>(STORAGE_KEYS.USER_PROFILE);
       const onboardingComplete = await getItem(STORAGE_KEYS.ONBOARDING_COMPLETE);
+      const consentAccepted = await getItem(STORAGE_KEYS.CONSENT_ACCEPTED);
 
       if (token && userData) {
         setIsAuthenticated(true);
         setUser(userData);
         setHasCompletedOnboarding(onboardingComplete === 'true');
+        setHasAcceptedConsent(consentAccepted === 'true');
+
+        // Validate token with backend
+        try {
+          const currentUser = await authAPI.getCurrentUser();
+          // Update local user data with latest from backend
+          const updatedUser: User = {
+            id: currentUser.uid,
+            email: currentUser.email,
+            fullName: currentUser.full_name,
+            emailVerified: currentUser.email_verified,
+            photoUrl: currentUser.photo_url,
+          };
+          setUser(updatedUser);
+          await setObject(STORAGE_KEYS.USER_PROFILE, updatedUser);
+        } catch (error) {
+          // Token invalid, logout
+          console.error('Token validation failed:', error);
+          await logout();
+        }
       }
     } catch (error) {
       console.error('Error checking auth state:', error);
@@ -39,70 +63,88 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  // Mock login function
+  // Login function
   const login = async (email: string, password: string): Promise<void> => {
-    // Simulate API delay
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    try {
+      // Call backend login API
+      const response = await authAPI.login(email, password);
 
-    // Retrieve stored user
-    const storedUser = await getObject<{ email: string; password: string; fullName?: string; id: string }>(
-      STORAGE_KEYS.MOCK_USER
-    );
+      // Store tokens
+      await setItem(STORAGE_KEYS.AUTH_TOKEN, response.access_token);
+      await setItem(STORAGE_KEYS.REFRESH_TOKEN, response.refresh_token);
 
-    if (storedUser && storedUser.email === email && storedUser.password === password) {
-      // Successful login
+      // Get user data
+      const userData = await authAPI.getCurrentUser();
+
       const user: User = {
-        id: storedUser.id,
-        email: storedUser.email,
-        fullName: storedUser.fullName,
-        emailVerified: true,
+        id: userData.uid,
+        email: userData.email,
+        fullName: userData.full_name,
+        emailVerified: userData.email_verified,
+        photoUrl: userData.photo_url,
       };
 
       setUser(user);
-      setIsAuthenticated(true);
-      await setItem(STORAGE_KEYS.AUTH_TOKEN, `mock_token_${Date.now()}`);
       await setObject(STORAGE_KEYS.USER_PROFILE, user);
 
-      // Check onboarding status
-      const onboardingComplete = await getItem(STORAGE_KEYS.ONBOARDING_COMPLETE);
-      setHasCompletedOnboarding(onboardingComplete === 'true');
-    } else {
-      throw new Error('Invalid email or password');
+      // Check onboarding status from backend (source of truth)
+      let onboardingCompleted = false;
+      try {
+        const onboardingStatus = await userAPI.getOnboardingStatus();
+        onboardingCompleted = onboardingStatus.onboarding_completed;
+        console.log('Onboarding status from backend:', onboardingCompleted);
+      } catch (error) {
+        console.error('Error checking onboarding status:', error);
+        // Fall back to local storage if backend call fails
+        const localOnboardingComplete = await getItem(STORAGE_KEYS.ONBOARDING_COMPLETE);
+        onboardingCompleted = localOnboardingComplete === 'true';
+        console.log('Onboarding status from local storage:', onboardingCompleted);
+      }
+
+      // Update onboarding status in state and storage
+      setHasCompletedOnboarding(onboardingCompleted);
+      await setItem(STORAGE_KEYS.ONBOARDING_COMPLETE, onboardingCompleted ? 'true' : 'false');
+
+      // Check consent status from storage (for new users, this will be false)
+      const consentAccepted = await getItem(STORAGE_KEYS.CONSENT_ACCEPTED);
+      setHasAcceptedConsent(consentAccepted === 'true');
+      console.log('Consent accepted:', consentAccepted === 'true');
+
+      // Set authenticated state last to trigger navigation
+      setIsAuthenticated(true);
+    } catch (error: any) {
+      console.error('Login error:', error);
+      throw new Error(error.response?.data?.detail || 'Login failed');
     }
   };
 
-  // Mock signup function
+  // Signup function
   const signup = async (email: string, password: string, fullName?: string): Promise<void> => {
-    // Simulate API delay
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    try {
+      // Call backend register API
+      await authAPI.register(email, password, fullName || '');
 
-    // Create mock user
-    const mockUser = {
-      id: `user_${Date.now()}`,
-      email,
-      password,
-      fullName: fullName || '',
-    };
+      // Mark onboarding as incomplete for new users
+      await setItem(STORAGE_KEYS.ONBOARDING_COMPLETE, 'false');
 
-    // Store user data
-    await setObject(STORAGE_KEYS.MOCK_USER, mockUser);
-
-    // Explicitly mark onboarding as incomplete for new users
-    await setItem(STORAGE_KEYS.ONBOARDING_COMPLETE, 'false');
-
-    // Store temp credentials for post-verification login
-    setTempEmail(email);
-    setTempPassword(password);
+      // Store temp credentials for post-verification login
+      setTempEmail(email);
+      setTempPassword(password);
+    } catch (error: any) {
+      console.error('Signup error:', error);
+      throw new Error(error.response?.data?.detail || 'Signup failed');
+    }
   };
 
-  // Mock email verification
+  // Email verification
   const verifyEmail = async (code: string): Promise<boolean> => {
-    // Simulate API delay
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    // Note: Email verification is handled by clicking the link in email
+    // This function is kept for compatibility but may not be used
+    // The backend sends a verification link, not an OTP code
 
-    // Accept any 6-digit code (mock)
+    // For now, we'll just validate the code format
     if (code.length === 6 && /^\d{6}$/.test(code)) {
-      // Auto-login after verification
+      // Auto-login after verification if temp credentials exist
       if (tempEmail && tempPassword) {
         try {
           await login(tempEmail, tempPassword);
@@ -119,45 +161,89 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     return false;
   };
 
-  // Mock password reset request
+  // Password reset request
   const resetPassword = async (email: string): Promise<void> => {
-    // Simulate API delay
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    try {
+      // Call backend forgot password API (sends OTP to email)
+      await authAPI.forgotPassword(email);
 
-    // Store temp email for password reset
-    setTempEmail(email);
-    await setItem(STORAGE_KEYS.TEMP_EMAIL, email);
+      // Store temp email for password reset flow
+      setTempEmail(email);
+      await setItem(STORAGE_KEYS.TEMP_EMAIL, email);
+    } catch (error: any) {
+      console.error('Password reset request error:', error);
+      throw new Error(error.response?.data?.detail || 'Password reset request failed');
+    }
   };
 
-  // Mock set new password
+  // Verify OTP for password reset
+  const verifyOTP = async (email: string, otp: string): Promise<boolean> => {
+    try {
+      await authAPI.verifyResetOTP(email, otp);
+      return true;
+    } catch (error: any) {
+      console.error('OTP verification error:', error);
+      throw new Error(error.response?.data?.detail || 'OTP verification failed');
+    }
+  };
+
+  // Set new password
   const setNewPassword = async (password: string): Promise<void> => {
-    // Simulate API delay
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    try {
+      if (!tempEmail) {
+        throw new Error('Email not found. Please start the password reset process again.');
+      }
 
-    // Get stored user and update password
-    const storedUser = await getObject<{ email: string; password: string; fullName?: string; id: string }>(
-      STORAGE_KEYS.MOCK_USER
-    );
+      // Get the OTP from somewhere - this needs to be passed as parameter
+      // For now, we'll throw an error as this flow needs adjustment
+      throw new Error('This function needs to be updated to accept OTP parameter');
 
-    if (storedUser && tempEmail) {
-      storedUser.password = password;
-      await setObject(STORAGE_KEYS.MOCK_USER, storedUser);
+      // The actual call would be:
+      // await authAPI.resetPasswordWithOTP(tempEmail, otp, password);
+
+      // Clear temp data
+      // setTempEmail(null);
+      // await removeItem(STORAGE_KEYS.TEMP_EMAIL);
+    } catch (error: any) {
+      console.error('Set new password error:', error);
+      throw new Error(error.response?.data?.detail || 'Password reset failed');
+    }
+  };
+
+  // Reset password with OTP (new method that accepts OTP)
+  const resetPasswordWithOTP = async (email: string, otp: string, newPassword: string): Promise<void> => {
+    try {
+      await authAPI.resetPasswordWithOTP(email, otp, newPassword);
 
       // Clear temp data
       setTempEmail(null);
       await removeItem(STORAGE_KEYS.TEMP_EMAIL);
+    } catch (error: any) {
+      console.error('Reset password with OTP error:', error);
+      throw new Error(error.response?.data?.detail || 'Password reset failed');
     }
   };
 
   // Logout function
   const logout = async (): Promise<void> => {
-    setIsAuthenticated(false);
-    setUser(null);
-    setHasCompletedOnboarding(false);
-    await removeItem(STORAGE_KEYS.AUTH_TOKEN);
-    await removeItem(STORAGE_KEYS.USER_PROFILE);
-    await removeItem(STORAGE_KEYS.ONBOARDING_COMPLETE);
-    await removeItem(STORAGE_KEYS.ONBOARDING_DATA);
+    try {
+      // Call backend logout API (optional - invalidates token on server)
+      await authAPI.logout();
+    } catch (error) {
+      console.error('Logout API error:', error);
+      // Continue with local logout even if API fails
+    } finally {
+      setIsAuthenticated(false);
+      setUser(null);
+      setHasCompletedOnboarding(false);
+      setHasAcceptedConsent(false);
+      await removeItem(STORAGE_KEYS.AUTH_TOKEN);
+      await removeItem(STORAGE_KEYS.REFRESH_TOKEN);
+      await removeItem(STORAGE_KEYS.USER_PROFILE);
+      await removeItem(STORAGE_KEYS.ONBOARDING_COMPLETE);
+      await removeItem(STORAGE_KEYS.CONSENT_ACCEPTED);
+      await removeItem(STORAGE_KEYS.ONBOARDING_DATA);
+    }
   };
 
   // Refresh onboarding status (called after onboarding is completed)
@@ -166,11 +252,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setHasCompletedOnboarding(onboardingComplete === 'true');
   };
 
+  // Set consent as accepted (called from important-info screen)
+  const setConsentAccepted = async (): Promise<void> => {
+    await setItem(STORAGE_KEYS.CONSENT_ACCEPTED, 'true');
+    setHasAcceptedConsent(true);
+    console.log('Consent accepted and saved');
+  };
+
   const value: AuthContextType = {
     isAuthenticated,
     isLoading,
     user,
     hasCompletedOnboarding,
+    hasAcceptedConsent,
     login,
     signup,
     logout,
@@ -178,10 +272,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     resetPassword,
     setNewPassword,
     refreshOnboardingStatus,
+    setConsentAccepted,
     tempEmail,
     tempPassword,
     setTempEmail,
     setTempPassword,
+    // New methods for OTP flow
+    verifyOTP: verifyOTP as any,
+    resetPasswordWithOTP: resetPasswordWithOTP as any,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -21,12 +21,33 @@ import { Colors } from '../../constants/colors';
 
 export default function LoginScreen() {
   const router = useRouter();
-  const { login } = useAuth();
+  const { login, isAuthenticated, hasCompletedOnboarding } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [emailError, setEmailError] = useState<string | null>(null);
   const [passwordError, setPasswordError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const loadingTimeoutRef = useRef<number | null>(null);
+
+  // Clear loading state when authentication succeeds
+  useEffect(() => {
+    if (loading && isAuthenticated) {
+      // Set a small delay to allow navigation to start
+      const timer = setTimeout(() => {
+        setLoading(false);
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [loading, isAuthenticated]);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (loadingTimeoutRef.current) {
+        clearTimeout(loadingTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const handleLogin = async () => {
     // Validate inputs
@@ -41,12 +62,27 @@ export default function LoginScreen() {
     }
 
     setLoading(true);
+
+    // Safety timeout: clear loading state after 5 seconds if still loading
+    // This prevents infinite spinner if navigation fails
+    loadingTimeoutRef.current = setTimeout(() => {
+      if (loading) {
+        console.warn('Login timeout: clearing loading state');
+        setLoading(false);
+      }
+    }, 5000);
+
     try {
       await login(email, password);
-      // Navigation handled by root layout
+      // Navigation is handled by root layout based on auth state
+      // Loading state will be cleared by useEffect when isAuthenticated changes
     } catch (error: any) {
+      // Clear timeout on error
+      if (loadingTimeoutRef.current) {
+        clearTimeout(loadingTimeoutRef.current);
+        loadingTimeoutRef.current = null;
+      }
       Alert.alert('Login Failed', error.message || 'Invalid email or password');
-    } finally {
       setLoading(false);
     }
   };
@@ -104,6 +140,22 @@ export default function LoginScreen() {
               style={styles.loginButton}
             />
 
+            <View style={styles.dividerContainer}>
+              <View style={styles.dividerLine} />
+              <Text style={styles.dividerText}>OR</Text>
+              <View style={styles.dividerLine} />
+            </View>
+
+            <TouchableOpacity
+              style={styles.googleButton}
+              onPress={() => {
+                // Google OAuth functionality will be added later
+                Alert.alert('Google Sign In', 'Google OAuth will be implemented soon');
+              }}
+            >
+              <Text style={styles.googleButtonText}>Continue with Google</Text>
+            </TouchableOpacity>
+
             <View style={styles.signupContainer}>
               <Text style={styles.signupText}>Don't have an account? </Text>
               <TouchableOpacity onPress={() => router.push('/(auth)/signup')}>
@@ -160,6 +212,40 @@ const styles = StyleSheet.create({
   },
   loginButton: {
     marginBottom: 24,
+  },
+  dividerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: Colors.textSecondary,
+    opacity: 0.3,
+  },
+  dividerText: {
+    fontSize: 14,
+    color: Colors.textSecondary,
+    marginHorizontal: 16,
+    fontWeight: '500',
+  },
+  googleButton: {
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+    borderRadius: 12,
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  googleButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1F1F1F',
   },
   signupContainer: {
     flexDirection: 'row',

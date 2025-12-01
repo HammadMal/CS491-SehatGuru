@@ -11,11 +11,12 @@ import { Colors } from '../../constants/colors';
 
 export default function CheckEmailScreen() {
   const router = useRouter();
-  const { tempEmail } = useAuth();
+  const { tempEmail, verifyOTP, resetPassword } = useAuth();
   const [code, setCode] = useState(['', '', '', '', '', '']);
   const [loading, setLoading] = useState(false);
   const [countdown, setCountdown] = useState(60);
   const [canResend, setCanResend] = useState(false);
+  const [verifiedOTP, setVerifiedOTP] = useState<string | null>(null);
 
   useEffect(() => {
     if (countdown > 0) {
@@ -40,30 +41,49 @@ export default function CheckEmailScreen() {
       return;
     }
 
+    if (!tempEmail) {
+      Alert.alert('Error', 'Email address not found. Please start the password reset process again.');
+      router.replace('/(auth)/forgot-password');
+      return;
+    }
+
     setLoading(true);
     try {
       const fullCode = code.join('');
-      // Mock OTP verification - accept any 6-digit code
-      await new Promise((resolve) => setTimeout(resolve, 500));
 
-      if (fullCode.length === 6 && /^\d{6}$/.test(fullCode)) {
-        router.push('/(auth)/set-new-password');
-      } else {
-        Alert.alert('Verification Failed', 'Invalid OTP code');
-        setCode(['', '', '', '', '', '']);
-      }
+      // Verify OTP with backend
+      await verifyOTP(tempEmail, fullCode);
+
+      // Store the verified OTP for the next screen
+      setVerifiedOTP(fullCode);
+
+      // Navigate to set new password screen
+      router.push({
+        pathname: '/(auth)/set-new-password',
+        params: { otp: fullCode, email: tempEmail },
+      });
     } catch (error: any) {
-      Alert.alert('Error', error.message || 'Verification failed');
+      Alert.alert('Verification Failed', error.message || 'Invalid OTP code');
       setCode(['', '', '', '', '', '']);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleResend = () => {
-    setCountdown(60);
-    setCanResend(false);
-    Alert.alert('OTP Sent', 'A new OTP has been sent to your email');
+  const handleResend = async () => {
+    if (!tempEmail) {
+      Alert.alert('Error', 'Email address not found');
+      return;
+    }
+
+    try {
+      await resetPassword(tempEmail);
+      setCountdown(60);
+      setCanResend(false);
+      Alert.alert('OTP Sent', 'A new OTP has been sent to your email');
+    } catch (error: any) {
+      Alert.alert('Error', error.message || 'Failed to resend OTP');
+    }
   };
 
   return (
@@ -77,6 +97,10 @@ export default function CheckEmailScreen() {
         <Text style={styles.subtitle}>
           We sent a verification code to{'\n'}
           <Text style={styles.email}>{tempEmail || 'your email'}</Text>
+        </Text>
+
+        <Text style={styles.noteText}>
+          The OTP code will expire in 10 minutes
         </Text>
 
         <VerificationCodeInput code={code} setCode={setCode} />
@@ -136,12 +160,19 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: Colors.textSecondary,
     textAlign: 'center',
-    marginBottom: 40,
+    marginBottom: 16,
     lineHeight: 22,
   },
   email: {
     fontWeight: '600',
     color: Colors.textPrimary,
+  },
+  noteText: {
+    fontSize: 13,
+    color: Colors.textLight,
+    textAlign: 'center',
+    marginBottom: 24,
+    fontStyle: 'italic',
   },
   verifyButton: {
     marginTop: 20,
