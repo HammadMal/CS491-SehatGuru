@@ -1,3 +1,3 @@
-from app.routes import auth
+from app.routes import auth, user
 
-__all__ = ["auth"]
+__all__ = ["auth", "user"]

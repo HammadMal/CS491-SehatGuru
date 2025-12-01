@@ -3,6 +3,7 @@ from typing import Optional, Dict
 from fastapi import HTTPException, status
 from google.oauth2 import id_token
 from google.auth.transport import requests
+from google.cloud.firestore_v1.base_query import FieldFilter
 from app.config.firebase import firebase_client
 from app.config.settings import settings
 from app.utils.password import hash_password, verify_password
@@ -12,7 +13,8 @@ from app.utils.jwt import (
     create_password_reset_token,
     verify_password_reset_token
 )
-from app.utils.email import send_verification_email, send_password_reset_email
+from app.utils.email import send_verification_email, send_password_reset_email, send_password_reset_otp_email
+from app.utils.otp import OTPService
 from app.models.auth import UserRegister, UserLogin, Token
 
 
@@ -36,7 +38,7 @@ class AuthService:
         try:
             # Check if user already exists in Firestore
             users_ref = firebase_client.db.collection(settings.FIRESTORE_COLLECTION_USERS)
-            existing_user = users_ref.where("email", "==", user_data.email).limit(1).get()
+            existing_user = users_ref.where(filter=FieldFilter("email", "==", user_data.email)).limit(1).get()
 
             if len(list(existing_user)) > 0:
                 raise HTTPException(
@@ -48,7 +50,7 @@ class AuthService:
             firebase_user = firebase_client.create_user(
                 email=user_data.email,
                 password=user_data.password,
-                display_name=user_data.full_name
+                display_name=user_data.full_name if user_data.full_name else None
             )
 
             # Hash password for server-side verification
@@ -58,7 +60,7 @@ class AuthService:
             now = datetime.utcnow()
             user_doc_data = {
                 "email": user_data.email,
-                "full_name": user_data.full_name,
+                "full_name": user_data.full_name if user_data.full_name else "",
                 "email_verified": False,
                 "created_at": now,
                 "updated_at": now,
@@ -111,7 +113,7 @@ class AuthService:
         try:
             # Get user from Firestore
             users_ref = firebase_client.db.collection(settings.FIRESTORE_COLLECTION_USERS)
-            user_query = users_ref.where("email", "==", login_data.email).limit(1).get()
+            user_query = users_ref.where(filter=FieldFilter("email", "==", login_data.email)).limit(1).get()
 
             users_list = list(user_query)
             if len(users_list) == 0:
@@ -144,6 +146,33 @@ class AuthService:
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,
                     detail="Invalid email or password"
+                )
+
+            # Sync email verification status from Firebase Auth to Firestore
+            # Firebase Auth is the source of truth for email verification
+            try:
+                firebase_user = firebase_client.get_user(uid)
+                firebase_email_verified = firebase_user.email_verified
+
+                # Update Firestore if verification status changed
+                firestore_email_verified = user_data.get("email_verified", False)
+                if firebase_email_verified != firestore_email_verified:
+                    users_ref.document(uid).update({
+                        "email_verified": firebase_email_verified,
+                        "updated_at": datetime.utcnow()
+                    })
+                    # Update local user_data to reflect the change
+                    user_data["email_verified"] = firebase_email_verified
+            except Exception as e:
+                print(f"Error syncing email verification status: {str(e)}")
+                # Continue with login even if sync fails
+
+            # Check if email is verified
+            email_verified = user_data.get("email_verified", False)
+            if not email_verified:
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="Please verify your email before logging in. Check your inbox for the verification link."
                 )
 
             # Update last login timestamp
@@ -208,7 +237,7 @@ class AuthService:
 
             # Check if user exists
             users_ref = firebase_client.db.collection(settings.FIRESTORE_COLLECTION_USERS)
-            existing_user = users_ref.where("email", "==", email).limit(1).get()
+            existing_user = users_ref.where(filter=FieldFilter("email", "==", email)).limit(1).get()
 
             existing_users_list = list(existing_user)
 
@@ -302,7 +331,7 @@ class AuthService:
     @staticmethod
     async def request_password_reset(email: str) -> bool:
         """
-        Request password reset
+        Request password reset with OTP
 
         Args:
             email: User email
@@ -316,20 +345,20 @@ class AuthService:
         try:
             # Check if user exists
             users_ref = firebase_client.db.collection(settings.FIRESTORE_COLLECTION_USERS)
-            user_query = users_ref.where("email", "==", email).limit(1).get()
+            user_query = users_ref.where(filter=FieldFilter("email", "==", email)).limit(1).get()
 
             if len(list(user_query)) == 0:
                 # Don't reveal if user exists or not for security
                 return True
 
-            # Generate password reset token
-            reset_token = create_password_reset_token(email)
+            # Generate 6-digit OTP
+            otp = OTPService.generate_otp()
 
-            # Create reset link
-            reset_link = f"{settings.FRONTEND_URL}/reset-password?token={reset_token}"
+            # Store OTP in Firestore with expiry
+            await OTPService.store_otp(email, otp)
 
-            # Send password reset email
-            await send_password_reset_email(email, reset_link)
+            # Send OTP email
+            await send_password_reset_otp_email(email, otp)
 
             return True
 
@@ -358,7 +387,7 @@ class AuthService:
 
             # Get user
             users_ref = firebase_client.db.collection(settings.FIRESTORE_COLLECTION_USERS)
-            user_query = users_ref.where("email", "==", email).limit(1).get()
+            user_query = users_ref.where(filter=FieldFilter("email", "==", email)).limit(1).get()
 
             users_list = list(user_query)
             if len(users_list) == 0:
@@ -390,6 +419,115 @@ class AuthService:
                 "password_changed_at": now,  # This will invalidate all existing tokens
                 "updated_at": now
             })
+
+            return True
+
+        except HTTPException:
+            raise
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Password reset failed: {str(e)}"
+            )
+
+    @staticmethod
+    async def verify_reset_otp(email: str, otp: str) -> bool:
+        """
+        Verify OTP for password reset
+
+        Args:
+            email: User email
+            otp: 6-digit OTP code
+
+        Returns:
+            True if OTP is valid
+
+        Raises:
+            HTTPException: If OTP is invalid or expired
+        """
+        try:
+            # Verify OTP
+            is_valid = await OTPService.verify_otp(email, otp)
+
+            if not is_valid:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Invalid or expired OTP code"
+                )
+
+            return True
+
+        except HTTPException:
+            raise
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"OTP verification failed: {str(e)}"
+            )
+
+    @staticmethod
+    async def reset_password_with_otp(email: str, otp: str, new_password: str) -> bool:
+        """
+        Reset user password using OTP
+
+        Args:
+            email: User email
+            otp: 6-digit OTP code
+            new_password: New password
+
+        Returns:
+            True if password reset successfully
+
+        Raises:
+            HTTPException: If OTP is invalid or reset fails
+        """
+        try:
+            # Check if OTP is verified
+            is_verified = await OTPService.check_otp_verified(email)
+
+            if not is_verified:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="OTP not verified. Please verify OTP first."
+                )
+
+            # Get user
+            users_ref = firebase_client.db.collection(settings.FIRESTORE_COLLECTION_USERS)
+            user_query = users_ref.where(filter=FieldFilter("email", "==", email)).limit(1).get()
+
+            users_list = list(user_query)
+            if len(users_list) == 0:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="User not found"
+                )
+
+            user_doc = users_list[0]
+            uid = user_doc.id
+            user_data = user_doc.to_dict()
+
+            # Check if user registered with email/password
+            if user_data.get("auth_provider") == "google":
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="This account uses Google Sign-In. Password cannot be reset."
+                )
+
+            # Update password in Firebase Auth
+            firebase_client.update_user(uid, password=new_password)
+
+            # Hash new password and update in Firestore
+            # Also update password_changed_at to invalidate all existing sessions
+            now = datetime.utcnow()
+            new_hashed_password = hash_password(new_password)
+            users_ref.document(uid).update({
+                "hashed_password": new_hashed_password,
+                "password_changed_at": now,  # This will invalidate all existing tokens
+                "updated_at": now
+            })
+
+            # Delete OTP after successful password reset
+            await OTPService.delete_otp(email)
 
             return True
 

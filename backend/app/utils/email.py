@@ -114,7 +114,7 @@ async def send_verification_email(email: str, verification_link: str) -> bool:
 
 async def send_password_reset_email(email: str, reset_link: str) -> bool:
     """
-    Send password reset email
+    Send password reset email with link (deprecated - use send_password_reset_otp_email)
 
     Args:
         email: User email address
@@ -165,6 +165,74 @@ async def send_password_reset_email(email: str, reset_link: str) -> bool:
             </p>
             <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
             <p style="color: #999; font-size: 12px;">
+                Best regards,<br>
+                The SehatGuru Team
+            </p>
+        </body>
+    </html>
+    """
+
+    return await send_email(email, subject, body, html_body)
+
+
+async def send_password_reset_otp_email(email: str, otp: str) -> bool:
+    """
+    Send password reset email with OTP code
+
+    Args:
+        email: User email address
+        otp: 6-digit OTP code
+
+    Returns:
+        True if email sent successfully
+    """
+    subject = "Reset your SehatGuru password - OTP Code"
+
+    body = f"""
+    Hello,
+
+    We received a request to reset your password for your SehatGuru account.
+
+    Your password reset OTP code is:
+
+    {otp}
+
+    This code will expire in 10 minutes.
+
+    Enter this code in the app to proceed with resetting your password.
+
+    If you didn't request a password reset, please ignore this email and your password will remain unchanged.
+
+    Best regards,
+    The SehatGuru Team
+    """
+
+    html_body = f"""
+    <html>
+        <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+            <h2 style="color: #4CAF50;">Password Reset Request</h2>
+            <p>We received a request to reset your password for your SehatGuru account.</p>
+            <p>Your password reset OTP code is:</p>
+            <div style="margin: 30px 0; text-align: center;">
+                <div style="background-color: #f5f5f5; border: 2px dashed #4CAF50;
+                            padding: 20px; border-radius: 8px; display: inline-block;">
+                    <span style="font-size: 32px; font-weight: bold; letter-spacing: 8px;
+                                 color: #4CAF50; font-family: 'Courier New', monospace;">
+                        {otp}
+                    </span>
+                </div>
+            </div>
+            <p style="text-align: center; color: #666;">
+                Enter this code in the app to proceed with resetting your password.
+            </p>
+            <p style="color: #999; font-size: 12px; margin-top: 30px; text-align: center;">
+                This code will expire in 10 minutes.
+            </p>
+            <p style="color: #999; font-size: 12px; text-align: center;">
+                If you didn't request a password reset, please ignore this email and your password will remain unchanged.
+            </p>
+            <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
+            <p style="color: #999; font-size: 12px; text-align: center;">
                 Best regards,<br>
                 The SehatGuru Team
             </p>

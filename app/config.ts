@@ -5,6 +5,10 @@
 
 export const API_BASE_URL = 'http://192.168.18.145:8000';
 
+// Google OAuth Configuration
+// Using the web client ID which works for both iOS and Android with expo-auth-session
+export const GOOGLE_WEB_CLIENT_ID = '307789075876-vdkvseo25qc1uqbq2j90gu6rl13dblqu.apps.googleusercontent.com';
+
 export const CONFIG = {
   apiBaseUrl: API_BASE_URL,
   timeout: 10000,

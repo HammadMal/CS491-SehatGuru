@@ -7,6 +7,8 @@ from app.models.auth import (
     GoogleAuthRequest,
     PasswordResetRequest,
     PasswordResetConfirm,
+    OTPVerifyRequest,
+    PasswordResetWithOTP,
     EmailVerificationRequest,
     UserResponse,
     MessageResponse
@@ -114,7 +116,7 @@ async def forgot_password(request: PasswordResetRequest):
 @router.post("/reset-password", response_model=MessageResponse)
 async def reset_password(request: PasswordResetConfirm):
     """
-    Reset password with token
+    Reset password with token (deprecated - use /reset-password-otp)
 
     - **token**: Password reset token from email
     - **new_password**: New password (minimum 6 characters)
@@ -122,6 +124,43 @@ async def reset_password(request: PasswordResetConfirm):
     Resets user password and returns success message.
     """
     await AuthService.reset_password(request.token, request.new_password)
+    return MessageResponse(
+        message="Password has been reset successfully.",
+        success=True
+    )
+
+
+@router.post("/verify-reset-otp", response_model=MessageResponse)
+async def verify_reset_otp(request: OTPVerifyRequest):
+    """
+    Verify OTP for password reset
+
+    - **email**: User's email address
+    - **otp**: 6-digit OTP code from email
+
+    Verifies the OTP code and returns success message.
+    After verification, use /reset-password-otp endpoint to set new password.
+    """
+    await AuthService.verify_reset_otp(request.email, request.otp)
+    return MessageResponse(
+        message="OTP verified successfully. You can now reset your password.",
+        success=True
+    )
+
+
+@router.post("/reset-password-otp", response_model=MessageResponse)
+async def reset_password_with_otp(request: PasswordResetWithOTP):
+    """
+    Reset password with OTP
+
+    - **email**: User's email address
+    - **otp**: 6-digit OTP code (must be verified first via /verify-reset-otp)
+    - **new_password**: New password (minimum 6 characters)
+
+    Resets user password using verified OTP and returns success message.
+    Note: OTP must be verified before calling this endpoint.
+    """
+    await AuthService.reset_password_with_otp(request.email, request.otp, request.new_password)
     return MessageResponse(
         message="Password has been reset successfully.",
         success=True

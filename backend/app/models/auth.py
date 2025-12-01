@@ -5,9 +5,15 @@ from datetime import datetime
 
 class UserRegister(BaseModel):
     """User registration model"""
-    full_name: str = Field(..., min_length=2, max_length=100)
+    full_name: Optional[str] = Field(default="", max_length=100)
     email: EmailStr
     password: str = Field(..., min_length=6)
+
+    @validator('full_name')
+    def validate_full_name(cls, v):
+        if v and len(v) < 2:
+            raise ValueError('Full name must be at least 2 characters long')
+        return v
 
     @validator('password')
     def validate_password(cls, v):
@@ -49,9 +55,44 @@ class PasswordResetRequest(BaseModel):
 
 
 class PasswordResetConfirm(BaseModel):
-    """Password reset confirmation model"""
+    """Password reset confirmation model (token-based - deprecated)"""
     token: str
     new_password: str = Field(..., min_length=6)
+
+    @validator('new_password')
+    def validate_password(cls, v):
+        if len(v) < 6:
+            raise ValueError('Password must be at least 6 characters long')
+        return v
+
+
+class OTPVerifyRequest(BaseModel):
+    """OTP verification request model"""
+    email: EmailStr
+    otp: str = Field(..., min_length=6, max_length=6)
+
+    @validator('otp')
+    def validate_otp(cls, v):
+        if not v.isdigit():
+            raise ValueError('OTP must contain only digits')
+        if len(v) != 6:
+            raise ValueError('OTP must be exactly 6 digits')
+        return v
+
+
+class PasswordResetWithOTP(BaseModel):
+    """Password reset with OTP model"""
+    email: EmailStr
+    otp: str = Field(..., min_length=6, max_length=6)
+    new_password: str = Field(..., min_length=6)
+
+    @validator('otp')
+    def validate_otp(cls, v):
+        if not v.isdigit():
+            raise ValueError('OTP must contain only digits')
+        if len(v) != 6:
+            raise ValueError('OTP must be exactly 6 digits')
+        return v
 
     @validator('new_password')
     def validate_password(cls, v):

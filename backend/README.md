@@ -7,15 +7,24 @@ FastAPI backend for SehatGuru - An intelligent nutrition tracking and advisory s
 ### Phase 1 & 2 - Authentication (Completed)
 - ✅ Email/Password Registration with Firebase Auth
 - ✅ Email/Password Login with JWT tokens & password verification
-- ✅ Google OAuth Authentication
-- ✅ Email Verification with auto-sync
-- ✅ Password Reset Flow (Forgot/Reset)
+- ✅ **Email Verification Required** - Users must verify email before login
+- ✅ **Auto-sync Email Verification** - Firebase Auth status syncs to Firestore on login
+- ✅ Google OAuth Authentication (email pre-verified)
+- ✅ Password Reset Flow with OTP (Forgot/Reset)
 - ✅ Session Invalidation on Password Reset
 - ✅ JWT Access & Refresh Tokens
 - ✅ Token Refresh Endpoint
 - ✅ Token Blacklist & Logout
 - ✅ User Profile Retrieval
 - ✅ Account Deletion
+
+### Phase 3 - User Profile & Onboarding (Completed)
+- ✅ User Profile Creation & Storage
+- ✅ Onboarding Data Collection (Basic Info, Activity Level, Health Goals)
+- ✅ Meal Preferences (Breakfast, Lunch, Dinner, Snacks)
+- ✅ Dietary Preferences (Vegetarian, Vegan, Gluten-Free)
+- ✅ Profile Update (Partial & Full)
+- ✅ Onboarding Status Tracking
 
 ## Tech Stack
 
@@ -260,6 +269,71 @@ Authorization: Bearer <access_token>
 DELETE /api/auth/admin/delete-user-by-email/{email}
 ```
 
+### User Profile Endpoints
+
+All profile endpoints are prefixed with `/api/user` and require authentication.
+
+#### Save/Update Profile (Onboarding)
+```http
+POST /api/user/profile
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+{
+  "basic_info": {
+    "full_name": "John Doe",
+    "height": "175",
+    "height_unit": "cm",
+    "weight": "70",
+    "weight_unit": "kg",
+    "age": "25",
+    "gender": "male"
+  },
+  "activity_level": "moderately-active",
+  "health_goals": ["lose-weight", "improve-health"],
+  "meal_preferences": {
+    "breakfast": true,
+    "lunch": true,
+    "dinner": true,
+    "snacks": false
+  },
+  "dietary_preferences": {
+    "vegetarian": false,
+    "vegan": false,
+    "gluten_free": false,
+    "other": ""
+  }
+}
+```
+
+#### Get User Profile
+```http
+GET /api/user/profile
+Authorization: Bearer <access_token>
+```
+
+#### Update Profile (Partial)
+```http
+PATCH /api/user/profile
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+{
+  "meal_preferences": {
+    "breakfast": true,
+    "lunch": true,
+    "dinner": false,
+    "snacks": true
+  }
+}
+```
+
+#### Check Onboarding Status
+```http
+GET /api/user/onboarding-status
+Authorization: Bearer <access_token>
+```
+
 ### Testing Endpoints
 
 #### Test Google OAuth (Development Only)
@@ -272,19 +346,23 @@ Opens an HTML page to test Google OAuth flow in the browser.
 
 ### Email/Password Flow
 1. User registers via `/api/auth/register`
-2. Verification email sent
-3. User verifies email (handled by Firebase)
-4. User logs in via `/api/auth/login`
-5. Backend returns access_token and refresh_token
-6. Client uses access_token for protected endpoints
-7. When access_token expires, use refresh_token at `/api/auth/refresh`
+2. Verification email sent automatically
+3. User clicks verification link in email (handled by Firebase)
+4. User attempts login via `/api/auth/login`
+5. **Backend checks email verification status**:
+   - If not verified → Returns 403 error with message
+   - If verified → Auto-syncs status from Firebase Auth to Firestore
+6. Backend returns access_token and refresh_token
+7. Client uses access_token for protected endpoints
+8. When access_token expires, use refresh_token at `/api/auth/refresh`
 
 ### Google OAuth Flow
 1. Client obtains Google ID token using Google Sign-In
 2. Client sends ID token to `/api/auth/google`
 3. Backend verifies token with Google
-4. Backend creates/updates user in Firebase
+4. Backend creates/updates user in Firebase with `email_verified: true`
 5. Backend returns JWT access_token and refresh_token
+6. **Note**: Google users bypass email verification since Google pre-verifies emails
 
 ### Password Reset Flow
 1. User requests reset via `/api/auth/forgot-password`
@@ -364,15 +442,16 @@ python test_google_oauth.py <google_id_token>
 
 **Important:** Use the **refresh_token** (not access_token) for `/api/auth/refresh` endpoint!
 
-## Next Steps (Phase 3+)
+## Next Steps (Phase 4+)
 
-- [ ] User Profile Management
 - [ ] Food Database Integration
-- [ ] Food Logging (Manual & Camera)
+- [ ] Food Logging (Manual Entry)
+- [ ] Food Recognition (Camera/ML)
+- [ ] Nutrition Analysis & Calculations
 - [ ] AI Chatbot with Gemini API
-- [ ] Meal Planning
-- [ ] Analytics Dashboard
-- [ ] Notifications
+- [ ] Meal Planning & Recommendations
+- [ ] Analytics & Progress Dashboard
+- [ ] Notifications & Reminders
 
 ## Troubleshooting
 
@@ -409,9 +488,22 @@ pip install -r requirements.txt
 - Verify Google Client ID is correct in both `.env` and HTML test file
 
 ### Email Verification Not Updating
-- The `/me` endpoint auto-syncs `email_verified` from Firebase Auth
-- First call after verification will sync the status
-- Check server logs for "Synced email_verified status" message
+- Email verification status is auto-synced **during login** from Firebase Auth to Firestore
+- Users must complete email verification before they can login
+- Check server logs for sync messages
+- Firebase Auth is the source of truth for email verification
+
+### Login Fails with "Please verify your email"
+- This is expected behavior - users MUST verify email before login
+- Check user's email inbox for verification link
+- Resend verification email using `/api/auth/verify-email` endpoint
+- Verification status syncs automatically on next login attempt
+
+### Boolean Values Not Saving in Profile (meal_preferences, dietary_preferences)
+- Ensure you're using Pydantic v2 (2.5.3+)
+- Backend uses `.model_dump()` not deprecated `.dict()`
+- Check request payload has explicit boolean values (not strings)
+- Verify Firestore document shows correct boolean types
 
 ### Password Reset Not Working
 - After reset, old password should NOT work

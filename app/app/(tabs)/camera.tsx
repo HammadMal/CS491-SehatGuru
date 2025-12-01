@@ -11,7 +11,7 @@ import {
   ScrollView,
 } from 'react-native';
 import { SafeAreaView } from "react-native-safe-area-context";
-import apiClient from '../services/api';
+import apiClient from '../../services/api';
 
 interface Nutrition {
   calories: number;
