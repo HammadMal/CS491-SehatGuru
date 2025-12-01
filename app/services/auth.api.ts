@@ -60,6 +60,16 @@ export const authAPI = {
   },
 
   /**
+   * Authenticate with Google OAuth
+   */
+  googleAuth: async (idToken: string): Promise<LoginResponse> => {
+    const response = await apiClient.post('/api/auth/google', {
+      id_token: idToken,
+    });
+    return response.data;
+  },
+
+  /**
    * Get current user information
    */
   getCurrentUser: async (): Promise<UserResponse> => {

@@ -8,6 +8,7 @@ import {
   Platform,
   TouchableOpacity,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -18,16 +19,21 @@ import { CustomButton } from '../../components/auth/CustomButton';
 import { useAuth } from '../../hooks/useAuth';
 import { validateEmail, validatePassword } from '../../utils/validation';
 import { Colors } from '../../constants/colors';
+import { useGoogleAuth, getGoogleIdToken } from '../../utils/googleAuth';
 
 export default function LoginScreen() {
   const router = useRouter();
-  const { login, isAuthenticated, hasCompletedOnboarding } = useAuth();
+  const { login, googleLogin, isAuthenticated, hasCompletedOnboarding } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [emailError, setEmailError] = useState<string | null>(null);
   const [passwordError, setPasswordError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const loadingTimeoutRef = useRef<number | null>(null);
+
+  // Google OAuth setup
+  const { request, response, promptAsync } = useGoogleAuth();
 
   // Clear loading state when authentication succeeds
   useEffect(() => {
@@ -48,6 +54,39 @@ export default function LoginScreen() {
       }
     };
   }, []);
+
+  // Handle Google OAuth response
+  useEffect(() => {
+    if (response) {
+      handleGoogleResponse();
+    }
+  }, [response]);
+
+  const handleGoogleResponse = async () => {
+    try {
+      const idToken = getGoogleIdToken(response);
+
+      if (idToken) {
+        setGoogleLoading(true);
+        await googleLogin(idToken);
+        // Navigation will be handled by root layout based on auth state
+      } else if (response?.type === 'error') {
+        Alert.alert('Google Sign In Failed', 'Could not complete Google authentication');
+      }
+    } catch (error: any) {
+      Alert.alert('Google Sign In Failed', error.message || 'Google authentication failed');
+    } finally {
+      setGoogleLoading(false);
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    try {
+      await promptAsync();
+    } catch (error) {
+      Alert.alert('Error', 'Failed to open Google Sign In');
+    }
+  };
 
   const handleLogin = async () => {
     // Validate inputs
@@ -82,7 +121,23 @@ export default function LoginScreen() {
         clearTimeout(loadingTimeoutRef.current);
         loadingTimeoutRef.current = null;
       }
-      Alert.alert('Login Failed', error.message || 'Invalid email or password');
+
+      // Check if error is due to unverified email
+      const errorMessage = error.message || 'Invalid email or password';
+      if (errorMessage.toLowerCase().includes('verify your email')) {
+        Alert.alert(
+          'Email Not Verified',
+          'Please verify your email before logging in. Check your inbox for the verification link.',
+          [
+            {
+              text: 'OK',
+              style: 'default',
+            },
+          ]
+        );
+      } else {
+        Alert.alert('Login Failed', errorMessage);
+      }
       setLoading(false);
     }
   };
@@ -147,13 +202,15 @@ export default function LoginScreen() {
             </View>
 
             <TouchableOpacity
-              style={styles.googleButton}
-              onPress={() => {
-                // Google OAuth functionality will be added later
-                Alert.alert('Google Sign In', 'Google OAuth will be implemented soon');
-              }}
+              style={[styles.googleButton, (googleLoading || !request) && styles.googleButtonDisabled]}
+              onPress={handleGoogleSignIn}
+              disabled={googleLoading || !request}
             >
-              <Text style={styles.googleButtonText}>Continue with Google</Text>
+              {googleLoading ? (
+                <ActivityIndicator color={Colors.textPrimary} />
+              ) : (
+                <Text style={styles.googleButtonText}>Sign in / Sign up with Google</Text>
+              )}
             </TouchableOpacity>
 
             <View style={styles.signupContainer}>
@@ -241,6 +298,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 24,
+  },
+  googleButtonDisabled: {
+    opacity: 0.6,
   },
   googleButtonText: {
     fontSize: 16,

@@ -33,12 +33,14 @@ export default function DailyIntakeScreen() {
   };
 
   const handleComplete = async () => {
+    // Update context with latest values (for local state consistency)
     updateMealPreferences(mealPreferences);
     updateDietaryPreferences(dietaryPreferences);
 
     setLoading(true);
     try {
-      await completeOnboarding();
+      // Pass the current local state directly to avoid async state update issues
+      await completeOnboarding(mealPreferences, dietaryPreferences);
       // Navigation will be handled automatically by root layout after state update
     } catch (error: any) {
       Alert.alert('Error', error.message || 'Could not complete onboarding');

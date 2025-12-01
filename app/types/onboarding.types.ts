@@ -57,7 +57,7 @@ export interface OnboardingContextType {
   updateHealthGoals: (goals: HealthGoal[]) => void;
   updateMealPreferences: (preferences: MealPreferences) => void;
   updateDietaryPreferences: (preferences: DietaryPreferences) => void;
-  completeOnboarding: () => Promise<void>;
+  completeOnboarding: (finalMealPrefs?: MealPreferences, finalDietaryPrefs?: DietaryPreferences) => Promise<void>;
   goToNextStep: () => void;
   goToPreviousStep: () => void;
   resetOnboarding: () => void;

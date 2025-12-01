@@ -1,4 +1,4 @@
-import React, { createContext, useState, ReactNode, useContext } from 'react';
+import React, { createContext, useState, ReactNode, useContext, useEffect, useRef } from 'react';
 import {
   OnboardingContextType,
   OnboardingData,
@@ -48,6 +48,28 @@ export const OnboardingProvider: React.FC<OnboardingProviderProps> = ({ children
   const [onboardingData, setOnboardingData] = useState<OnboardingData>(initialOnboardingData);
   const [currentStep, setCurrentStep] = useState(0);
   const authContext = useContext(AuthContext);
+  const previousUserIdRef = useRef<string | null>(null);
+
+  // Reset onboarding data when user logs out or changes
+  useEffect(() => {
+    const currentUserId = authContext?.user?.id || null;
+
+    // If user logged out (went from having an ID to null)
+    if (previousUserIdRef.current !== null && currentUserId === null) {
+      console.log('User logged out, resetting onboarding data');
+      setOnboardingData(initialOnboardingData);
+      setCurrentStep(0);
+    }
+    // If user changed (different user ID)
+    else if (previousUserIdRef.current !== null && currentUserId !== null && previousUserIdRef.current !== currentUserId) {
+      console.log('User changed, resetting onboarding data');
+      setOnboardingData(initialOnboardingData);
+      setCurrentStep(0);
+    }
+
+    // Update the ref to track the current user
+    previousUserIdRef.current = currentUserId;
+  }, [authContext?.user?.id]);
 
   const updateBasicInfo = (data: BasicInfo) => {
     setOnboardingData((prev) => ({
@@ -84,11 +106,20 @@ export const OnboardingProvider: React.FC<OnboardingProviderProps> = ({ children
     }));
   };
 
-  const completeOnboarding = async () => {
+  const completeOnboarding = async (finalMealPrefs?: MealPreferences, finalDietaryPrefs?: DietaryPreferences) => {
     try {
+      // Use the most up-to-date data (either passed in or from state)
+      const dataToSave: OnboardingData = {
+        ...onboardingData,
+        mealPreferences: finalMealPrefs || onboardingData.mealPreferences,
+        dietaryPreferences: finalDietaryPrefs || onboardingData.dietaryPreferences,
+      };
+
+      console.log('Completing onboarding with data:', JSON.stringify(dataToSave, null, 2));
+
       // Save onboarding data to backend
       try {
-        await userAPI.saveProfile(onboardingData);
+        await userAPI.saveProfile(dataToSave);
         console.log('Onboarding data saved to backend successfully');
       } catch (apiError) {
         console.error('Error saving to backend:', apiError);
@@ -97,7 +128,7 @@ export const OnboardingProvider: React.FC<OnboardingProviderProps> = ({ children
       }
 
       // Save onboarding data locally (as backup)
-      await setObject(STORAGE_KEYS.ONBOARDING_DATA, onboardingData);
+      await setObject(STORAGE_KEYS.ONBOARDING_DATA, dataToSave);
       await setItem(STORAGE_KEYS.ONBOARDING_COMPLETE, 'true');
 
       // Refresh auth context to update hasCompletedOnboarding

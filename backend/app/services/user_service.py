@@ -39,11 +39,11 @@ class UserService:
             # Prepare profile data
             now = datetime.utcnow()
             profile_dict = {
-                "basic_info": profile_data.basic_info.dict(),
+                "basic_info": profile_data.basic_info.model_dump(),
                 "activity_level": profile_data.activity_level,
                 "health_goals": profile_data.health_goals,
-                "meal_preferences": profile_data.meal_preferences.dict(),
-                "dietary_preferences": profile_data.dietary_preferences.dict(),
+                "meal_preferences": profile_data.meal_preferences.model_dump(),
+                "dietary_preferences": profile_data.dietary_preferences.model_dump(),
                 "onboarding_completed": True,
                 "updated_at": now
             }
@@ -176,7 +176,7 @@ class UserService:
             update_dict = {"updated_at": datetime.utcnow()}
 
             if update_data.basic_info is not None:
-                update_dict["basic_info"] = update_data.basic_info.dict()
+                update_dict["basic_info"] = update_data.basic_info.model_dump()
 
             if update_data.activity_level is not None:
                 update_dict["activity_level"] = update_data.activity_level
@@ -185,10 +185,10 @@ class UserService:
                 update_dict["health_goals"] = update_data.health_goals
 
             if update_data.meal_preferences is not None:
-                update_dict["meal_preferences"] = update_data.meal_preferences.dict()
+                update_dict["meal_preferences"] = update_data.meal_preferences.model_dump()
 
             if update_data.dietary_preferences is not None:
-                update_dict["dietary_preferences"] = update_data.dietary_preferences.dict()
+                update_dict["dietary_preferences"] = update_data.dietary_preferences.model_dump()
 
             # Update user document
             user_doc.update(update_dict)

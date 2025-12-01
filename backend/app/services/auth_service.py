@@ -148,6 +148,33 @@ class AuthService:
                     detail="Invalid email or password"
                 )
 
+            # Sync email verification status from Firebase Auth to Firestore
+            # Firebase Auth is the source of truth for email verification
+            try:
+                firebase_user = firebase_client.get_user(uid)
+                firebase_email_verified = firebase_user.email_verified
+
+                # Update Firestore if verification status changed
+                firestore_email_verified = user_data.get("email_verified", False)
+                if firebase_email_verified != firestore_email_verified:
+                    users_ref.document(uid).update({
+                        "email_verified": firebase_email_verified,
+                        "updated_at": datetime.utcnow()
+                    })
+                    # Update local user_data to reflect the change
+                    user_data["email_verified"] = firebase_email_verified
+            except Exception as e:
+                print(f"Error syncing email verification status: {str(e)}")
+                # Continue with login even if sync fails
+
+            # Check if email is verified
+            email_verified = user_data.get("email_verified", False)
+            if not email_verified:
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="Please verify your email before logging in. Check your inbox for the verification link."
+                )
+
             # Update last login timestamp
             users_ref.document(uid).update({
                 "last_login": datetime.utcnow(),

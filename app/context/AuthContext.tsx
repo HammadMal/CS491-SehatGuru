@@ -118,6 +118,61 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
+  // Google OAuth login/signup function
+  const googleLogin = async (idToken: string): Promise<void> => {
+    try {
+      // Call backend Google auth API
+      const response = await authAPI.googleAuth(idToken);
+
+      // Store tokens
+      await setItem(STORAGE_KEYS.AUTH_TOKEN, response.access_token);
+      await setItem(STORAGE_KEYS.REFRESH_TOKEN, response.refresh_token);
+
+      // Get user data
+      const userData = await authAPI.getCurrentUser();
+
+      const user: User = {
+        id: userData.uid,
+        email: userData.email,
+        fullName: userData.full_name,
+        emailVerified: userData.email_verified, // Always true for Google users
+        photoUrl: userData.photo_url,
+      };
+
+      setUser(user);
+      await setObject(STORAGE_KEYS.USER_PROFILE, user);
+
+      // Check onboarding status from backend (source of truth)
+      let onboardingCompleted = false;
+      try {
+        const onboardingStatus = await userAPI.getOnboardingStatus();
+        onboardingCompleted = onboardingStatus.onboarding_completed;
+        console.log('Onboarding status from backend:', onboardingCompleted);
+      } catch (error) {
+        console.error('Error checking onboarding status:', error);
+        // Fall back to local storage if backend call fails
+        const localOnboardingComplete = await getItem(STORAGE_KEYS.ONBOARDING_COMPLETE);
+        onboardingCompleted = localOnboardingComplete === 'true';
+        console.log('Onboarding status from local storage:', onboardingCompleted);
+      }
+
+      // Update onboarding status in state and storage
+      setHasCompletedOnboarding(onboardingCompleted);
+      await setItem(STORAGE_KEYS.ONBOARDING_COMPLETE, onboardingCompleted ? 'true' : 'false');
+
+      // Check consent status from storage (for new users, this will be false)
+      const consentAccepted = await getItem(STORAGE_KEYS.CONSENT_ACCEPTED);
+      setHasAcceptedConsent(consentAccepted === 'true');
+      console.log('Consent accepted:', consentAccepted === 'true');
+
+      // Set authenticated state last to trigger navigation
+      setIsAuthenticated(true);
+    } catch (error: any) {
+      console.error('Google login error:', error);
+      throw new Error(error.response?.data?.detail || 'Google authentication failed');
+    }
+  };
+
   // Signup function
   const signup = async (email: string, password: string, fullName?: string): Promise<void> => {
     try {
@@ -266,6 +321,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     hasCompletedOnboarding,
     hasAcceptedConsent,
     login,
+    googleLogin,
     signup,
     logout,
     verifyEmail,

@@ -34,14 +34,16 @@ A complete authentication and onboarding flow consisting of:
 ### Key Features
 
 ✅ **Splash Screen** - Displays logo for 2.5 seconds, auto-navigates to login
-✅ **Email/Password Authentication** - Full signup and login flow
-✅ **Email Verification** - 6-digit OTP input with auto-submit
+✅ **Email/Password Authentication** - Full signup and login flow with backend integration
+✅ **Email Verification Required** - Users must verify email before login (auto-synced)
+✅ **Google OAuth Integration** - "Sign in / Sign up with Google" (expo-auth-session)
 ✅ **Password Reset** - OTP-based password reset flow
 ✅ **Multi-step Onboarding** - 4 steps with progress indicator and back navigation
-✅ **Data Persistence** - AsyncStorage for local data storage
+✅ **Onboarding Data Reset** - Automatically clears data when user logs out
+✅ **Profile Data Persistence** - Saves to backend (Firestore) with proper boolean handling
 ✅ **Form Validation** - Real-time validation with error messages
 ✅ **Keyboard Handling** - Proper KeyboardAvoidingView on all forms
-✅ **Mock Authentication** - Ready for backend integration
+✅ **Backend Integration** - Fully connected to FastAPI backend
 
 ---
 
@@ -898,29 +900,78 @@ Uses multiples of 4: 4, 8, 12, 16, 20, 24, 32, 40
 
 ### Overview
 
-The current system uses mock authentication with AsyncStorage. To integrate with the backend:
+✅ **Backend integration is COMPLETE!** The app is fully connected to the FastAPI backend.
 
-1. Replace mock functions in AuthContext with actual API calls
-2. Use existing backend at `http://192.168.18.145:8000`
-3. Update axios interceptors for auth headers
-4. Handle refresh tokens
-5. Add proper error handling
+**What's Integrated:**
+1. ✅ Email/Password authentication with JWT tokens
+2. ✅ Email verification required before login
+3. ✅ Google OAuth (expo-auth-session implementation ready)
+4. ✅ Password reset with OTP flow
+5. ✅ User profile & onboarding data persistence
+6. ✅ Axios interceptors for auth headers
+7. ✅ Token refresh handling
+8. ✅ Automatic logout on auth failures
+
+**Backend URL:** `http://192.168.18.145:8000`
+
+### Important Implementation Details
+
+#### 1. Email Verification Enforcement
+**Location:** `app/app/(auth)/login.tsx:86-101`
+
+- Users MUST verify their email before logging in
+- Backend returns 403 error if email not verified
+- Frontend shows dedicated alert: "Email Not Verified"
+- Firebase Auth status auto-syncs to Firestore during login
+
+#### 2. Onboarding Data Reset on Logout
+**Location:** `app/context/OnboardingContext.tsx:53-72`
+
+- Automatically resets onboarding form data when user logs out
+- Tracks user ID changes using `useRef` hook
+- Prevents data from previous users carrying over to new users
+- Critical for multi-user scenarios
+
+#### 3. Boolean Values Fix for Meal/Dietary Preferences
+**Location:** `app/app/(onboarding)/daily-intake.tsx:35-50`
+
+- **Problem Solved:** React async state update causing boolean values to save as `false`
+- **Solution:** Pass local state directly to `completeOnboarding(mealPreferences, dietaryPreferences)`
+- Ensures actual checkbox selections are saved to backend
+
+#### 4. Google OAuth Integration
+**Location:** `app/app/(auth)/login.tsx:58-89`
+
+- Uses `expo-auth-session` for OAuth flow
+- "Sign in / Sign up with Google" button on login screen
+- Google users have `email_verified: true` automatically
+- **Note:** Requires proper mobile OAuth credentials (not web client)
 
 ### Backend Endpoints Available
 
-**File:** `backend/app/routes/auth.py`
+**Authentication:** `backend/app/routes/auth.py`
 
 ```
-POST   /auth/register              - Email & password registration
-POST   /auth/login                 - Email & password login
-POST   /auth/google                - Google OAuth integration
-POST   /auth/refresh               - Refresh access token
-GET    /auth/me                    - Get current user info
-POST   /auth/forgot-password       - Password reset request
-POST   /auth/reset-password        - Confirm password reset
-POST   /auth/verify-email          - Email verification
-POST   /auth/logout                - Logout (token blacklist)
-DELETE /auth/delete-account        - Account deletion
+POST   /api/auth/register              - Email & password registration
+POST   /api/auth/login                 - Email & password login (requires verified email)
+POST   /api/auth/google                - Google OAuth integration
+POST   /api/auth/refresh               - Refresh access token
+GET    /api/auth/me                    - Get current user info
+POST   /api/auth/forgot-password       - Password reset request (sends OTP)
+POST   /api/auth/verify-reset-otp      - Verify OTP for password reset
+POST   /api/auth/reset-password-otp    - Reset password with OTP
+POST   /api/auth/verify-email          - Request email verification link
+POST   /api/auth/logout                - Logout (token blacklist)
+DELETE /api/auth/delete-account        - Account deletion
+```
+
+**User Profile:** `backend/app/routes/user.py`
+
+```
+POST   /api/user/profile               - Save/update profile (onboarding data)
+GET    /api/user/profile               - Get user profile
+PATCH  /api/user/profile               - Partial profile update
+GET    /api/user/onboarding-status     - Check if onboarding completed
 ```
 
 ### Migration Steps
@@ -1246,6 +1297,66 @@ await clearAll();
 **Solution:**
 - Added `&& !inAuthGroup` check in root layout
 - This allows users to stay on important-info screen until they click Continue
+
+---
+
+#### Issue: Login fails with "Please verify your email"
+
+**Cause:** User hasn't verified their email after signup (EXPECTED BEHAVIOR)
+
+**Solution:**
+- This is working as intended - email verification is REQUIRED before login
+- User must click verification link in their email
+- Firebase verifies the email, status syncs on next login attempt
+- For testing: Check email inbox or use Firebase Console to manually verify
+
+**Code Location:** `app/app/(auth)/login.tsx:86-101`
+
+---
+
+#### Issue: Meal preferences (breakfast, lunch, etc.) save as false in database
+
+**Cause:** React async state update race condition - `completeOnboarding()` was called before state updates completed
+
+**Solution:**
+- Pass local state directly to `completeOnboarding(mealPreferences, dietaryPreferences)`
+- Avoids waiting for async state updates
+- Ensures actual checkbox values are sent to backend
+
+**Code Location:** `app/app/(onboarding)/daily-intake.tsx:35-50`
+
+**Fix Applied:** Modified `completeOnboarding()` to accept optional parameters
+
+---
+
+#### Issue: Onboarding data from previous user appears for new user
+
+**Cause:** OnboardingContext state persists in memory between user sessions
+
+**Solution:**
+- Added `useEffect` hook to detect user logout/changes
+- Automatically resets onboarding data when user ID changes or becomes null
+- Uses `useRef` to track previous user ID
+
+**Code Location:** `app/context/OnboardingContext.tsx:53-72`
+
+**Fix Applied:** Auto-reset on logout implemented
+
+---
+
+#### Issue: Google OAuth not working on mobile
+
+**Cause:** Google doesn't allow web client IDs for mobile apps
+
+**Solution:**
+- Need to create proper iOS and Android OAuth credentials in Google Cloud Console
+- Update `app/config.ts` with mobile client IDs
+- For now, use basic structure is in place (`expo-auth-session` installed)
+- Will be properly configured in future update
+
+**Code Location:** `app/app/(auth)/login.tsx:58-89`
+
+**Status:** Partial implementation - requires proper OAuth credentials
 
 **Fix Applied:** Root layout now checks `!inAuthGroup` before redirecting to onboarding
 
