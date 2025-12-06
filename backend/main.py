@@ -13,6 +13,8 @@ from app.config.firebase import firebase_client
 from app.routes import auth, food, user
 from app.ml.food_detector import initialize_detector
 
+# Nutrients endpoint (correct location)
+import csv
 # Configure logging for ML module
 logging.basicConfig(level=logging.INFO)
 ml_logger = logging.getLogger('app.ml.food_detector')
@@ -117,6 +119,23 @@ async def general_exception_handler(request: Request, exc: Exception):
 app.include_router(auth.router, prefix="/api")
 app.include_router(user.router, prefix="/api")
 app.include_router(food.router)
+
+
+@app.get("/api/nutrients")
+def get_nutrients():
+    file_path = os.path.join(os.path.dirname(__file__), "nutrients.csv")
+
+    if not os.path.exists(file_path):
+        return {"error": "nutrients.csv not found"}
+
+    rows = []
+    with open(file_path, encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            rows.append(row)
+
+    return rows
+
 
 
 # Root endpoint

@@ -8,6 +8,9 @@
     "scheme": "sehatguru",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+
+    "assetBundlePatterns": ["**/*"],
+
     "ios": {
       "supportsTablet": true
     },

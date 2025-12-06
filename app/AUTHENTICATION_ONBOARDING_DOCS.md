@@ -1515,6 +1515,251 @@ This authentication and onboarding system provides a complete, production-ready 
 
 ---
 
-**Document Version:** 1.0
-**Last Updated:** December 1, 2024
+
+
+# UPDATED SECTION **
+
+
+---
+
+# **13. Nutrition Logging & Food Detection System**
+
+## **13.1 Overview**
+
+This module powers SehatGuru’s core meal-logging features. Users can log meals using:
+
+1. **Camera-based automatic food detection**
+2. **Manual food search** using `/api/nutrients`
+3. **A unified AddMealModal** where users:
+
+   * View food name
+   * Adjust quantity in grams
+   * See automatically scaled calories and macros
+   * Select meal type (Breakfast, Lunch, Dinner, Snack)
+   * Add meal manually or retake photo
+
+This system integrates seamlessly with the dashboard for daily intakes.
+
+---
+
+## **13.2 File Structure**
+
+```
+app/
+ ├── app/(tabs)/camera.tsx             # Camera + food detection workflow
+ ├── app/manual/index.tsx              # Manual meal logging screen
+ ├── components/AddMealModal.tsx       # Reusable bottom sheet for adding meals
+ ├── services/api.ts                   # Axios client for backend communication
+```
+
+**Note:**
+Nutrient data is **NOT stored locally**.
+It is fetched from the backend FastAPI endpoint:
+
+```
+GET /api/nutrients
+```
+
+---
+
+## **13.3 Camera Workflow (camera.tsx)**
+
+### User Flow:
+
+1. User taps **Add Meal with Camera**
+
+2. Camera opens using Expo ImagePicker
+
+3. Captured photo is uploaded via:
+
+   ```
+   POST /api/food/detect
+   ```
+
+4. Backend returns:
+
+   * `food_name`
+   * `confidence`
+   * `nutrients` (calories, protein, carbs, fat)
+
+5. AddMealModal opens automatically, pre-filled with:
+
+   * Food name
+   * Image preview
+   * Confidence score
+   * Nutrition facts (per 100g)
+   * Adjustable gram input (default 100g)
+
+---
+
+## **13.4 Retake Photo Flow**
+
+The modal includes a **Retake Photo** button.
+
+When tapped:
+
+```ts
+const handleRetake = () => {
+  setModalVisible(false);
+  setImage(null);
+  setDetection(null);
+  setNutrients(null);
+
+  setTimeout(() => openCamera(), 200);
+};
+```
+
+This restarts the entire camera process cleanly without stale state.
+
+---
+
+## **13.5 AddMealModal Component**
+
+### Key UI Features
+
+#### ✔ Gram-based scaling
+
+Macros automatically scale based on the quantity the user enters.
+
+#### ✔ Meal Type Selection
+
+Dropdown allowing:
+
+* Breakfast
+* Lunch
+* Dinner
+* Snack
+
+#### ✔ Camera vs Manual Mode
+
+* When opened from camera:
+
+  * Shows image preview
+  * Shows confidence
+  * Shows **Retake Photo**
+* When opened manually:
+
+  * Hides image + confidence
+  * Shows only macro and gram input
+
+#### ✔ Macros Display
+
+Displays:
+
+* Calories
+* Protein
+* Fat
+* Carbs
+* Fiber (placeholder = 0g)
+
+All values update dynamically.
+
+---
+
+## **13.6 Manual Meal Logging (manual/index.tsx)**
+
+### Flow:
+
+1. User searches for food (backend CSV handled server-side)
+2. Data is fetched via:
+
+```
+GET /api/nutrients
+```
+
+3. User selects a food item
+4. AddMealModal opens (manual mode)
+5. User enters grams and selects meal type
+6. Meal is added to daily logs (future integration with backend)
+
+---
+
+## **13.7 Backend Integration**
+
+### **Camera Detection Endpoint**
+
+```
+POST /api/food/detect
+Content-Type: multipart/form-data
+```
+
+Frontend sends:
+
+```ts
+formData.append("file", {
+  uri: imageUri,
+  name: filename,
+  type: "image/jpeg",
+});
+```
+
+Returns:
+
+```json
+{
+  "food_name": "Pizza",
+  "confidence": 0.92,
+  "nutrients": {
+    "calories": 266,
+    "protein": 11,
+    "carbs": 33,
+    "fat": 10
+  }
+}
+```
+
+---
+
+### **Nutrition CSV Endpoint (manual logging)**
+
+```
+GET /api/nutrients
+```
+
+Backend loads nutrients.csv → returns JSON.
+
+Frontend only performs:
+
+* Text search
+* Displays results
+* Opens modal with selected item
+
+No CSV exists in frontend.
+
+---
+
+## **13.8 Summary of All Implemented Features**
+
+### **Camera Screen**
+
+* Take photo
+* Upload image to backend
+* Receive food label + macros
+* Automatically open modal
+* Retake photo workflow
+* Manual logging button
+
+### **Manual Logging Screen**
+
+* Backend-powered food search
+* Item selection opens modal
+* Clean, scrollable UI
+
+### **AddMealModal**
+
+* Dynamic gram-based macro scaling
+* Meal type selection
+* Works for both camera + manual modes
+* Clean bottom sheet UI
+* Image + confidence shown only in camera mode
+
+### **Backend**
+
+* `/api/food/detect` for ML inference
+* `/api/nutrients` for CSV lookup
+
+
+
+**Document Version:** 1.1
+**Last Updated:** December 6, 2025
 **Maintained By:** SehatGuru Development Team

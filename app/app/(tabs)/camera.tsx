@@ -12,6 +12,10 @@ import {
 } from 'react-native';
 import { SafeAreaView } from "react-native-safe-area-context";
 import apiClient from '../../services/api';
+import AddMealModal from "../../components/AddMealModal";
+import { router } from "expo-router";
+
+
 
 interface Nutrition {
   calories: number;
@@ -33,6 +37,8 @@ export default function CameraScreen({ navigation }: any) {
   const [nutrients, setNutrients] = useState<Nutrition | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [modalVisible, setModalVisible] = useState(false);
+
 
   const openCamera = async () => {
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
@@ -78,6 +84,11 @@ export default function CameraScreen({ navigation }: any) {
 
       setDetection(response.data);
       setNutrients(response.data.nutrients || null);
+      // Only show the modal if we have a detection result
+      if (response.data) {
+        setModalVisible(true);
+      }
+
 
     } catch (err: any) {
       const errorMsg =
@@ -104,55 +115,31 @@ export default function CameraScreen({ navigation }: any) {
               <Text style={styles.cameraMainBtnText}>Add Meal with Camera</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.manualBtn}>
-              <Ionicons name="create-outline" size={18} color="#374151" />
-              <Text style={styles.manualBtnText}>Log Meal Manually</Text>
+            <TouchableOpacity style={styles.manualBtn} onPress={() => router.push("/manual")}>
+                <Ionicons name="create-outline" size={18} color="#374151" />
+                <Text style={styles.manualBtnText}>Log Meal Manually</Text>
             </TouchableOpacity>
           </View>
         )}
 
-        {/* IMAGE + DETECTION UI */}
-        {image && (
-          <>
-            <Image source={{ uri: image }} style={styles.preview} />
-
-            {detection && (
-              <View style={styles.resultCard}>
-                <Text style={styles.resultTitle}>Detected Food</Text>
-                <Text style={styles.foodName}>{detection.food_name}</Text>
-
-                <TouchableOpacity style={styles.retakeBtn} onPress={openCamera}>
-                  <Text style={styles.retakeBtnText}>Retake Photo</Text>
-                </TouchableOpacity>
-              </View>
-            )}
-
-            {nutrients && (
-              <View style={styles.nutritionCard}>
-                <Text style={styles.nutritionTitle}>Nutritional Breakdown</Text>
-                <Text style={styles.nutritionItem}>
-                  Calories: {nutrients.calories} kcal
-                </Text>
-                <Text style={styles.nutritionItem}>
-                  Carbs: {nutrients.carbs} g
-                </Text>
-                <Text style={styles.nutritionItem}>
-                  Protein: {nutrients.protein} g
-                </Text>
-                <Text style={styles.nutritionItem}>
-                  Fat: {nutrients.fat} g
-                </Text>
-              </View>
-            )}
-          </>
-        )}
-
+      
         {/* ERROR */}
         {error && (
           <View style={styles.errorCard}>
             <Text style={styles.errorText}>{error}</Text>
           </View>
         )}
+
+        <AddMealModal
+          key="camera-modal"
+          visible={modalVisible}
+          onClose={() => setModalVisible(false)}
+          foodName={detection?.food_name}
+          nutrients={nutrients}
+          image={image}
+          confidence={detection?.confidence}   
+          isManual={false}
+        />
 
       </ScrollView>
     </SafeAreaView>
