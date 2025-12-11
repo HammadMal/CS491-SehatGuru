@@ -320,32 +320,31 @@ class FoodDetector:
 
     def _load_class_names(self) -> list:
         """
-        Load class names for the model
+        Load class names for the model.
 
-        Returns the 20 Pakistani food classes used during model training
+        Returns the 20 Pakistani food classes in the specified order.
         """
         return [
-            "Aloo Keema",
             "Aloo Samosa",
-            "Chai",
+            "Chana Chaat",
             "Chapli Kebab",
-            "Charga",
             "Chicken Biryani",
             "Chicken Karahi",
-            "Chicken Pulao",
+            "Dahi Baray",
             "Gajar ka Halwa",
+            "Gulaab Jamun",
             "Haleem",
+            "Jalebi",
+            "Kheer",
             "Kulfi",
-            "Lassi",
-            "Naan",
             "Nihari",
             "Pakora",
             "Paratha",
-            "Paya",
+            "Saag",
+            "Sajji",
             "Seekh Kebab",
-            "Tandoori Chicken",
-            "Zarda"
-        ]
+            "White Chicken Pulao",
+            "Zarda" ]   
 
 
     def _get_num_classes(self) -> int:

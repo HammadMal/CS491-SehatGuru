@@ -2,7 +2,7 @@
 from fastapi import APIRouter, UploadFile, File, HTTPException
 from pydantic import BaseModel
 from app.utils.nutrition import get_macros
-from typing import Optional
+from typing import Optional, List
 import logging
 
 from app.ml.food_detector import get_detector
@@ -183,3 +183,87 @@ async def health_check():
         "service": "food_detection",
         "model_loaded": True
     }
+
+
+@router.post("/detect/batch", response_model=List[dict])
+async def detect_food_batch(
+    files: List[UploadFile] = File(..., description="Multiple image files"),
+    top_k: int = 5
+) -> List[dict]:
+    """
+    Detect food items from multiple uploaded images with top K predictions
+    Perfect for confidence testing on multiple images
+
+    Args:
+        files: List of uploaded image files (JPG, PNG, etc.)
+        top_k: Number of top predictions to return per image (default: 5)
+
+    Returns:
+        List of detection results, one per image
+
+    Raises:
+        HTTPException: If detection fails
+    """
+    results = []
+    
+    for idx, file in enumerate(files):
+        try:
+            # Validate file type
+            if not file.content_type or not file.content_type.startswith('image/'):
+                results.append({
+                    "filename": file.filename,
+                    "error": "File must be an image",
+                    "success": False
+                })
+                continue
+
+            # Read image bytes
+            image_bytes = await file.read()
+
+            # Get detector
+            detector = get_detector()
+
+            # Run prediction
+            predictions = detector.predict_from_bytes(image_bytes, top_k=top_k)
+
+            if not predictions:
+                results.append({
+                    "filename": file.filename,
+                    "error": "Model failed to generate predictions",
+                    "success": False
+                })
+                continue
+
+            # Format predictions
+            formatted_predictions = [
+                {
+                    "rank": i + 1,
+                    "food_name": name,
+                    "confidence": round(conf * 100, 2),  # Convert to percentage
+                    "is_low_confidence": conf < 0.7
+                }
+                for i, (name, conf) in enumerate(predictions)
+            ]
+
+            results.append({
+                "filename": file.filename,
+                "success": True,
+                "top_prediction": formatted_predictions[0],
+                "all_predictions": formatted_predictions
+            })
+
+            logger.info(
+                f"[{idx + 1}/{len(files)}] {file.filename}: "
+                f"{formatted_predictions[0]['food_name']} "
+                f"({formatted_predictions[0]['confidence']}%)"
+            )
+
+        except Exception as e:
+            logger.error(f"Error processing {file.filename}: {str(e)}")
+            results.append({
+                "filename": file.filename,
+                "error": str(e),
+                "success": False
+            })
+
+    return results
