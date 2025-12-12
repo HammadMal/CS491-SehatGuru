@@ -104,6 +104,14 @@ INFO:     Uvicorn running on http://localhost:8000
    - Click "Execute"
    - Review the top-K predictions
 
+5. **Test Batch Detection (multiple images):**
+   - Find the `POST /api/food/detect/batch` endpoint
+   - Click "Try it out"
+   - Set `top_k` parameter (default: 5)
+   - Click "Add string item" to upload multiple images
+   - Click "Execute"
+   - Review predictions for all images
+
 ## API Endpoints
 
 ### 1. Simple Detection
@@ -150,7 +158,48 @@ INFO:     Uvicorn running on http://localhost:8000
 }
 ```
 
-### 3. Health Check
+### 3. Batch Detection (NEW)
+- **Endpoint:** `POST /api/food/detect/batch`
+- **Description:** Process multiple images at once with top-K predictions
+- **Query Parameter:** `top_k` (optional, default: 5)
+- **Use Case:** Perfect for confidence testing and batch analysis
+- **Response:**
+```json
+[
+  {
+    "filename": "biryani1.jpg",
+    "success": true,
+    "top_prediction": {
+      "rank": 1,
+      "food_name": "Chicken Biryani",
+      "confidence": 95.23,
+      "is_low_confidence": false
+    },
+    "all_predictions": [
+      {
+        "rank": 1,
+        "food_name": "Chicken Biryani",
+        "confidence": 95.23,
+        "is_low_confidence": false
+      },
+      {
+        "rank": 2,
+        "food_name": "White Chicken Pulao",
+        "confidence": 3.45,
+        "is_low_confidence": true
+      },
+      {
+        "rank": 3,
+        "food_name": "Nihari",
+        "confidence": 0.89,
+        "is_low_confidence": true
+      }
+    ]
+  }
+]
+```
+
+### 4. Health Check
 - **Endpoint:** `GET /api/food/health`
 - **Description:** Check if model is loaded and ready
 - **Response:**
@@ -164,29 +213,28 @@ INFO:     Uvicorn running on http://localhost:8000
 
 ## Supported Food Classes
 
-The model can detect 21 Pakistani food items:
+The model can detect 20 Pakistani food items:
 
-1. Aloo Keema
-2. Aloo Sabzi
-3. Aloo Samosa
-4. Bhindi Masala
-5. Chana Chaat
-6. Chana Masala
-7. Chapli Kebab
-8. Chicken Biryani
-9. Chicken Karahi
-10. Chicken Pulao
-11. Doodh Patti Chai
-12. Gajar ka Halwa
-13. Gulaab Jamun
-14. Haleem
-15. Naan
-16. Nihari
-17. Pakora
-18. Palak Paneer
-19. Paratha
-20. Seekh Kebab
-21. Tandoori Chicken
+1. Aloo Samosa
+2. Chana Chaat
+3. Chapli Kebab
+4. Chicken Biryani
+5. Chicken Karahi
+6. Dahi Baray
+7. Gajar ka Halwa
+8. Gulaab Jamun
+9. Haleem
+10. Jalebi
+11. Kheer
+12. Kulfi
+13. Nihari
+14. Pakora
+15. Paratha
+16. Saag
+17. Sajji
+18. Seekh Kebab
+19. White Chicken Pulao
+20. Zarda
 
 ## Understanding Results
 
@@ -215,7 +263,7 @@ When `is_low_confidence` is `true`, it means the model is not very confident. Th
 
 ### Issue: Model predictions don't match the food
 **Solution:** This could happen if:
-1. The food item is not one of the 21 supported Pakistani dishes
+1. The food item is not one of the 20 supported Pakistani dishes
 2. The image quality is poor or unclear
 3. The food looks different from typical presentation
 
