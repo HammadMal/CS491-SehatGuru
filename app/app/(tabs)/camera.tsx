@@ -60,9 +60,37 @@ export default function CameraScreen({ navigation }: any) {
       setNutrients(null);
       setError(null);
 
+      setModalVisible(true);
+
       await detectFood(imageUri);
     }
   };
+
+    const handleModalClose = () => {
+    setModalVisible(false);
+    setImage(null);
+    setDetection(null);
+    setNutrients(null);
+    setError(null);
+  };
+
+
+  const handleRetake = () => {
+      handleModalClose();
+      setTimeout(openCamera, 200);
+    };
+
+  const handleManual = () => {
+      handleModalClose();
+      router.push("/manual");
+    };
+
+  const handleDone = (mealData: any) => {
+      console.log("Meal logged:", mealData);
+      handleModalClose();
+    };
+
+
 
   const detectFood = async (imageUri: string) => {
     setLoading(true);
@@ -84,10 +112,10 @@ export default function CameraScreen({ navigation }: any) {
 
       setDetection(response.data);
       setNutrients(response.data.nutrients || null);
-      // Only show the modal if we have a detection result
-      if (response.data) {
-        setModalVisible(true);
-      }
+      // // Only show the modal if we have a detection result
+      // if (response.data) {
+      //   setModalVisible(true);
+      // }
 
 
     } catch (err: any) {
@@ -108,19 +136,18 @@ export default function CameraScreen({ navigation }: any) {
         <Text style={styles.title}>Add a Meal</Text>
 
         {/* MAIN MENU (no image yet) */}
-        {!image && (
-          <View style={styles.menuContainer}>
-            <TouchableOpacity style={styles.cameraMainBtn} onPress={openCamera}>
-              <Ionicons name="camera" size={22} color="white" />
-              <Text style={styles.cameraMainBtnText}>Add Meal with Camera</Text>
-            </TouchableOpacity>
+        <View style={styles.menuContainer}>
+          <TouchableOpacity style={styles.cameraMainBtn} onPress={openCamera}>
+            <Ionicons name="camera" size={22} color="white" />
+            <Text style={styles.cameraMainBtnText}>Add Meal with Camera</Text>
+          </TouchableOpacity>
 
-            <TouchableOpacity style={styles.manualBtn} onPress={() => router.push("/manual")}>
-                <Ionicons name="create-outline" size={18} color="#374151" />
-                <Text style={styles.manualBtnText}>Log Meal Manually</Text>
-            </TouchableOpacity>
-          </View>
-        )}
+          <TouchableOpacity style={styles.manualBtn} onPress={() => router.push("/manual")}>
+            <Ionicons name="create-outline" size={18} color="#374151" />
+            <Text style={styles.manualBtnText}>Log Meal Manually</Text>
+          </TouchableOpacity>
+        </View>
+
 
       
         {/* ERROR */}
@@ -131,13 +158,15 @@ export default function CameraScreen({ navigation }: any) {
         )}
 
         <AddMealModal
-          key="camera-modal"
           visible={modalVisible}
-          onClose={() => setModalVisible(false)}
+          loading={loading}
+          onClose={handleModalClose}
+          onRetake={handleRetake}
+          onManual={handleManual}
+          onDone={handleDone}
           foodName={detection?.food_name}
           nutrients={nutrients}
           image={image}
-          confidence={detection?.confidence}   
           isManual={false}
         />
 

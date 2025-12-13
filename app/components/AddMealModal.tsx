@@ -1,4 +1,3 @@
-import React, { useState } from "react";
 import {
   Modal,
   View,
@@ -8,6 +7,7 @@ import {
   StyleSheet,
   TextInput,
 } from "react-native";
+import React, { useState, useEffect } from "react";
 import { Ionicons } from "@expo/vector-icons";
 
 const MEAL_TYPES = ["Breakfast", "Lunch", "Dinner", "Snack"];
@@ -15,11 +15,15 @@ const MEAL_TYPES = ["Breakfast", "Lunch", "Dinner", "Snack"];
 export default function AddMealModal({
   visible,
   onClose,
+  onRetake,
+  onManual,
+  onDone,
   foodName,
   nutrients,
   image,
+  loading = false,
   isManual = false,
-}: any) {
+  }: any) {
 
   // SAFE NUTRIENTS IF NO DATA
   const safeNutrients = nutrients || {
@@ -45,133 +49,158 @@ export default function AddMealModal({
   // OTHER UI STATE
   const [mealType, setMealType] = useState("Dinner");
   const [showDropdown, setShowDropdown] = useState(false);
+  useEffect(() => {
+      if (visible) {
+        setGrams(100);
+        setMealType("Dinner");
+        setShowDropdown(false);
+      }
+  }, [visible]);
 
   return (
-    <Modal visible={visible} transparent animationType="slide">
-      <View style={styles.overlay}>
-        <View style={styles.sheet}>
+  <Modal visible={visible} transparent animationType="slide">
+    <View style={styles.overlay}>
+      <View style={styles.sheet}>
 
-          {/* Close Button */}
-          <TouchableOpacity style={styles.closeBtn} onPress={onClose}>
-            <Ionicons name="close" size={26} color="#444" />
-          </TouchableOpacity>
+        {/* CLOSE BUTTON */}
+        <TouchableOpacity style={styles.closeBtn} onPress={onClose}>
+          <Ionicons name="close" size={26} color="#444" />
+        </TouchableOpacity>
 
-          {/* FOOD IMAGE */}
-          {!isManual && image && (
-            <Image source={{ uri: image }} style={styles.foodImage} />
-          )}
+        {/* 🔄 LOADING STATE */}
+        {loading ? (
+            /* ================= LOADING ================= */
+            <View style={styles.loadingContainer}>
+              <Ionicons name="scan-outline" size={42} color="#22c55e" />
+              <Text style={styles.loadingTitle}>Analyzing food</Text>
+              <Text style={styles.loadingSubtitle}>
+                Identifying dish and nutrients…
+              </Text>
+            </View>
 
-          {/* MEAL TYPE DROPDOWN */}
-          <View style={styles.mealTypeContainer}>
-            <TouchableOpacity
-              style={styles.mealTypeButton}
-              onPress={() => setShowDropdown(!showDropdown)}
-            >
-              <Text style={styles.mealTypeText}>{mealType}</Text>
-              <Ionicons name="chevron-down" size={18} color="#444" />
-            </TouchableOpacity>
+          ) : !foodName ? (
+            /* ================= ERROR ================= */
+            <View style={styles.errorState}>
+              <Ionicons name="alert-circle-outline" size={42} color="#dc2626" />
+              <Text style={styles.errorTitle}>Couldn’t identify food</Text>
+              <Text style={styles.errorSubtitle}>
+                Try retaking the photo or log the meal manually.
+              </Text>
 
-            {showDropdown && (
-              <View style={styles.dropdown}>
-                {MEAL_TYPES.map((type) => (
-                  <TouchableOpacity
-                    key={type}
-                    style={styles.dropdownItem}
-                    onPress={() => {
-                      setMealType(type);
-                      setShowDropdown(false);
-                    }}
-                  >
-                    <Text style={styles.dropdownItemText}>{type}</Text>
-                  </TouchableOpacity>
-                ))}
+              <View style={styles.btnColumn}>
+                <TouchableOpacity style={styles.retakeBtn} onPress={onRetake}>
+                  <Ionicons name="camera-outline" size={18} color="white" />
+                  <Text style={styles.retakeText}>Retake Photo</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity style={styles.manualBtn} onPress={onManual}>
+                  <Ionicons name="create-outline" size={18} color="white" />
+                  <Text style={styles.manualText}>Add Manually</Text>
+                </TouchableOpacity>
               </View>
+            </View>
+
+          ) : (
+          <>
+            {/* FOOD IMAGE */}
+            {!isManual && image && (
+              <Image source={{ uri: image }} style={styles.foodImage} />
             )}
-          </View>
 
-          {/* FOOD NAME */}
-          <View style={styles.foodNameRow}>
-            <Text style={styles.foodName}>{foodName}</Text>
-            <Ionicons name="create-outline" size={18} color="#444" />
-          </View>
-
-          {/* GRAM INPUT */}
-          <View style={styles.gramsRow}>
-            <Text style={styles.gramsLabel}>Quantity (g):</Text>
-            <TextInput
-              style={styles.gramsInput}
-              value={String(grams)}
-              keyboardType="numeric"
-              onChangeText={(text) => setGrams(Number(text) || 0)}
-            />
-          </View>
-
-          {/* CALORIES */}
-          <View style={styles.calorieContainer}>
-            <Ionicons name="flame-outline" size={22} color="#444" />
-            <Text style={styles.calories}>{scaledNutrients.calories}</Text>
-            <Text style={styles.calText}>Cal</Text>
-          </View>
-
-          {/* MACROS ROW */}
-          <View style={styles.macrosRow}>
-            <View style={styles.macroChip}>
-              <Text style={styles.macroLabel}>Protein</Text>
-              <Text style={styles.macroValue}>{scaledNutrients.protein}g</Text>
-            </View>
-
-            <View style={styles.macroChip}>
-              <Text style={styles.macroLabel}>Fat</Text>
-              <Text style={styles.macroValue}>{scaledNutrients.fat}g</Text>
-            </View>
-
-            <View style={styles.macroChip}>
-              <Text style={styles.macroLabel}>Carbs</Text>
-              <Text style={styles.macroValue}>{scaledNutrients.carbs}g</Text>
-            </View>
-
-            <View style={styles.macroChip}>
-              <Text style={styles.macroLabel}>Fiber</Text>
-              <Text style={styles.macroValue}>0g</Text>
-            </View>
-          </View>
-
-          {/* ACTION BUTTONS */}
-          <View style={styles.btnColumn}>
-
-            {/* RETAKE — ONLY IF CAMERA MODE */}
-            {!isManual && (
+            {/* MEAL TYPE */}
+            <View style={styles.mealTypeContainer}>
               <TouchableOpacity
-                style={styles.retakeBtn}
-                onPress={onClose}
+                style={styles.mealTypeButton}
+                onPress={() => setShowDropdown(!showDropdown)}
               >
-                <Ionicons name="camera-outline" size={18} color="white" />
-                <Text style={styles.retakeText}>Retake Photo</Text>
+                <Text style={styles.mealTypeText}>{mealType}</Text>
+                <Ionicons name="chevron-down" size={18} color="#444" />
               </TouchableOpacity>
-            )}
 
-            {/* ADD MANUALLY — ONLY IF CAMERA MODE */}
-            {!isManual && (
+              {showDropdown && (
+                <View style={styles.dropdown}>
+                  {MEAL_TYPES.map((type) => (
+                    <TouchableOpacity
+                      key={type}
+                      style={styles.dropdownItem}
+                      onPress={() => {
+                        setMealType(type);
+                        setShowDropdown(false);
+                      }}
+                    >
+                      <Text style={styles.dropdownItemText}>{type}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              )}
+            </View>
+
+            {/* FOOD NAME */}
+            <View style={styles.foodNameRow}>
+              <Text style={styles.foodName}>{foodName}</Text>
+              <Ionicons name="create-outline" size={18} color="#444" />
+            </View>
+
+            {/* GRAMS */}
+            <View style={styles.gramsRow}>
+              <Text style={styles.gramsLabel}>Quantity (g):</Text>
+              <TextInput
+                style={styles.gramsInput}
+                value={String(grams)}
+                keyboardType="numeric"
+                onChangeText={(text) => setGrams(Number(text) || 0)}
+              />
+            </View>
+
+            {/* CALORIES */}
+            <View style={styles.calorieContainer}>
+              <Ionicons name="flame-outline" size={22} color="#444" />
+              <Text style={styles.calories}>{scaledNutrients.calories}</Text>
+              <Text style={styles.calText}>Cal</Text>
+            </View>
+
+            {/* ACTION BUTTONS */}
+            <View style={styles.btnColumn}>
+              {!isManual && (
+                <TouchableOpacity style={styles.retakeBtn} onPress={onRetake}>
+                  <Ionicons name="camera-outline" size={18} color="white" />
+                  <Text style={styles.retakeText}>Retake Photo</Text>
+                </TouchableOpacity>
+              )}
+
+              {!isManual && (
+                <TouchableOpacity
+                  style={styles.manualBtn}
+                  onPress={() => {
+                    onClose();        // ✅ close modal FIRST
+                    setTimeout(() => {
+                      onManual();    // ✅ then navigate
+                    }, 150);
+                  }}
+                >
+                  <Ionicons name="create-outline" size={18} color="white" />
+                  <Text style={styles.manualText}>Add Manually</Text>
+                </TouchableOpacity>
+              )}
+
               <TouchableOpacity
-                style={styles.manualBtn}
-                onPress={onClose}
+                style={styles.doneBtn}
+                onPress={() =>
+                  onDone
+                    ? onDone({ foodName, grams, mealType, nutrients: scaledNutrients })
+                    : onClose()
+                }
               >
-                <Ionicons name="create-outline" size={18} color="white" />
-                <Text style={styles.manualText}>Add Manually</Text>
+                <Text style={styles.doneText}>Done</Text>
               </TouchableOpacity>
-            )}
-
-            {/* DONE */}
-            <TouchableOpacity style={styles.doneBtn} onPress={onClose}>
-              <Text style={styles.doneText}>Done</Text>
-            </TouchableOpacity>
-
-          </View>
-
-        </View>
+            </View>
+          </>
+        )}
       </View>
-    </Modal>
-  );
+    </View>
+  </Modal>
+);
+
 }
 
 const styles = StyleSheet.create({
@@ -331,6 +360,47 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: "center",
   },
+  loadingContainer: {
+  alignItems: "center",
+  justifyContent: "center",
+  paddingVertical: 60,
+  },
+
+  loadingTitle: {
+    fontSize: 20,
+    fontWeight: "700",
+    marginTop: 14,
+    color: "#1f2937",
+  },
+
+  loadingSubtitle: {
+    fontSize: 14,
+    color: "#6b7280",
+    marginTop: 6,
+  },
+
+  errorState: {
+  alignItems: "center",
+  justifyContent: "center",
+  paddingVertical: 40,
+  gap: 10,
+},
+
+errorTitle: {
+  fontSize: 18,
+  fontWeight: "700",
+  color: "#1f2937",
+  marginTop: 10,
+},
+
+errorSubtitle: {
+  fontSize: 14,
+  color: "#6b7280",
+  textAlign: "center",
+  marginBottom: 20,
+},
+
+
 
   doneText: { color: "white", fontSize: 17, fontWeight: "700" },
 });
