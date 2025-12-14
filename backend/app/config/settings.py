@@ -63,6 +63,10 @@ class Settings(BaseSettings):
     FIRESTORE_COLLECTION_MEAL_PLANS: str = "meal_plans"
     FIRESTORE_COLLECTION_CHAT_HISTORY: str = "chat_history"
 
+    # Gemini AI
+    GEMINI_API_KEY: str = ""
+    GEMINI_MODEL: str = "gemini-2.0-flash-exp"
+
     class Config:
         env_file = ".env"
         case_sensitive = True

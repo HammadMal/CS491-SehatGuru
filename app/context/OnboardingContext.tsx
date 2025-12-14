@@ -131,6 +131,10 @@ export const OnboardingProvider: React.FC<OnboardingProviderProps> = ({ children
       await setObject(STORAGE_KEYS.ONBOARDING_DATA, dataToSave);
       await setItem(STORAGE_KEYS.ONBOARDING_COMPLETE, 'true');
 
+      // Also mark consent as accepted since user completed onboarding
+      // (user must have accepted consent to reach onboarding screens)
+      await setItem(STORAGE_KEYS.CONSENT_ACCEPTED, 'true');
+
       // Refresh auth context to update hasCompletedOnboarding
       if (authContext && authContext.refreshOnboardingStatus) {
         await authContext.refreshOnboardingStatus();

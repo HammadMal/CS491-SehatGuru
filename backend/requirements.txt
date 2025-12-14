@@ -33,6 +33,9 @@ python-dateutil==2.8.2
 # Data Processing
 pandas==2.1.4
 
+# AI/LLM
+google-generativeai>=0.3.0
+
 # Machine Learning
 torch==2.1.2
 torchvision==0.16.2
