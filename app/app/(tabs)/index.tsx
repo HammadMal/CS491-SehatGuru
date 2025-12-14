@@ -123,7 +123,7 @@ useEffect(() => {
 
             <TouchableOpacity
               style={styles.plusButton}
-              onPress={() => router.push("/camera")}
+              onPress={() => router.push(`/(tabs)/camera?mealType=${mealType}`)}
             >
               <Ionicons name="add" size={20} color="#fff" />
             </TouchableOpacity>
