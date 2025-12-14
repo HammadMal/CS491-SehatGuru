@@ -13,5 +13,5 @@ export const GOOGLE_WEB_CLIENT_ID = '307789075876-vdkvseo25qc1uqbq2j90gu6rl13dbl
 
 export const CONFIG = {
   apiBaseUrl: API_BASE_URL,
-  timeout: 10000,
+  timeout: 20000,
 };

@@ -40,11 +40,12 @@ export default function AddMealModal({
   const scaleFactor = grams / 100;
 
   const scaledNutrients = {
-    calories: (safeNutrients.calories * scaleFactor).toFixed(1),
-    protein: (safeNutrients.protein * scaleFactor).toFixed(1),
-    carbs: (safeNutrients.carbs * scaleFactor).toFixed(1),
-    fat: (safeNutrients.fat * scaleFactor).toFixed(1),
-  };
+  calories: Number((safeNutrients.calories * scaleFactor).toFixed(1)),
+  protein: Number((safeNutrients.protein * scaleFactor).toFixed(1)),
+  carbs: Number((safeNutrients.carbs * scaleFactor).toFixed(1)),
+  fat: Number((safeNutrients.fat * scaleFactor).toFixed(1)),
+};
+
 
   // OTHER UI STATE
   const [mealType, setMealType] = useState("Dinner");
@@ -158,6 +159,25 @@ export default function AddMealModal({
               <Text style={styles.calories}>{scaledNutrients.calories}</Text>
               <Text style={styles.calText}>Cal</Text>
             </View>
+
+            {/* MACROS */}
+            <View style={styles.macrosRow}>
+              <View style={styles.macroChip}>
+                <Text style={styles.macroLabel}>Protein</Text>
+                <Text style={styles.macroValue}>{scaledNutrients.protein} g</Text>
+              </View>
+
+              <View style={styles.macroChip}>
+                <Text style={styles.macroLabel}>Carbs</Text>
+                <Text style={styles.macroValue}>{scaledNutrients.carbs} g</Text>
+              </View>
+
+              <View style={styles.macroChip}>
+                <Text style={styles.macroLabel}>Fat</Text>
+                <Text style={styles.macroValue}>{scaledNutrients.fat} g</Text>
+              </View>
+            </View>
+
 
             {/* ACTION BUTTONS */}
             <View style={styles.btnColumn}>

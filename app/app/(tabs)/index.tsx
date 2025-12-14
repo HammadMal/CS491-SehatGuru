@@ -1,34 +1,76 @@
-import React from "react";
+
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import { useMealStore } from "../../store/useMealStore";
+import { Meal, MealType } from "../../types/meal.types";
+import React, { useEffect, useRef, useState } from "react";
+
+import { fetchMealsForUser } from "../../services/meals.firestore";
+import { useAuth } from "../../hooks/useAuth";
+
 
 export default function Dashboard() {
-  const eaten = 0;
-  const burned = 0;
-  const calorieGoal = 2819;
-  const remaining = calorieGoal - eaten;
+const meals = useMealStore((s) => s.meals);
+const setMeals = useMealStore((s) => s.setMeals);
+const hydrated = useMealStore((s) => s.hydrated);
+const clearMeals = useMealStore((s) => s.clearMeals);
+const { user } = useAuth();
+
+useEffect(() => {
+  if (!user?.id || hydrated) return;
+
+  fetchMealsForUser(user.id).then(setMeals).catch(console.error);
+}, [user?.id, hydrated, setMeals]);
+
+useEffect(() => {
+  if (!user) clearMeals();
+}, [user, clearMeals]);
+
+
+
+  /* ===== TOTALS ===== */
+ const calorieGoal = 2819;
+
+  // Calories → whole numbers
+  const eaten = Math.round(
+    meals.reduce((sum, meal) => sum + meal.calories, 0)
+  );
+
+  const remaining = Math.max(0, Math.round(calorieGoal - eaten));
+
+  // Macros → 1 decimal
+  const carbs = Number(
+    meals.reduce((sum, meal) => sum + meal.carbs, 0).toFixed(1)
+  );
+
+  const protein = Number(
+    meals.reduce((sum, meal) => sum + meal.protein, 0).toFixed(1)
+  );
+
+  const fat = Number(
+    meals.reduce((sum, meal) => sum + meal.fat, 0).toFixed(1)
+  );
+
+// // Progress for circle
+// const progress = Math.min(1, eaten / calorieGoal);
+
+
+  /* ===== GROUP BY MEAL TYPE ===== */
+  const mealsByType = meals.reduce((acc, meal) => {
+    if (!acc[meal.mealType]) acc[meal.mealType] = [];
+    acc[meal.mealType].push(meal);
+    return acc;
+  }, {} as Record<MealType, Meal[]>);
 
   return (
     <ScrollView style={styles.scroll} contentContainerStyle={styles.container}>
 
       {/* HEADER */}
-      <View style={styles.headerRow}>
-        <View>
-          <Text style={styles.todayText}>Today</Text>
-        </View>
-
-        {/* Removed Notification + AI icons */}
-      </View>
+      <Text style={styles.todayText}>Today</Text>
 
       {/* SUMMARY CARD */}
       <View style={styles.summaryCard}>
-        <View style={styles.summaryHeader}>
-          <Text style={styles.summaryTitle}>Summary</Text>
-          <Text style={styles.detailsText}>Details</Text>
-        </View>
-
-        {/* CIRCLE */}
         <View style={styles.circleContainer}>
           <View style={styles.innerCircle}>
             <Text style={styles.remainingText}>{remaining}</Text>
@@ -36,123 +78,96 @@ export default function Dashboard() {
           </View>
         </View>
 
-        {/* SUMMARY ROW */}
         <View style={styles.summaryRow}>
-          <View style={styles.summaryBox}>
-            <Text style={styles.summaryNumber}>{eaten}</Text>
-            <Text style={styles.summaryLabel}>Eaten</Text>
-          </View>
-
-          <View style={styles.summaryBox}>
-            <Text style={styles.summaryNumber}>{remaining}</Text>
-            <Text style={styles.summaryLabel}>Remaining</Text>
-          </View>
-
-          <View style={styles.summaryBox}>
-            <Text style={styles.summaryNumber}>{burned}</Text>
-            <Text style={styles.summaryLabel}>Burned</Text>
-          </View>
+          <SummaryBox label="Eaten" value={eaten} />
+          <SummaryBox label="Remaining" value={remaining} />
+          <SummaryBox label="Burned" value={0} />
         </View>
 
-        {/* MACROS */}
         <View style={styles.macroSection}>
-          <View style={styles.macroItem}>
-            <Text style={styles.macroTitle}>Carbs</Text>
-            <Text style={styles.macroSubtitle}>0 / 344 g</Text>
-          </View>
-
-          <View style={styles.macroItem}>
-            <Text style={styles.macroTitle}>Protein</Text>
-            <Text style={styles.macroSubtitle}>0 / 138 g</Text>
-          </View>
-
-          <View style={styles.macroItem}>
-            <Text style={styles.macroTitle}>Fat</Text>
-            <Text style={styles.macroSubtitle}>0 / 91 g</Text>
-          </View>
+          <Macro label="Carbs" value={`${carbs} g`} />
+          <Macro label="Protein" value={`${protein} g`} />
+          <Macro label="Fat" value={`${fat} g`} />
         </View>
       </View>
 
-      {/* MEAL CARDS */}
-      {["Breakfast", "Lunch", "Dinner", "Snacks"].map((meal) => (
-        <View key={meal} style={styles.mealCard}>
-          <Text style={styles.mealText}>{meal}</Text>
+      {/* MEAL SECTIONS */}
+      {(["Breakfast", "Lunch", "Dinner", "Snack"] as MealType[]).map((mealType) => {
+        const sectionMeals = mealsByType[mealType] || [];
+        const sectionCalories = Math.round(
+          sectionMeals.reduce((sum, meal) => sum + meal.calories, 0)
+        );
 
-          <TouchableOpacity
-            style={styles.plusButton}
-            onPress={() => router.push("/camera")}
-          >
-            <Ionicons name="add" size={20} color="#fff" />
-          </TouchableOpacity>
-        </View>
-      ))}
 
-      {/* Extra padding */}
+        return (
+          <View key={mealType} style={styles.mealCard}>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.mealText}>{mealType}</Text>
+
+              {sectionMeals.length === 0 ? (
+                <Text style={styles.emptyText}>No meals logged</Text>
+              ) : (
+                sectionMeals.map((meal) => (
+                  <Text key={meal.id} style={styles.mealItem}>
+                    {meal.foodName} · {Math.round(meal.calories)} calories
+                  </Text>
+                ))
+              )}
+
+              {sectionCalories > 0 && (
+                <Text style={styles.sectionTotal}>
+                  Total: {sectionCalories} calories
+                </Text>
+              )}
+            </View>
+
+            <TouchableOpacity
+              style={styles.plusButton}
+              onPress={() => router.push("/camera")}
+            >
+              <Ionicons name="add" size={20} color="#fff" />
+            </TouchableOpacity>
+          </View>
+        );
+      })}
+
       <View style={{ height: 40 }} />
-
     </ScrollView>
   );
 }
 
+/* ===== SMALL COMPONENTS ===== */
+const SummaryBox = ({ label, value }: { label: string; value: number }) => (
+  <View style={styles.summaryBox}>
+    <Text style={styles.summaryNumber}>{value}</Text>
+    <Text style={styles.summaryLabel}>{label}</Text>
+  </View>
+);
+
+const Macro = ({ label, value }: { label: string; value: string }) => (
+  <View style={styles.macroItem}>
+    <Text style={styles.macroTitle}>{label}</Text>
+    <Text style={styles.macroSubtitle}>{value}</Text>
+  </View>
+);
+
+/* ===== STYLES ===== */
 const CIRCLE_SIZE = 140;
 
 const styles = StyleSheet.create({
-  scroll: {
-    flex: 1,
-    backgroundColor: "#F7F9FA",
-  },
+  scroll: { flex: 1, backgroundColor: "#F7F9FA" },
+  container: { paddingHorizontal: 20, paddingTop: 50, paddingBottom: 40 },
 
-  container: {
-    paddingHorizontal: 20,
-    paddingTop: 50,
-    paddingBottom: 40,
-  },
+  todayText: { fontSize: 26, fontWeight: "700", color: "#111" },
 
-  /** HEADER **/
-  headerRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  todayText: {
-    fontSize: 26,
-    fontWeight: "700",
-    color: "#111",
-  },
-
-  /** SUMMARY CARD **/
   summaryCard: {
     backgroundColor: "#fff",
     marginTop: 25,
     borderRadius: 20,
     padding: 18,
-    shadowColor: "#000",
-    shadowOpacity: 0.05,
-    shadowRadius: 5,
-    elevation: 2,
   },
 
-  summaryHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 15,
-  },
-  summaryTitle: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#222",
-  },
-  detailsText: {
-    fontSize: 14,
-    color: "#22c55e",
-    fontWeight: "600",
-  },
-
-  /** CIRCLE **/
-  circleContainer: {
-    alignItems: "center",
-    marginVertical: 12,
-  },
+  circleContainer: { alignItems: "center", marginVertical: 12 },
   innerCircle: {
     width: CIRCLE_SIZE,
     height: CIRCLE_SIZE,
@@ -163,23 +178,11 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  remainingText: {
-    fontSize: 32,
-    fontWeight: "800",
-    color: "#111",
-  },
-  kcalLabel: {
-    fontSize: 13,
-    marginTop: 3,
-    color: "#444",
-  },
 
-  /** SUMMARY BOXES **/
-  summaryRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: 20,
-  },
+  remainingText: { fontSize: 32, fontWeight: "800" },
+  kcalLabel: { fontSize: 13, color: "#444" },
+
+  summaryRow: { flexDirection: "row", justifyContent: "space-between" },
   summaryBox: {
     width: "30%",
     backgroundColor: "#F9FAFB",
@@ -187,61 +190,42 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     alignItems: "center",
   },
-  summaryNumber: {
-    fontSize: 17,
-    fontWeight: "700",
-  },
-  summaryLabel: {
-    marginTop: 5,
-    fontSize: 13,
-    color: "#555",
-  },
 
-  /** MACROS **/
+  summaryNumber: { fontSize: 17, fontWeight: "700" },
+  summaryLabel: { fontSize: 13, color: "#555" },
+
   macroSection: {
     marginTop: 20,
     flexDirection: "row",
     justifyContent: "space-between",
   },
+
   macroItem: {
     width: "30%",
-    paddingVertical: 8,
     backgroundColor: "#F9FAFB",
     borderRadius: 12,
     alignItems: "center",
-  },
-  macroTitle: {
-    fontSize: 13,
-    color: "#777",
-  },
-  macroSubtitle: {
-    marginTop: 4,
-    fontWeight: "600",
-    color: "#111",
+    paddingVertical: 8,
   },
 
-  /** MEAL CARDS **/
+  macroTitle: { fontSize: 13, color: "#777" },
+  macroSubtitle: { fontWeight: "600" },
+
   mealCard: {
     marginTop: 18,
     backgroundColor: "#fff",
-    paddingVertical: 14,
-    paddingHorizontal: 16,
+    padding: 16,
     borderRadius: 14,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    shadowColor: "#000",
-    shadowOpacity: 0.03,
-    shadowRadius: 3,
-    elevation: 1,
-  },
-  mealText: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#222",
   },
 
-  /** GREEN + BUTTON **/
+  mealText: { fontSize: 16, fontWeight: "600" },
+  emptyText: { color: "#777", marginTop: 4 },
+  mealItem: { marginTop: 4 },
+  sectionTotal: { marginTop: 6, fontWeight: "600" },
+
   plusButton: {
     width: 36,
     height: 36,

@@ -7,7 +7,7 @@ import { User } from '../types/auth.types';
  */
 
 export interface RegisterResponse {
-  uid: string;
+  id: string;
   email: string;
   full_name: string;
   email_verified: boolean;

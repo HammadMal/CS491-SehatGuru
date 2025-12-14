@@ -2,7 +2,6 @@ import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { useState } from 'react';
 import {
-  Image,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -14,6 +13,13 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import apiClient from '../../services/api';
 import AddMealModal from "../../components/AddMealModal";
 import { router } from "expo-router";
+import { useMealStore } from "../../store/useMealStore";
+import { Meal } from "../../types/meal.types";
+import * as Crypto from "expo-crypto";
+import { useAuth } from "../../hooks/useAuth";
+import { saveMealToFirestore } from "../../services/meals.firestore";
+
+
 
 
 
@@ -38,6 +44,9 @@ export default function CameraScreen({ navigation }: any) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
+  const { addMeal } = useMealStore();
+  const { user } = useAuth();
+
 
 
   const openCamera = async () => {
@@ -81,14 +90,42 @@ export default function CameraScreen({ navigation }: any) {
     };
 
   const handleManual = () => {
-      handleModalClose();
-      router.push("/manual");
+  setModalVisible(false);
+
+  // wait for modal to close before navigating
+  setTimeout(() => {
+    router.push("/manual");
+  }, 150);
+};
+
+
+  const handleDone = async (mealData: any) => {
+    if (!user) return;
+
+    const meal: Meal = {
+      id: Crypto.randomUUID(),
+      userId: user.id,
+      foodName: mealData.foodName,
+      mealType: mealData.mealType,
+      grams: mealData.grams,
+      calories: Number(mealData.nutrients.calories),
+      protein: Number(mealData.nutrients.protein),
+      carbs: Number(mealData.nutrients.carbs),
+      fat: Number(mealData.nutrients.fat),
+      source: "camera",
+      createdAt: new Date().toISOString(),
     };
 
-  const handleDone = (mealData: any) => {
-      console.log("Meal logged:", mealData);
-      handleModalClose();
+    
+    await saveMealToFirestore(meal);
+
+    
+    addMeal(meal);
+
+    
+    handleModalClose();
     };
+
 
 
 

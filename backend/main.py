@@ -13,8 +13,6 @@ from app.config.firebase import firebase_client
 from app.routes import auth, food, user
 from app.ml.food_detector import initialize_detector
 
-# Nutrients endpoint (correct location)
-import csv
 # Configure logging for ML module
 logging.basicConfig(level=logging.INFO)
 ml_logger = logging.getLogger('app.ml.food_detector')
@@ -120,6 +118,8 @@ app.include_router(auth.router, prefix="/api")
 app.include_router(user.router, prefix="/api")
 app.include_router(food.router)
 
+# Nutrients endpoint (correct location)
+import csv
 
 @app.get("/api/nutrients")
 def get_nutrients():

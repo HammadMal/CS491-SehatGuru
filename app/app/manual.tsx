@@ -8,7 +8,10 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { Stack } from "expo-router";
-
+import { useMealStore } from "../store/useMealStore";
+import { useAuth } from "../hooks/useAuth";
+import * as Crypto from "expo-crypto";
+import { saveMealToFirestore } from "../services/meals.firestore";
 import apiClient from "../services/api";
 import AddMealModal from "../components/AddMealModal";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -19,6 +22,9 @@ export default function ManualMealScreen() {
   const [data, setData] = useState<any[]>([]);
   const [filtered, setFiltered] = useState<any[]>([]);
   const [selectedFood, setSelectedFood] = useState<any>(null);
+  const { addMeal } = useMealStore();
+  const { user } = useAuth();
+
 
   // Fetch CSV data from backend
   useEffect(() => {
@@ -64,6 +70,31 @@ export default function ManualMealScreen() {
     setFiltered(results);
   }, [search, data]);
 
+
+  const handleDone = async (mealData: any) => {
+  if (!user) return;
+
+  const meal = {
+    id: Crypto.randomUUID(),
+    userId: user.id,
+    foodName: mealData.foodName,
+    mealType: mealData.mealType,
+    grams: mealData.grams,
+    calories: Number(mealData.nutrients?.calories ?? 0),
+    protein: Number(mealData.nutrients?.protein ?? 0),
+    carbs: Number(mealData.nutrients?.carbs ?? 0),
+    fat: Number(mealData.nutrients?.fat ?? 0),
+    source: "manual" as const,
+    createdAt: new Date().toISOString(),
+  };
+
+  await saveMealToFirestore(meal); //  persistence
+  addMeal(meal);                  //  instant UI
+
+  setSelectedFood(null);
+};
+
+
   return (
     <SafeAreaView style={styles.safeArea}>
       {/* 🔥 This goes INSIDE the component */}
@@ -103,20 +134,23 @@ export default function ManualMealScreen() {
         )}
       />
 
+
       <AddMealModal
-        key="manual-modal"   
-        visible={!!selectedFood}
-        onClose={() => setSelectedFood(null)}
-        foodName={selectedFood?.food_name}
-        nutrients={{
-          calories: selectedFood?.calories,
-          protein: selectedFood?.protein,
-          carbs: selectedFood?.carbs,
-          fat: selectedFood?.fat,
-        }}
-        image={null}
-        isManual={true} 
-      />
+      key={selectedFood?.food_name ?? "manual"}   // ✅ IMPORTANT
+      visible={!!selectedFood}
+      onClose={() => setSelectedFood(null)}
+      onDone={handleDone}
+      foodName={selectedFood?.food_name}
+      nutrients={{
+        calories: selectedFood?.calories,
+        protein: selectedFood?.protein,
+        carbs: selectedFood?.carbs,
+        fat: selectedFood?.fat,
+      }}
+      image={null}
+      isManual={true}
+    />
+
     </SafeAreaView>
   );
 }
