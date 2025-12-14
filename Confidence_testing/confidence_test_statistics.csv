@@ -1,0 +1,6 @@
+Dish Name,Total Images,Correct,Incorrect,Accuracy (%),Avg Confidence (%),Avg Conf When Correct (%),Avg Conf When Incorrect (%)
+Chicken Biryani,10,9,1,90.0,47.31,48.85,33.41
+Chicken Karahi,10,9,1,90.0,61.78,63.56,45.71
+White Chicken Pulao,10,10,0,100.0,59.81,59.81,N/A
+Nihari,10,10,0,100.0,57.26,57.26,N/A
+Haleem,10,7,3,70.0,65.46,77.98,36.27
