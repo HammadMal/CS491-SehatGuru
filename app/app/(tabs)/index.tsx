@@ -1,197 +1,236 @@
+
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { router } from "expo-router";
+import { useMealStore } from "../../store/useMealStore";
+import { Meal, MealType } from "../../types/meal.types";
+import React, { useEffect, useRef, useState } from "react";
+
+import { fetchMealsForUser } from "../../services/meals.firestore";
+import { useAuth } from "../../hooks/useAuth";
+
 
 export default function Dashboard() {
+const meals = useMealStore((s) => s.meals);
+const setMeals = useMealStore((s) => s.setMeals);
+const hydrated = useMealStore((s) => s.hydrated);
+const clearMeals = useMealStore((s) => s.clearMeals);
+const { user } = useAuth();
+
+useEffect(() => {
+  if (!user?.id || hydrated) return;
+
+  fetchMealsForUser(user.id).then(setMeals).catch(console.error);
+}, [user?.id, hydrated, setMeals]);
+
+useEffect(() => {
+  if (!user) clearMeals();
+}, [user, clearMeals]);
+
+
+
+  /* ===== TOTALS ===== */
+ const calorieGoal = 2819;
+
+  // Calories → whole numbers
+  const eaten = Math.round(
+    meals.reduce((sum, meal) => sum + meal.calories, 0)
+  );
+
+  const remaining = Math.max(0, Math.round(calorieGoal - eaten));
+
+  // Macros → 1 decimal
+  const carbs = Number(
+    meals.reduce((sum, meal) => sum + meal.carbs, 0).toFixed(1)
+  );
+
+  const protein = Number(
+    meals.reduce((sum, meal) => sum + meal.protein, 0).toFixed(1)
+  );
+
+  const fat = Number(
+    meals.reduce((sum, meal) => sum + meal.fat, 0).toFixed(1)
+  );
+
+// // Progress for circle
+// const progress = Math.min(1, eaten / calorieGoal);
+
+
+  /* ===== GROUP BY MEAL TYPE ===== */
+  const mealsByType = meals.reduce((acc, meal) => {
+    if (!acc[meal.mealType]) acc[meal.mealType] = [];
+    acc[meal.mealType].push(meal);
+    return acc;
+  }, {} as Record<MealType, Meal[]>);
+
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.scroll} contentContainerStyle={styles.container}>
 
-      {/* Header */}
-      <Text style={styles.mainTitle}>Main Dashboard</Text>
-      <Text style={styles.subTitle}>SehatGuru</Text>
-      <Ionicons name="notifications-outline" size={24} style={styles.bell} />
+      {/* HEADER */}
+      <Text style={styles.todayText}>Today</Text>
 
-      {/* Calories Card */}
-      <View style={styles.calorieCard}>
-        <View style={styles.rowBetween}>
-          <Text style={styles.cardTitle}>Calories</Text>
-          <Text style={styles.cardValue}>1500 / 2200 kcal</Text>
+      {/* SUMMARY CARD */}
+      <View style={styles.summaryCard}>
+        <View style={styles.circleContainer}>
+          <View style={styles.innerCircle}>
+            <Text style={styles.remainingText}>{remaining}</Text>
+            <Text style={styles.kcalLabel}>Remaining</Text>
+          </View>
         </View>
 
-        <View style={styles.progressBarBackground}>
-          <View style={[styles.progressFill, { width: "68%" }]} />
-        </View>
-      </View>
-
-      {/* Macro Boxes */}
-      <View style={styles.macroRow}>
-        <View style={styles.macroBox}>
-          <Text style={styles.macroLabel}>Carbs</Text>
-          <Text style={styles.macroValue}>180g</Text>
+        <View style={styles.summaryRow}>
+          <SummaryBox label="Eaten" value={eaten} />
+          <SummaryBox label="Remaining" value={remaining} />
+          <SummaryBox label="Burned" value={0} />
         </View>
 
-        <View style={styles.macroBox}>
-          <Text style={styles.macroLabel}>Protein</Text>
-          <Text style={styles.macroValue}>120g</Text>
-        </View>
-
-        <View style={styles.macroBox}>
-          <Text style={styles.macroLabel}>Fat</Text>
-          <Text style={styles.macroValue}>50g</Text>
+        <View style={styles.macroSection}>
+          <Macro label="Carbs" value={`${carbs} g`} />
+          <Macro label="Protein" value={`${protein} g`} />
+          <Macro label="Fat" value={`${fat} g`} />
         </View>
       </View>
 
-      {/* Progress & Analytics Button */}
-      <TouchableOpacity style={styles.analyticsButton}>
-        <Text style={styles.analyticsText}>View Progress & Analytics</Text>
-      </TouchableOpacity>
+      {/* MEAL SECTIONS */}
+      {(["Breakfast", "Lunch", "Dinner", "Snack"] as MealType[]).map((mealType) => {
+        const sectionMeals = mealsByType[mealType] || [];
+        const sectionCalories = Math.round(
+          sectionMeals.reduce((sum, meal) => sum + meal.calories, 0)
+        );
 
-      {/* Meal Sections */}
-      {["Breakfast", "Lunch", "Dinner", "Snacks"].map((meal) => (
-        <View key={meal} style={styles.mealCard}>
-          <Text style={styles.mealText}>{meal}</Text>
-          <TouchableOpacity style={styles.plusButton}>
-            <Ionicons name="add" size={20} color="#000" />
-          </TouchableOpacity>
-        </View>
-      ))}
 
-    </View>
+        return (
+          <View key={mealType} style={styles.mealCard}>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.mealText}>{mealType}</Text>
+
+              {sectionMeals.length === 0 ? (
+                <Text style={styles.emptyText}>No meals logged</Text>
+              ) : (
+                sectionMeals.map((meal) => (
+                  <Text key={meal.id} style={styles.mealItem}>
+                    {meal.foodName} · {Math.round(meal.calories)} calories
+                  </Text>
+                ))
+              )}
+
+              {sectionCalories > 0 && (
+                <Text style={styles.sectionTotal}>
+                  Total: {sectionCalories} calories
+                </Text>
+              )}
+            </View>
+
+            <TouchableOpacity
+              style={styles.plusButton}
+              onPress={() => router.push("/camera")}
+            >
+              <Ionicons name="add" size={20} color="#fff" />
+            </TouchableOpacity>
+          </View>
+        );
+      })}
+
+      <View style={{ height: 40 }} />
+    </ScrollView>
   );
 }
 
+/* ===== SMALL COMPONENTS ===== */
+const SummaryBox = ({ label, value }: { label: string; value: number }) => (
+  <View style={styles.summaryBox}>
+    <Text style={styles.summaryNumber}>{value}</Text>
+    <Text style={styles.summaryLabel}>{label}</Text>
+  </View>
+);
+
+const Macro = ({ label, value }: { label: string; value: string }) => (
+  <View style={styles.macroItem}>
+    <Text style={styles.macroTitle}>{label}</Text>
+    <Text style={styles.macroSubtitle}>{value}</Text>
+  </View>
+);
+
+/* ===== STYLES ===== */
+const CIRCLE_SIZE = 140;
+
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#F4F6F8",
-    paddingHorizontal: 20,
-    paddingTop: 60,
-  },
+  scroll: { flex: 1, backgroundColor: "#F7F9FA" },
+  container: { paddingHorizontal: 20, paddingTop: 50, paddingBottom: 40 },
 
-  /** HEADER **/
-  mainTitle: {
-    fontSize: 24,
-    fontWeight: "700",
-    textAlign: "center",
-    color: "#1E1E1E",
-  },
-  subTitle: {
-    fontSize: 15,
-    textAlign: "center",
-    marginBottom: 10,
-    color: "#777",
-  },
-  bell: {
-    position: "absolute",
-    right: 20,
-    top: 65,
-    color: "#333",
-  },
+  todayText: { fontSize: 26, fontWeight: "700", color: "#111" },
 
-  /** CALORIES **/
-  calorieCard: {
+  summaryCard: {
     backgroundColor: "#fff",
-    padding: 15,
-    borderRadius: 15,
     marginTop: 25,
-    shadowColor: "#000",
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  rowBetween: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
-  cardTitle: {
-    fontSize: 16,
-    color: "#333",
-    fontWeight: "600",
-  },
-  cardValue: {
-    fontSize: 15,
-    fontWeight: "500",
-    color: "#444",
+    borderRadius: 20,
+    padding: 18,
   },
 
-  progressBarBackground: {
-    width: "100%",
-    height: 8,
-    backgroundColor: "#d9d9d9",
-    borderRadius: 6,
-    marginTop: 10,
-  },
-  progressFill: {
-    height: "100%",
-    backgroundColor: "#22c55e",
-    borderRadius: 6,
-  },
-
-  /** MACROS **/
-  macroRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: 18,
-  },
-
-  macroBox: {
-    width: "30%",
-    backgroundColor: "#fff",
-    paddingVertical: 18,
-    borderRadius: 15,
+  circleContainer: { alignItems: "center", marginVertical: 12 },
+  innerCircle: {
+    width: CIRCLE_SIZE,
+    height: CIRCLE_SIZE,
+    borderRadius: CIRCLE_SIZE / 2,
+    backgroundColor: "#F0FDF4",
+    borderWidth: 8,
+    borderColor: "#22c55e",
+    justifyContent: "center",
     alignItems: "center",
-    shadowColor: "#000",
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  macroLabel: {
-    fontSize: 14,
-    color: "#777",
-    marginBottom: 6,
-  },
-  macroValue: {
-    fontSize: 17,
-    fontWeight: "700",
   },
 
-  /** BUTTON **/
-  analyticsButton: {
-    marginTop: 22,
-    backgroundColor: "#fff",
+  remainingText: { fontSize: 32, fontWeight: "800" },
+  kcalLabel: { fontSize: 13, color: "#444" },
+
+  summaryRow: { flexDirection: "row", justifyContent: "space-between" },
+  summaryBox: {
+    width: "30%",
+    backgroundColor: "#F9FAFB",
     paddingVertical: 14,
     borderRadius: 12,
     alignItems: "center",
-    shadowColor: "#000",
-    shadowOpacity: 0.06,
-    shadowRadius: 3,
-    elevation: 2,
-  },
-  analyticsText: {
-    fontSize: 16,
-    fontWeight: "600",
   },
 
-  /** MEAL CARDS **/
+  summaryNumber: { fontSize: 17, fontWeight: "700" },
+  summaryLabel: { fontSize: 13, color: "#555" },
+
+  macroSection: {
+    marginTop: 20,
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+
+  macroItem: {
+    width: "30%",
+    backgroundColor: "#F9FAFB",
+    borderRadius: 12,
+    alignItems: "center",
+    paddingVertical: 8,
+  },
+
+  macroTitle: { fontSize: 13, color: "#777" },
+  macroSubtitle: { fontWeight: "600" },
+
   mealCard: {
+    marginTop: 18,
     backgroundColor: "#fff",
-    paddingVertical: 14,
-    paddingHorizontal: 18,
+    padding: 16,
     borderRadius: 14,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginTop: 16,
   },
-  mealText: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#333",
-  },
+
+  mealText: { fontSize: 16, fontWeight: "600" },
+  emptyText: { color: "#777", marginTop: 4 },
+  mealItem: { marginTop: 4 },
+  sectionTotal: { marginTop: 6, fontWeight: "600" },
+
   plusButton: {
-    backgroundColor: "#F1F1F1",
-    width: 32,
-    height: 32,
-    borderRadius: 8,
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    backgroundColor: "#22c55e",
     justifyContent: "center",
     alignItems: "center",
   },

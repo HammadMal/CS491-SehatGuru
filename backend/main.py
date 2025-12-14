@@ -118,6 +118,25 @@ app.include_router(auth.router, prefix="/api")
 app.include_router(user.router, prefix="/api")
 app.include_router(food.router)
 
+# Nutrients endpoint (correct location)
+import csv
+
+@app.get("/api/nutrients")
+def get_nutrients():
+    file_path = os.path.join(os.path.dirname(__file__), "nutrients.csv")
+
+    if not os.path.exists(file_path):
+        return {"error": "nutrients.csv not found"}
+
+    rows = []
+    with open(file_path, encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            rows.append(row)
+
+    return rows
+
+
 
 # Root endpoint
 @app.get("/")

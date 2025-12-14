@@ -1,4 +1,4 @@
-import { Stack, Redirect, useSegments, useRouter } from 'expo-router';
+import { Stack, useSegments, useRouter } from 'expo-router';
 import { AuthProvider } from '../context/AuthContext';
 import { OnboardingProvider } from '../context/OnboardingContext';
 import { useAuth } from '../hooks/useAuth';
@@ -12,47 +12,53 @@ function RootLayoutNav() {
   useEffect(() => {
     if (isLoading) return;
 
-    const inAuthGroup = segments[0] === '(auth)';
-    const inOnboardingGroup = segments[0] === '(onboarding)';
-    const inTabsGroup = segments[0] === '(tabs)';
-    const onImportantInfo = segments[1] === 'important-info';
+    const segment = segments[0];
+    const screen = segments[1];
 
-    console.log('Navigation check:', {
-      isAuthenticated,
-      hasAcceptedConsent,
-      hasCompletedOnboarding,
-      currentSegment: segments[0],
-      currentScreen: segments[1],
-      inAuthGroup,
-      inOnboardingGroup,
-      inTabsGroup,
-      onImportantInfo
-    });
+    const isManual = segment === 'manual';
+    const isAuth = segment === '(auth)';
+    const isOnboarding = segment === '(onboarding)';
+    const isTabs = segment === '(tabs)';
+    const isImportantInfo = screen === 'important-info';
 
-    if (!isAuthenticated && !inAuthGroup) {
-      // Redirect to auth if not authenticated
-      console.log('Redirecting to auth/splash');
-      router.replace('/(auth)/splash');
-    } else if (isAuthenticated && hasCompletedOnboarding && !inTabsGroup) {
-      // If onboarding is complete, go straight to tabs (skip consent check)
-      console.log('Redirecting to tabs (onboarding complete)');
-      router.replace('/(tabs)');
-    } else if (isAuthenticated && !hasCompletedOnboarding && !hasAcceptedConsent && !onImportantInfo) {
-      // Only show consent screen for new users who haven't completed onboarding
-      console.log('Redirecting to important-info (new user, no consent)');
-      router.replace('/(auth)/important-info');
-    } else if (isAuthenticated && !hasCompletedOnboarding && hasAcceptedConsent && !inOnboardingGroup) {
-      // Redirect to onboarding if consent accepted but onboarding not completed
-      console.log('Redirecting to onboarding/basic-info');
-      router.replace('/(onboarding)/basic-info');
+    // ===== 1. User NOT logged in =====
+    if (!isAuthenticated) {
+      if (!isAuth) router.replace('/(auth)/splash');
+      return;
     }
-  }, [isAuthenticated, hasAcceptedConsent, hasCompletedOnboarding, isLoading, segments, router]);
+
+    // ===== 2. User logged in but has NOT accepted consent =====
+    if (!hasAcceptedConsent) {
+      if (!isImportantInfo) router.replace('/(auth)/important-info');
+      return;
+    }
+
+    // ===== 3. User accepted consent but NOT finished onboarding =====
+    if (!hasCompletedOnboarding) {
+      if (!isOnboarding) router.replace('/(onboarding)/basic-info');
+      return;
+    }
+
+    // ===== 4. User finished onboarding =====
+    const allowedScreens = ['(tabs)', 'manual'];
+    if (!allowedScreens.includes(segment)) {
+      router.replace('/(tabs)');
+    }
+  }, [
+    isAuthenticated,
+    isLoading,
+    hasCompletedOnboarding,
+    hasAcceptedConsent,
+    segments,
+    router
+  ]);
 
   return (
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="(auth)" />
       <Stack.Screen name="(onboarding)" />
       <Stack.Screen name="(tabs)" />
+      <Stack.Screen name="manual" />
     </Stack>
   );
 }
