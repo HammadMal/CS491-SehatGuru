@@ -182,11 +182,11 @@ export default function CameraScreen({ navigation }: any) {
           Track your nutrition with camera or manual entry
         </Text>
 
-        {urlMealType && (
+        {/* {urlMealType && (
   <View style={styles.mealTypePill}>
     <Text style={styles.mealTypeText}>{urlMealType}</Text>
   </View>
-)}
+)} */}
 
 
 
@@ -405,20 +405,20 @@ divider: {
   marginVertical: 16,
 },
 
-mealTypePill: {
-  alignSelf: "center",
-  backgroundColor: "#ecfdf5",
-  paddingHorizontal: 14,
-  paddingVertical: 6,
-  borderRadius: 999,
-  marginBottom: 16,
-},
+// mealTypePill: {
+//   alignSelf: "center",
+//   backgroundColor: "#ecfdf5",
+//   paddingHorizontal: 14,
+//   paddingVertical: 6,
+//   borderRadius: 999,
+//   marginBottom: 16,
+// },
 
-mealTypeText: {
-  color: "#059669",
-  fontSize: 13,
-  fontWeight: "600",
-},
+// mealTypeText: {
+//   color: "#059669",
+//   fontSize: 13,
+//   fontWeight: "600",
+// },
 
 
 });
