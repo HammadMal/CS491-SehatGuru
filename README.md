@@ -56,16 +56,46 @@ For detailed manual setup instructions without Docker, see:
 - [Backend Setup Guide](backend/SETUP.md)
 - [App Setup Guide](app/README.md)
 
+## Features
+
+### ✅ Implemented
+- **Authentication System** - Email/password and Google OAuth login
+- **User Onboarding** - Personalized health profile setup
+- **Food Detection** - AI-powered meal identification via camera
+- **Manual Meal Logging** - Search and add meals from nutrition database
+- **Dashboard** - Real-time calorie and macro tracking
+- **AI Wellness Chatbot** - Instant fitness and nutrition guidance powered by Gemini AI
+
+### 🚧 In Development
+- Personalized workout plans
+- Meal recommendations
+- Progress tracking and analytics
+
 ## Documentation
 
-- [Project Proposal](Docs/SehatGuru-ProjectProposal.pdf) - Initial project proposal (under review)
+### User Guides
+- [App Setup Guide](app/README.md) - Mobile app installation and configuration
+- [Authentication & Onboarding](app/AUTHENTICATION_ONBOARDING_DOCS.md) - User account flow
+- [Dashboard & Camera Feature](app/DASHBOARD_CAMERAFEATURE.md) - Meal tracking features
+- [AI Chatbot Feature](app/CHATBOT_FEATURE.md) - Wellness coach chatbot guide
+
+### Developer Guides
+- [Backend Setup](backend/SETUP.md) - Backend server configuration
+- [Food Detection Setup](backend/FOOD_DETECTION_SETUP.md) - ML model integration
+- [API Testing Guide](Confidence_testing/API_TESTING_GUIDE.md) - Testing endpoints
+
+### Project Documentation
+- [Project Proposal](Docs/SehatGuru-ProjectProposal.pdf) - Initial project proposal
 
 ## Development Status
 
-We are currently working on:
-- Software Requirements Specification (SRS)
-- System architecture design
-- Technology stack evaluation
+**Current Phase:** Active Development
+
+Recent implementations:
+- ✅ AI-powered wellness chatbot with Gemini integration
+- ✅ Meal type preselection for faster logging
+- ✅ Dashboard auto-redirect after meal addition
+- ✅ Onboarding flow bug fixes
 
 More details will be added as the project progresses.
 

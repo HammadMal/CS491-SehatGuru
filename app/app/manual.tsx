@@ -7,7 +7,7 @@ import {
   FlatList,
   TouchableOpacity,
 } from "react-native";
-import { Stack } from "expo-router";
+import { Stack, router, useLocalSearchParams } from "expo-router";
 import { useMealStore } from "../store/useMealStore";
 import { useAuth } from "../hooks/useAuth";
 import * as Crypto from "expo-crypto";
@@ -18,6 +18,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 
 export default function ManualMealScreen() {
+  const { mealType: urlMealType } = useLocalSearchParams<{ mealType?: string }>();
   const [search, setSearch] = useState("");
   const [data, setData] = useState<any[]>([]);
   const [filtered, setFiltered] = useState<any[]>([]);
@@ -92,6 +93,11 @@ export default function ManualMealScreen() {
   addMeal(meal);                  //  instant UI
 
   setSelectedFood(null);
+
+  // Navigate to dashboard to see the added meal
+  setTimeout(() => {
+    router.push("/(tabs)/");
+  }, 150);
 };
 
 
@@ -149,6 +155,7 @@ export default function ManualMealScreen() {
       }}
       image={null}
       isManual={true}
+      defaultMealType={urlMealType || "Dinner"}
     />
 
     </SafeAreaView>

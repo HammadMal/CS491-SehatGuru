@@ -34,8 +34,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (token && userData) {
         setIsAuthenticated(true);
         setUser(userData);
-        setHasCompletedOnboarding(onboardingComplete === 'true');
-        setHasAcceptedConsent(consentAccepted === 'true');
+
+        const isOnboardingComplete = onboardingComplete === 'true';
+        setHasCompletedOnboarding(isOnboardingComplete);
+
+        // If onboarding is complete, consent must also be accepted
+        // (users can't complete onboarding without accepting consent first)
+        let isConsentAccepted = consentAccepted === 'true';
+        if (isOnboardingComplete && !isConsentAccepted) {
+          console.log('Onboarding completed but consent not set - fixing...');
+          await setItem(STORAGE_KEYS.CONSENT_ACCEPTED, 'true');
+          isConsentAccepted = true;
+        }
+        setHasAcceptedConsent(isConsentAccepted);
 
         // Validate token with backend
         try {
@@ -105,8 +116,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setHasCompletedOnboarding(onboardingCompleted);
       await setItem(STORAGE_KEYS.ONBOARDING_COMPLETE, onboardingCompleted ? 'true' : 'false');
 
-      // Check consent status from storage (for new users, this will be false)
-      const consentAccepted = await getItem(STORAGE_KEYS.CONSENT_ACCEPTED);
+      // Check consent status from storage
+      let consentAccepted = await getItem(STORAGE_KEYS.CONSENT_ACCEPTED);
+
+      // If onboarding is completed, consent must also be accepted
+      // (users can't complete onboarding without accepting consent first)
+      if (onboardingCompleted && consentAccepted !== 'true') {
+        console.log('Onboarding completed but consent not set - fixing...');
+        await setItem(STORAGE_KEYS.CONSENT_ACCEPTED, 'true');
+        consentAccepted = 'true';
+      }
+
       setHasAcceptedConsent(consentAccepted === 'true');
       console.log('Consent accepted:', consentAccepted === 'true');
 
@@ -160,8 +180,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setHasCompletedOnboarding(onboardingCompleted);
       await setItem(STORAGE_KEYS.ONBOARDING_COMPLETE, onboardingCompleted ? 'true' : 'false');
 
-      // Check consent status from storage (for new users, this will be false)
-      const consentAccepted = await getItem(STORAGE_KEYS.CONSENT_ACCEPTED);
+      // Check consent status from storage
+      let consentAccepted = await getItem(STORAGE_KEYS.CONSENT_ACCEPTED);
+
+      // If onboarding is completed, consent must also be accepted
+      // (users can't complete onboarding without accepting consent first)
+      if (onboardingCompleted && consentAccepted !== 'true') {
+        console.log('Onboarding completed but consent not set - fixing...');
+        await setItem(STORAGE_KEYS.CONSENT_ACCEPTED, 'true');
+        consentAccepted = 'true';
+      }
+
       setHasAcceptedConsent(consentAccepted === 'true');
       console.log('Consent accepted:', consentAccepted === 'true');
 
@@ -304,7 +333,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // Refresh onboarding status (called after onboarding is completed)
   const refreshOnboardingStatus = async () => {
     const onboardingComplete = await getItem(STORAGE_KEYS.ONBOARDING_COMPLETE);
+    const consentAccepted = await getItem(STORAGE_KEYS.CONSENT_ACCEPTED);
     setHasCompletedOnboarding(onboardingComplete === 'true');
+    setHasAcceptedConsent(consentAccepted === 'true');
   };
 
   // Set consent as accepted (called from important-info screen)

@@ -23,6 +23,7 @@ export default function AddMealModal({
   image,
   loading = false,
   isManual = false,
+  defaultMealType = "Dinner",
   }: any) {
 
   // SAFE NUTRIENTS IF NO DATA
@@ -48,15 +49,15 @@ export default function AddMealModal({
 
 
   // OTHER UI STATE
-  const [mealType, setMealType] = useState("Dinner");
+  const [mealType, setMealType] = useState(defaultMealType);
   const [showDropdown, setShowDropdown] = useState(false);
   useEffect(() => {
       if (visible) {
         setGrams(100);
-        setMealType("Dinner");
+        setMealType(defaultMealType);
         setShowDropdown(false);
       }
-  }, [visible]);
+  }, [visible, defaultMealType]);
 
   return (
   <Modal visible={visible} transparent animationType="slide">

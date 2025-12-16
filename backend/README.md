@@ -26,11 +26,27 @@ FastAPI backend for SehatGuru - An intelligent nutrition tracking and advisory s
 - ✅ Profile Update (Partial & Full)
 - ✅ Onboarding Status Tracking
 
+### Phase 4 - Food Detection & Meal Tracking (Completed)
+- ✅ AI-Powered Food Detection via Camera
+- ✅ Nutrition Database API
+- ✅ Manual Meal Logging
+- ✅ Meal Storage in Firestore
+- ✅ Real-time Calorie & Macro Tracking
+
+### Phase 5 - AI Wellness Chatbot (Completed)
+- ✅ **Gemini AI Integration** - Google Gemini 2.0 Flash
+- ✅ **Real-time Q&A** - Instant fitness and nutrition guidance
+- ✅ **Backend Proxy Pattern** - Secure API key management
+- ✅ **JWT Protected** - Authenticated chat endpoint
+- ✅ **Markdown Support** - Formatted responses
+- ✅ See [../app/CHATBOT_FEATURE.md](../app/CHATBOT_FEATURE.md) for details
+
 ## Tech Stack
 
 - **Framework**: FastAPI
 - **Authentication**: Firebase Auth + JWT
 - **Database**: Firebase Firestore
+- **AI/ML**: Google Gemini 2.0 Flash (Chatbot), PyTorch (Food Detection)
 - **Password Hashing**: Passlib with BCrypt
 - **Token Management**: PyJWT & Python-Jose
 - **Email**: SMTP (Gmail)
@@ -49,18 +65,29 @@ backend/
 │   │   └── auth.py           # Auth middleware & dependencies
 │   ├── models/
 │   │   ├── __init__.py
-│   │   └── auth.py           # Pydantic models for auth
+│   │   ├── auth.py           # Auth models
+│   │   ├── user.py           # User profile models
+│   │   └── chat.py           # Chatbot models
 │   ├── routes/
 │   │   ├── __init__.py
-│   │   └── auth.py           # Auth endpoints
+│   │   ├── auth.py           # Auth endpoints
+│   │   ├── user.py           # User profile endpoints
+│   │   ├── food.py           # Food detection endpoints
+│   │   └── chat.py           # Chatbot endpoints
 │   ├── services/
 │   │   ├── __init__.py
-│   │   └── auth_service.py   # Auth business logic
+│   │   ├── auth_service.py   # Auth business logic
+│   │   ├── user_service.py   # User profile logic
+│   │   └── gemini_service.py # Gemini AI integration
+│   ├── ml/
+│   │   ├── __init__.py
+│   │   └── food_detector.py  # Food detection ML model
 │   └── utils/
 │       ├── __init__.py
 │       ├── jwt.py            # JWT utilities
 │       ├── password.py       # Password hashing
-│       └── email.py          # Email utilities
+│       ├── email.py          # Email utilities
+│       └── nutrition.py      # Nutrition calculations
 ├── main.py                   # FastAPI app entry point
 ├── requirements.txt          # Python dependencies
 ├── .env.example             # Environment variables template
@@ -150,6 +177,10 @@ GOOGLE_CLIENT_SECRET=your-google-client-secret
 # Email (Gmail)
 SMTP_USER=your-email@gmail.com
 SMTP_PASSWORD=your-gmail-app-password
+
+# Gemini AI (for Chatbot)
+GEMINI_API_KEY=your-gemini-api-key
+GEMINI_MODEL=gemini-2.0-flash-exp
 
 # Frontend URL
 FRONTEND_URL=http://localhost:3000

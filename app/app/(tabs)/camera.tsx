@@ -12,7 +12,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import apiClient from '../../services/api';
 import AddMealModal from "../../components/AddMealModal";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { useMealStore } from "../../store/useMealStore";
 import { Meal } from "../../types/meal.types";
 import * as Crypto from "expo-crypto";
@@ -38,6 +38,7 @@ interface FoodDetectionResult {
 }
 
 export default function CameraScreen({ navigation }: any) {
+  const { mealType: urlMealType } = useLocalSearchParams<{ mealType?: string }>();
   const [image, setImage] = useState<string | null>(null);
   const [detection, setDetection] = useState<FoodDetectionResult | null>(null);
   const [nutrients, setNutrients] = useState<Nutrition | null>(null);
@@ -94,7 +95,7 @@ export default function CameraScreen({ navigation }: any) {
 
   // wait for modal to close before navigating
   setTimeout(() => {
-    router.push("/manual");
+    router.push(`/manual?mealType=${urlMealType || "Dinner"}`);
   }, 150);
 };
 
@@ -116,14 +117,19 @@ export default function CameraScreen({ navigation }: any) {
       createdAt: new Date().toISOString(),
     };
 
-    
+
     await saveMealToFirestore(meal);
 
-    
+
     addMeal(meal);
 
-    
+
     handleModalClose();
+
+    // Navigate to dashboard to see the added meal
+    setTimeout(() => {
+      router.push("/(tabs)/");
+    }, 150);
     };
 
 
@@ -179,7 +185,7 @@ export default function CameraScreen({ navigation }: any) {
             <Text style={styles.cameraMainBtnText}>Add Meal with Camera</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.manualBtn} onPress={() => router.push("/manual")}>
+          <TouchableOpacity style={styles.manualBtn} onPress={() => router.push(`/manual?mealType=${urlMealType || "Dinner"}`)}>
             <Ionicons name="create-outline" size={18} color="#374151" />
             <Text style={styles.manualBtnText}>Log Meal Manually</Text>
           </TouchableOpacity>
@@ -205,6 +211,7 @@ export default function CameraScreen({ navigation }: any) {
           nutrients={nutrients}
           image={image}
           isManual={false}
+          defaultMealType={urlMealType || "Dinner"}
         />
 
       </ScrollView>
