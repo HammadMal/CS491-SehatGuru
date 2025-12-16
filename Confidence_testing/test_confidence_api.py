@@ -254,13 +254,28 @@ def main():
     API_URL = "http://localhost:8000"  # Change if your API runs on different port
     CONFIDENCE_IMAGES_DIR = "Dataset/confidence_images"  # Your images directory
     
-    # Top 5 dishes - UPDATE THESE to match your actual dish names
+    # Top 20 dishes - Based on consensus ranking
     TOP_DISHES = [
-        "Chicken Biryani",
-        "Chicken Karahi",
-        "White Chicken Pulao",
-        "Nihari",
-        "Haleem"
+        "Chicken Biryani",        # 1. Biryani (all types)
+        "Chicken Karahi",         # 2. Karahi (all types)
+        "White Chicken Pulao",    # 3. Pulao (all types)
+        "Nihari",                 # 4. Nihari
+        "Haleem",                 # 5. Haleem (all types)
+        "Saag",                   # 6. Saag Dishes
+        "Kheer",                  # 7. Kheer
+        "Gulaab Jamun",          # 8. Gulab Jamun
+        "Chana Chaat",                  # 9. Chaat (all types)
+        "Chapli Kebab",           # 10. Chapli Kebab
+        "Sajji",                  # 11. Sajji
+        "Samosas",                # 12. Samosas
+        "Pakoras",                # 13. Pakoras
+        "Dahi Baray",             # 14. Dahi Baray / Bhalla
+        "Seekh Kebab",            # 15. Seekh Kabab
+        "Jalebi",                 # 16. Jalebi
+        "Gajar ka Halwa",         # 17. Gajar ka Halwa
+        "Kulfi",                  # 18. Kulfi
+        "Paratha",                # 19. Paratha
+        "Zarda"                   # 20. Zarda
     ]
     
     print("\n🔬 Model Confidence Testing via API")
