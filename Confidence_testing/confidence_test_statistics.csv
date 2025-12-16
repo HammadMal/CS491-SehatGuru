@@ -1,6 +1,19 @@
 Dish Name,Total Images,Correct,Incorrect,Accuracy (%),Avg Confidence (%),Avg Conf When Correct (%),Avg Conf When Incorrect (%)
-Chicken Biryani,10,9,1,90.0,47.31,48.85,33.41
-Chicken Karahi,10,9,1,90.0,61.78,63.56,45.71
-White Chicken Pulao,10,10,0,100.0,59.81,59.81,N/A
-Nihari,10,10,0,100.0,57.26,57.26,N/A
-Haleem,10,7,3,70.0,65.46,77.98,36.27
+Chicken Biryani,10,8,2,80.0,45.98,50.44,28.15
+Chicken Karahi,10,9,1,90.0,61.76,63.41,46.9
+White Chicken Pulao,10,10,0,100.0,61.59,61.59,N/A
+Nihari,10,9,1,90.0,57.56,61.23,24.58
+Haleem,10,7,3,70.0,65.25,77.17,37.44
+Saag,11,10,1,90.91,69.65,73.21,34.06
+Kheer,11,11,0,100.0,70.83,70.83,N/A
+Gulaab Jamun,11,11,0,100.0,75.75,75.75,N/A
+Chana Chaat,13,12,1,92.31,57.66,59.86,31.3
+Chapli Kebab,11,10,1,90.91,56.16,57.55,42.21
+Sajji,10,7,3,70.0,50.82,55.17,40.69
+Dahi Baray,9,9,0,100.0,68.71,68.71,N/A
+Seekh Kebab,9,9,0,100.0,64.57,64.57,N/A
+Jalebi,10,10,0,100.0,77.58,77.58,N/A
+Gajar ka Halwa,10,10,0,100.0,68.1,68.1,N/A
+Kulfi,11,11,0,100.0,72.44,72.44,N/A
+Paratha,10,10,0,100.0,74.94,74.94,N/A
+Zarda,10,10,0,100.0,54.91,54.91,N/A
