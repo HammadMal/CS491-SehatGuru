@@ -178,12 +178,28 @@ export default function CameraScreen({ navigation }: any) {
         {/* HEADER */}
         <Text style={styles.title}>Add a Meal</Text>
 
+        <Text style={styles.subtitle}>
+          Track your nutrition with camera or manual entry
+        </Text>
+
+        {urlMealType && (
+  <View style={styles.mealTypePill}>
+    <Text style={styles.mealTypeText}>{urlMealType}</Text>
+  </View>
+)}
+
+
+
         {/* MAIN MENU (no image yet) */}
-        <View style={styles.menuContainer}>
+        <View style={styles.card}>
+
           <TouchableOpacity style={styles.cameraMainBtn} onPress={openCamera}>
             <Ionicons name="camera" size={22} color="white" />
             <Text style={styles.cameraMainBtnText}>Add Meal with Camera</Text>
           </TouchableOpacity>
+
+          <View style={styles.divider} />
+
 
           <TouchableOpacity style={styles.manualBtn} onPress={() => router.push(`/manual?mealType=${urlMealType || "Dinner"}`)}>
             <Ionicons name="create-outline" size={18} color="#374151" />
@@ -226,36 +242,39 @@ const styles = StyleSheet.create({
   },
 
   scrollContainer: {
-    paddingHorizontal: 20,
-    paddingBottom: 40,
-    alignItems: "center",
-  },
+  paddingHorizontal: 20,
+  paddingTop: 20,   // ⬅ ADD
+  paddingBottom: 40,
+  alignItems: "center",
+},
+
 
   title: {
-    fontSize: 24,
-    fontWeight: "700",
-    marginTop: 10,
-    marginBottom: 20,
-    color: "#1f2937",
-    textAlign: "center",
-  },
+  fontSize: 24,
+  fontWeight: "700",
+  marginTop: 10,
+  marginBottom: 6,   // ⬅ reduce from 20
+  color: "#1f2937",
+  textAlign: "center",
+},
 
-  menuContainer: {
-    marginTop: 40,
-    width: "100%",
-    alignItems: "center",
-  },
+ 
 
   cameraMainBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#22c55e",
-    paddingVertical: 14,
-    paddingHorizontal: 22,
-    borderRadius: 14,
-    width: "90%",
-    justifyContent: "center",
-  },
+  flexDirection: "row",
+  alignItems: "center",
+  backgroundColor: "#22c55e",
+  paddingVertical: 16,
+  paddingHorizontal: 22,
+  borderRadius: 14,
+  width: "100%",
+  justifyContent: "center",
+  shadowColor: "#22c55e",
+  shadowOpacity: 0.25,
+  shadowRadius: 8,
+  elevation: 3,
+},
+
 
   cameraMainBtnText: {
     color: "white",
@@ -265,16 +284,15 @@ const styles = StyleSheet.create({
   },
 
   manualBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#e5e7eb",
-    paddingVertical: 12,
-    paddingHorizontal: 18,
-    borderRadius: 12,
-    width: "75%",
-    justifyContent: "center",
-    marginTop: 15,
-  },
+  flexDirection: "row",
+  alignItems: "center",
+  backgroundColor: "#e5e7eb",
+  paddingVertical: 14,
+  borderRadius: 12,
+  width: "100%",          // ⬅ change from 75%
+  justifyContent: "center",
+},
+
 
   manualBtnText: {
     fontSize: 15,
@@ -360,4 +378,47 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: "600",
   },
+
+  subtitle: {
+  fontSize: 14,
+  color: "#6b7280",
+  marginBottom: 30,
+  textAlign: "center",
+},
+
+card: {
+  width: "100%",
+  backgroundColor: "white",
+  borderRadius: 18,
+  padding: 20,
+  marginTop: 12,     // ⬅ ADD THIS
+  shadowColor: "#000",
+  shadowOpacity: 0.08,
+  shadowRadius: 10,
+  elevation: 4,
+},
+
+
+divider: {
+  height: 1,
+  backgroundColor: "#e5e7eb",
+  marginVertical: 16,
+},
+
+mealTypePill: {
+  alignSelf: "center",
+  backgroundColor: "#ecfdf5",
+  paddingHorizontal: 14,
+  paddingVertical: 6,
+  borderRadius: 999,
+  marginBottom: 16,
+},
+
+mealTypeText: {
+  color: "#059669",
+  fontSize: 13,
+  fontWeight: "600",
+},
+
+
 });
