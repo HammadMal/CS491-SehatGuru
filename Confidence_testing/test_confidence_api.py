@@ -263,12 +263,12 @@ def main():
         "Haleem",                 # 5. Haleem (all types)
         "Saag",                   # 6. Saag Dishes
         "Kheer",                  # 7. Kheer
-        "Gulaab Jamun",          # 8. Gulab Jamun
-        "Chana Chaat",                  # 9. Chaat (all types)
+        "Gulaab Jamun",           # 8. Gulab Jamun
+        "Chana Chaat",            # 9. Chaat (all types)
         "Chapli Kebab",           # 10. Chapli Kebab
         "Sajji",                  # 11. Sajji
-        "Samosas",                # 12. Samosas
-        "Pakoras",                # 13. Pakoras
+        "Aloo Samosa",            # 12. Samosas
+        "Pakora",                 # 13. Pakoras
         "Dahi Baray",             # 14. Dahi Baray / Bhalla
         "Seekh Kebab",            # 15. Seekh Kabab
         "Jalebi",                 # 16. Jalebi
