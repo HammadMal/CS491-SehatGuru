@@ -1,187 +1,207 @@
 True Dish,Image Number,Filename,Predicted Class,Confidence (%),Correct,Top-1 Class,Top-1 Conf (%),Top-2 Class,Top-2 Conf (%),Top-3 Class,Top-3 Conf (%),Top-4 Class,Top-4 Conf (%),Top-5 Class,Top-5 Conf (%)
-Chicken Biryani,1,image 1.png,Chicken Biryani,22.47,✓,Chicken Biryani,22.47,Zarda,19.8,White Chicken Pulao,12.78,Chana Chaat,7.77,Gulaab Jamun,5.07
-Chicken Biryani,2,image 10.png,Zarda,32.66,✗,Zarda,32.66,Chicken Biryani,16.5,Pakora,10.34,Chana Chaat,7.93,White Chicken Pulao,4.5
-Chicken Biryani,3,image 2.png,Chicken Biryani,29.44,✓,Chicken Biryani,29.44,Paratha,15.17,Zarda,12.22,White Chicken Pulao,5.86,Kulfi,5.04
-Chicken Biryani,4,image 3.png,Chicken Biryani,69.02,✓,Chicken Biryani,69.02,Pakora,6.69,Chana Chaat,3.75,Gulaab Jamun,3.09,Chicken Karahi,1.99
-Chicken Biryani,5,image 4.png,Chicken Biryani,22.07,✓,Chicken Biryani,22.07,Gajar ka Halwa,19.73,Sajji,10.65,Haleem,7.44,Kulfi,6.84
-Chicken Biryani,6,image 5.png,Chicken Biryani,49.94,✓,Chicken Biryani,49.94,Zarda,18.71,Haleem,3.81,Gulaab Jamun,3.19,White Chicken Pulao,2.95
-Chicken Biryani,7,image 6.png,Chicken Biryani,66.72,✓,Chicken Biryani,66.72,Gulaab Jamun,4.36,Kulfi,2.5,Haleem,2.45,Nihari,2.3
-Chicken Biryani,8,image 7.png,Chicken Biryani,61.69,✓,Chicken Biryani,61.69,White Chicken Pulao,4.71,Gulaab Jamun,4.3,Pakora,2.8,Kulfi,2.56
-Chicken Biryani,9,image 8.png,White Chicken Pulao,23.64,✗,White Chicken Pulao,23.64,Chicken Biryani,17.02,Zarda,13.15,Pakora,6.92,Chana Chaat,5.08
-Chicken Biryani,10,image 9.png,Chicken Biryani,82.14,✓,Chicken Biryani,82.14,Kulfi,1.89,Gulaab Jamun,1.84,Kheer,1.57,Paratha,1.29
-Chicken Karahi,1,image 1.png,Chicken Karahi,66.16,✓,Chicken Karahi,66.16,Gajar ka Halwa,9.91,Pakora,8.74,Gulaab Jamun,1.81,Jalebi,1.28
-Chicken Karahi,2,image 10.png,Chicken Karahi,44.67,✓,Chicken Karahi,44.67,Pakora,14.15,Nihari,6.42,Saag,5.45,Haleem,4.83
-Chicken Karahi,3,image 2.png,Chicken Karahi,66.88,✓,Chicken Karahi,66.88,Haleem,7.04,Gajar ka Halwa,3.92,Gulaab Jamun,2.06,Aloo Samosa,1.97
-Chicken Karahi,4,image 3.png,Chicken Karahi,84.3,✓,Chicken Karahi,84.3,Jalebi,2.24,Pakora,1.89,White Chicken Pulao,1.17,Sajji,1.05
-Chicken Karahi,5,image 4.png,Chicken Karahi,69.77,✓,Chicken Karahi,69.77,Pakora,8.12,Gulaab Jamun,2.72,Jalebi,2.19,Haleem,1.66
-Chicken Karahi,6,image 5.png,Chicken Karahi,48.81,✓,Chicken Karahi,48.81,Nihari,18.78,Haleem,8.92,Gulaab Jamun,4.05,Chana Chaat,3.27
-Chicken Karahi,7,image 6.png,Chicken Karahi,51.62,✓,Chicken Karahi,51.62,Nihari,8.93,Gulaab Jamun,7.19,Gajar ka Halwa,5.63,Jalebi,4.55
-Chicken Karahi,8,image 7.png,Chicken Karahi,61.06,✓,Chicken Karahi,61.06,Aloo Samosa,5.07,White Chicken Pulao,3.8,Kulfi,3.49,Haleem,3.13
-Chicken Karahi,9,image 8.png,Chicken Karahi,77.43,✓,Chicken Karahi,77.43,Haleem,4.01,Gulaab Jamun,2.09,Chana Chaat,1.72,Jalebi,1.64
-Chicken Karahi,10,image 9.png,Nihari,46.9,✗,Nihari,46.9,Chicken Karahi,33.06,Haleem,3.45,Zarda,2.76,Pakora,2.33
-White Chicken Pulao,1,image 1.png,White Chicken Pulao,65.18,✓,White Chicken Pulao,65.18,Chana Chaat,3.24,Gulaab Jamun,2.97,Seekh Kebab,2.77,Saag,2.37
-White Chicken Pulao,2,image 10.png,White Chicken Pulao,60.55,✓,White Chicken Pulao,60.55,Saag,4.04,Gajar ka Halwa,3.51,Jalebi,3.37,Gulaab Jamun,2.9
-White Chicken Pulao,3,image 2.png,White Chicken Pulao,50.66,✓,White Chicken Pulao,50.66,Zarda,23.31,Paratha,3.47,Jalebi,3.28,Kheer,3.15
-White Chicken Pulao,4,image 3.png,White Chicken Pulao,51.33,✓,White Chicken Pulao,51.33,Zarda,6.12,Chana Chaat,4.48,Gulaab Jamun,3.73,Gajar ka Halwa,3.71
-White Chicken Pulao,5,image 4.png,White Chicken Pulao,80.5,✓,White Chicken Pulao,80.5,Chana Chaat,2.33,Saag,2.27,Gulaab Jamun,1.72,Gajar ka Halwa,1.6
-White Chicken Pulao,6,image 5.png,White Chicken Pulao,64.44,✓,White Chicken Pulao,64.44,Chana Chaat,6.74,Saag,3.77,Gajar ka Halwa,2.49,Aloo Samosa,2.19
-White Chicken Pulao,7,image 6.png,White Chicken Pulao,69.12,✓,White Chicken Pulao,69.12,Seekh Kebab,4.32,Pakora,3.49,Chicken Karahi,3.47,Zarda,2.64
-White Chicken Pulao,8,image 7.png,White Chicken Pulao,58.58,✓,White Chicken Pulao,58.58,Zarda,5.15,Gulaab Jamun,4.74,Aloo Samosa,3.68,Saag,2.76
-White Chicken Pulao,9,image 8.png,White Chicken Pulao,71.1,✓,White Chicken Pulao,71.1,Saag,4.12,Gajar ka Halwa,3.71,Zarda,3.27,Kulfi,2.39
-White Chicken Pulao,10,image 9.png,White Chicken Pulao,44.41,✓,White Chicken Pulao,44.41,Kulfi,9.85,Chicken Biryani,7.91,Zarda,4.4,Haleem,4.24
-Nihari,1,image 1.png,Nihari,55.83,✓,Nihari,55.83,Jalebi,5.55,Haleem,4.72,Gajar ka Halwa,3.61,Aloo Samosa,3.5
-Nihari,2,image 10.png,Nihari,69.14,✓,Nihari,69.14,Gulaab Jamun,3.31,Zarda,3.06,Haleem,2.26,Aloo Samosa,2.16
-Nihari,3,image 2.png,Gulaab Jamun,24.58,✗,Gulaab Jamun,24.58,Nihari,19.1,Kulfi,17.71,Jalebi,10.29,Saag,4.31
-Nihari,4,image 3.png,Nihari,46.47,✓,Nihari,46.47,Gulaab Jamun,9.91,Jalebi,4.52,Kheer,4.5,Aloo Samosa,3.67
-Nihari,5,image 4.png,Nihari,67.34,✓,Nihari,67.34,Jalebi,5.48,Kulfi,4.9,Sajji,4.0,Haleem,3.84
-Nihari,6,image 5.png,Nihari,64.94,✓,Nihari,64.94,Jalebi,5.39,Haleem,4.41,Saag,4.26,Gajar ka Halwa,3.7
-Nihari,7,image 6.png,Nihari,61.79,✓,Nihari,61.79,Gulaab Jamun,4.71,Chicken Karahi,3.97,Aloo Samosa,3.11,Haleem,2.94
-Nihari,8,image 7.png,Nihari,44.26,✓,Nihari,44.26,Kheer,11.75,Gulaab Jamun,8.97,Chana Chaat,6.41,Gajar ka Halwa,6.26
-Nihari,9,image 8.png,Nihari,77.55,✓,Nihari,77.55,Kulfi,3.72,Saag,1.89,Seekh Kebab,1.66,Gulaab Jamun,1.63
-Nihari,10,image 9.png,Nihari,63.73,✓,Nihari,63.73,Haleem,4.16,Saag,2.99,Pakora,2.61,Gulaab Jamun,2.55
-Haleem,1,image 1.png,Kheer,50.27,✗,Kheer,50.27,Haleem,20.98,Saag,5.88,Pakora,2.57,Nihari,2.36
-Haleem,2,image 10.png,Kheer,36.51,✗,Kheer,36.51,Haleem,24.64,Chicken Karahi,4.69,White Chicken Pulao,4.48,Chana Chaat,3.82
-Haleem,3,image 2.png,Haleem,91.65,✓,Haleem,91.65,Paratha,0.96,Saag,0.75,Gulaab Jamun,0.73,White Chicken Pulao,0.65
-Haleem,4,image 3.png,Haleem,64.79,✓,Haleem,64.79,Nihari,12.15,Zarda,2.89,Jalebi,2.86,Gulaab Jamun,1.78
-Haleem,5,image 4.png,Haleem,67.36,✓,Haleem,67.36,Saag,13.43,Gajar ka Halwa,2.98,Chana Chaat,2.77,Aloo Samosa,1.83
-Haleem,6,image 5.png,Haleem,71.98,✓,Haleem,71.98,Aloo Samosa,9.16,Kulfi,2.9,Jalebi,2.37,Chicken Karahi,1.77
-Haleem,7,image 6.png,Saag,25.53,✗,Saag,25.53,Kheer,20.99,Haleem,14.55,Paratha,9.24,Jalebi,5.4
-Haleem,8,image 7.png,Haleem,82.38,✓,Haleem,82.38,Paratha,2.0,Gajar ka Halwa,1.25,Aloo Samosa,1.24,Gulaab Jamun,1.2
-Haleem,9,image 8.png,Haleem,79.54,✓,Haleem,79.54,Nihari,6.0,Dahi Baray,2.39,Jalebi,1.7,Aloo Samosa,1.52
-Haleem,10,image 9.png,Haleem,82.48,✓,Haleem,82.48,Kheer,2.09,Pakora,1.62,Chana Chaat,1.35,Kulfi,1.12
-Saag,1,Screenshot 2025-12-12 035230.png,Saag,82.47,✓,Saag,82.47,Paratha,2.08,Kheer,1.95,Gulaab Jamun,1.93,Kulfi,1.5
-Saag,2,Screenshot 2025-12-12 035316.png,Saag,71.43,✓,Saag,71.43,Kulfi,3.45,Paratha,2.99,Zarda,2.23,Gulaab Jamun,2.2
-Saag,3,Screenshot 2025-12-12 035351.png,Saag,77.54,✓,Saag,77.54,Jalebi,4.91,Gulaab Jamun,2.07,White Chicken Pulao,1.78,Nihari,1.36
-Saag,4,Screenshot 2025-12-12 035416.png,Gajar ka Halwa,34.06,✗,Gajar ka Halwa,34.06,Aloo Samosa,10.59,Chapli Kebab,10.19,Zarda,8.38,Jalebi,5.39
-Saag,5,Screenshot 2025-12-12 035427.png,Saag,80.01,✓,Saag,80.01,Kulfi,5.62,Gulaab Jamun,2.06,White Chicken Pulao,1.56,Paratha,1.42
-Saag,6,Screenshot 2025-12-12 035448.png,Saag,84.03,✓,Saag,84.03,Kulfi,1.95,Gulaab Jamun,1.41,Aloo Samosa,1.38,White Chicken Pulao,1.35
-Saag,7,Screenshot 2025-12-12 035512.png,Saag,79.28,✓,Saag,79.28,Gulaab Jamun,4.33,White Chicken Pulao,2.26,Aloo Samosa,1.41,Kulfi,1.3
-Saag,8,Screenshot 2025-12-12 035519.png,Saag,76.76,✓,Saag,76.76,Jalebi,2.36,White Chicken Pulao,2.22,Paratha,1.59,Gulaab Jamun,1.52
-Saag,9,Screenshot 2025-12-12 035555.png,Saag,55.15,✓,Saag,55.15,Jalebi,15.51,Nihari,5.46,Zarda,3.36,Gajar ka Halwa,3.13
-Saag,10,Screenshot 2025-12-12 035624.png,Saag,41.15,✓,Saag,41.15,Haleem,35.0,Jalebi,3.28,Nihari,2.98,Gajar ka Halwa,2.69
-Saag,11,Screenshot 2025-12-12 035642.png,Saag,84.28,✓,Saag,84.28,Paratha,1.77,Kulfi,1.6,Jalebi,1.43,Haleem,1.4
-Kheer,1,Screenshot 2025-12-12 040614.png,Kheer,39.32,✓,Kheer,39.32,White Chicken Pulao,30.13,Zarda,4.13,Kulfi,4.13,Aloo Samosa,2.36
-Kheer,2,Screenshot 2025-12-12 040629.png,Kheer,63.94,✓,Kheer,63.94,White Chicken Pulao,10.66,Aloo Samosa,3.81,Pakora,2.02,Nihari,1.82
-Kheer,3,Screenshot 2025-12-12 040653.png,Kheer,67.18,✓,Kheer,67.18,Pakora,3.02,Aloo Samosa,3.0,Gulaab Jamun,2.96,Nihari,2.35
-Kheer,4,Screenshot 2025-12-12 040711.png,Kheer,80.5,✓,Kheer,80.5,Zarda,3.53,White Chicken Pulao,2.48,Kulfi,1.7,Paratha,1.61
-Kheer,5,Screenshot 2025-12-12 040740.png,Kheer,76.87,✓,Kheer,76.87,White Chicken Pulao,2.2,Gulaab Jamun,2.2,Paratha,1.88,Aloo Samosa,1.48
-Kheer,6,Screenshot 2025-12-12 040800.png,Kheer,75.38,✓,Kheer,75.38,Gulaab Jamun,3.34,Pakora,2.55,Aloo Samosa,2.53,Kulfi,1.91
-Kheer,7,Screenshot 2025-12-12 040816.png,Kheer,81.38,✓,Kheer,81.38,Aloo Samosa,1.62,Gulaab Jamun,1.52,Saag,1.31,Nihari,1.29
-Kheer,8,Screenshot 2025-12-12 040839.png,Kheer,77.97,✓,Kheer,77.97,Kulfi,4.16,Zarda,3.7,Aloo Samosa,1.42,Pakora,1.3
-Kheer,9,Screenshot 2025-12-12 040905.png,Kheer,77.78,✓,Kheer,77.78,Dahi Baray,3.27,Saag,1.76,Nihari,1.53,Chicken Karahi,1.43
-Kheer,10,Screenshot 2025-12-12 040917.png,Kheer,61.98,✓,Kheer,61.98,Kulfi,6.45,Chapli Kebab,3.52,Aloo Samosa,3.0,Gulaab Jamun,2.48
-Kheer,11,Screenshot 2025-12-12 040943.png,Kheer,76.87,✓,Kheer,76.87,Paratha,2.5,Gulaab Jamun,1.68,Zarda,1.64,Chapli Kebab,1.62
-Gulaab Jamun,1,Screenshot 2025-12-12 034151.png,Gulaab Jamun,77.17,✓,Gulaab Jamun,77.17,Kheer,1.9,Kulfi,1.9,Seekh Kebab,1.89,Sajji,1.75
-Gulaab Jamun,2,Screenshot 2025-12-12 034208.png,Gulaab Jamun,43.52,✓,Gulaab Jamun,43.52,Kulfi,21.26,Kheer,5.58,Pakora,3.11,Nihari,2.96
-Gulaab Jamun,3,Screenshot 2025-12-12 034252.png,Gulaab Jamun,78.61,✓,Gulaab Jamun,78.61,Seekh Kebab,1.64,Aloo Samosa,1.53,Chana Chaat,1.52,Haleem,1.41
-Gulaab Jamun,4,Screenshot 2025-12-12 034310.png,Gulaab Jamun,87.67,✓,Gulaab Jamun,87.67,Saag,1.05,Seekh Kebab,0.96,Kulfi,0.93,Chicken Karahi,0.77
-Gulaab Jamun,5,Screenshot 2025-12-12 034426.png,Gulaab Jamun,73.5,✓,Gulaab Jamun,73.5,Gajar ka Halwa,3.75,Aloo Samosa,3.36,Seekh Kebab,3.15,Jalebi,2.9
-Gulaab Jamun,6,Screenshot 2025-12-12 034438.png,Gulaab Jamun,82.18,✓,Gulaab Jamun,82.18,Aloo Samosa,1.99,Seekh Kebab,1.27,Paratha,1.11,Nihari,1.11
-Gulaab Jamun,7,Screenshot 2025-12-12 034459.png,Gulaab Jamun,79.44,✓,Gulaab Jamun,79.44,Jalebi,1.8,Seekh Kebab,1.68,Kulfi,1.36,Kheer,1.36
-Gulaab Jamun,8,Screenshot 2025-12-12 034527.png,Gulaab Jamun,87.72,✓,Gulaab Jamun,87.72,Kulfi,1.17,White Chicken Pulao,0.93,Seekh Kebab,0.82,Aloo Samosa,0.8
-Gulaab Jamun,9,Screenshot 2025-12-12 034539.png,Gulaab Jamun,55.36,✓,Gulaab Jamun,55.36,Jalebi,27.34,Aloo Samosa,4.51,Gajar ka Halwa,3.26,Seekh Kebab,0.98
-Gulaab Jamun,10,Screenshot 2025-12-12 034557.png,Gulaab Jamun,81.36,✓,Gulaab Jamun,81.36,Kulfi,3.07,Jalebi,1.3,Seekh Kebab,1.1,Gajar ka Halwa,1.1
-Gulaab Jamun,11,Screenshot 2025-12-12 034613.png,Gulaab Jamun,86.7,✓,Gulaab Jamun,86.7,Saag,2.37,Kheer,1.78,Nihari,0.74,Seekh Kebab,0.69
-Chana Chaat,1,Screenshot 2025-12-12 035830.png,Chana Chaat,71.14,✓,Chana Chaat,71.14,Pakora,5.23,Seekh Kebab,2.86,White Chicken Pulao,1.96,Aloo Samosa,1.93
-Chana Chaat,2,Screenshot 2025-12-12 035846.png,Chana Chaat,70.07,✓,Chana Chaat,70.07,Saag,2.88,Gulaab Jamun,2.53,Gajar ka Halwa,2.34,Nihari,2.31
-Chana Chaat,3,Screenshot 2025-12-12 035924.png,Chana Chaat,69.55,✓,Chana Chaat,69.55,Gulaab Jamun,13.17,Kheer,1.93,Zarda,1.92,Paratha,1.79
-Chana Chaat,4,Screenshot 2025-12-12 035955.png,Zarda,31.3,✗,Zarda,31.3,Chana Chaat,31.02,Kulfi,9.8,Pakora,4.25,White Chicken Pulao,2.91
-Chana Chaat,5,Screenshot 2025-12-12 040018.png,Chana Chaat,70.2,✓,Chana Chaat,70.2,Gulaab Jamun,2.69,Chapli Kebab,2.55,Kulfi,2.53,Aloo Samosa,2.47
-Chana Chaat,6,Screenshot 2025-12-12 040027.png,Chana Chaat,62.9,✓,Chana Chaat,62.9,Saag,7.18,Gulaab Jamun,5.16,Seekh Kebab,2.75,Kheer,2.16
-Chana Chaat,7,Screenshot 2025-12-12 040036.png,Chana Chaat,45.22,✓,Chana Chaat,45.22,Chicken Karahi,11.28,Jalebi,9.99,Gulaab Jamun,6.83,Gajar ka Halwa,6.16
-Chana Chaat,8,Screenshot 2025-12-12 040046.png,Chana Chaat,67.78,✓,Chana Chaat,67.78,Seekh Kebab,4.44,Chicken Karahi,3.92,Jalebi,2.55,Nihari,2.18
-Chana Chaat,9,Screenshot 2025-12-12 040155.png,Chana Chaat,39.25,✓,Chana Chaat,39.25,Jalebi,20.83,Haleem,11.13,Zarda,4.7,Kulfi,2.81
-Chana Chaat,10,Screenshot 2025-12-12 040207.png,Chana Chaat,38.36,✓,Chana Chaat,38.36,Jalebi,14.72,Kulfi,6.44,Aloo Samosa,6.0,Haleem,5.78
-Chana Chaat,11,Screenshot 2025-12-12 040219.png,Chana Chaat,51.47,✓,Chana Chaat,51.47,Nihari,4.94,Gulaab Jamun,4.92,Kheer,3.66,Haleem,3.36
-Chana Chaat,12,Screenshot 2025-12-12 040248.png,Chana Chaat,74.76,✓,Chana Chaat,74.76,Gulaab Jamun,3.25,Kulfi,2.45,Paratha,1.93,Aloo Samosa,1.78
-Chana Chaat,13,Screenshot 2025-12-12 040319.png,Chana Chaat,57.61,✓,Chana Chaat,57.61,Jalebi,7.73,Haleem,5.63,Gulaab Jamun,3.52,Aloo Samosa,2.85
-Chapli Kebab,1,Screenshot 2025-12-12 041208.png,Pakora,42.21,✗,Pakora,42.21,Chapli Kebab,38.06,Gulaab Jamun,4.06,Kulfi,1.46,Gajar ka Halwa,1.42
-Chapli Kebab,2,Screenshot 2025-12-12 041221.png,Chapli Kebab,54.95,✓,Chapli Kebab,54.95,Saag,10.31,Paratha,4.46,Chana Chaat,3.91,Gulaab Jamun,3.28
-Chapli Kebab,3,Screenshot 2025-12-12 041235.png,Chapli Kebab,31.36,✓,Chapli Kebab,31.36,Kulfi,12.92,Aloo Samosa,9.51,Gajar ka Halwa,9.26,Saag,6.59
-Chapli Kebab,4,Screenshot 2025-12-12 041303.png,Chapli Kebab,68.74,✓,Chapli Kebab,68.74,Seekh Kebab,3.51,Saag,3.06,Gulaab Jamun,2.77,Paratha,2.59
-Chapli Kebab,5,Screenshot 2025-12-12 041317.png,Chapli Kebab,68.25,✓,Chapli Kebab,68.25,Chana Chaat,4.34,Seekh Kebab,3.36,Kulfi,2.23,Aloo Samosa,2.09
-Chapli Kebab,6,Screenshot 2025-12-12 041335.png,Chapli Kebab,65.34,✓,Chapli Kebab,65.34,Kulfi,2.62,Chana Chaat,2.56,Seekh Kebab,2.34,Haleem,2.29
-Chapli Kebab,7,Screenshot 2025-12-12 041353.png,Chapli Kebab,71.43,✓,Chapli Kebab,71.43,Haleem,2.54,Kulfi,2.35,Chana Chaat,1.83,Gulaab Jamun,1.81
-Chapli Kebab,8,Screenshot 2025-12-12 041406.png,Chapli Kebab,54.84,✓,Chapli Kebab,54.84,Gulaab Jamun,4.23,Chana Chaat,3.61,Kulfi,3.42,Aloo Samosa,3.4
-Chapli Kebab,9,Screenshot 2025-12-12 041442.png,Chapli Kebab,87.01,✓,Chapli Kebab,87.01,Pakora,2.92,Kulfi,1.06,Paratha,0.87,Gulaab Jamun,0.87
-Chapli Kebab,10,Screenshot 2025-12-12 041612.png,Chapli Kebab,40.48,✓,Chapli Kebab,40.48,Kulfi,18.07,Kheer,12.54,Gulaab Jamun,10.2,Pakora,4.03
-Chapli Kebab,11,Screenshot 2025-12-12 041636.png,Chapli Kebab,33.11,✓,Chapli Kebab,33.11,Seekh Kebab,32.87,Pakora,6.2,Aloo Samosa,4.05,Chicken Karahi,4.05
-Sajji,1,image.png,Sajji,36.14,✓,Sajji,36.14,Gajar ka Halwa,24.21,Aloo Samosa,6.0,Pakora,5.54,Seekh Kebab,4.34
-Sajji,2,image10.png,Sajji,62.88,✓,Sajji,62.88,Pakora,12.74,Aloo Samosa,4.71,Jalebi,3.25,Chicken Biryani,2.26
-Sajji,3,image2.png,Sajji,33.81,✓,Sajji,33.81,Chicken Biryani,24.78,White Chicken Pulao,9.52,Gulaab Jamun,4.23,Pakora,3.44
-Sajji,4,image3.png,Sajji,73.65,✓,Sajji,73.65,Chana Chaat,2.26,Chicken Biryani,2.13,Gulaab Jamun,1.86,Pakora,1.79
-Sajji,5,image4.png,Sajji,68.24,✓,Sajji,68.24,Aloo Samosa,6.24,Seekh Kebab,5.28,Gajar ka Halwa,3.02,Kulfi,3.01
-Sajji,6,image5.png,Sajji,61.33,✓,Sajji,61.33,Pakora,10.72,Jalebi,6.7,Kulfi,2.48,Seekh Kebab,2.41
-Sajji,7,image6.png,Sajji,50.13,✓,Sajji,50.13,Aloo Samosa,14.64,Pakora,5.53,Chapli Kebab,3.91,Gajar ka Halwa,3.79
-Sajji,8,image7.png,Aloo Samosa,34.19,✗,Aloo Samosa,34.19,Sajji,19.31,Chicken Karahi,11.77,Pakora,6.0,Jalebi,4.06
-Sajji,9,image8.png,Zarda,47.24,✗,Zarda,47.24,Chapli Kebab,11.61,Chicken Biryani,8.65,Gulaab Jamun,4.75,Sajji,3.59
-Sajji,10,image9.png,White Chicken Pulao,40.64,✗,White Chicken Pulao,40.64,Aloo Samosa,25.77,Sajji,12.9,Pakora,4.7,Chicken Biryani,2.23
-Dahi Baray,1,Screenshot 2025-12-16 203907.png,Dahi Baray,72.37,✓,Dahi Baray,72.37,Kulfi,3.91,White Chicken Pulao,2.14,Gulaab Jamun,1.9,Aloo Samosa,1.87
-Dahi Baray,2,Screenshot 2025-12-16 204011.png,Dahi Baray,73.27,✓,Dahi Baray,73.27,Gulaab Jamun,2.41,Pakora,2.3,Nihari,2.28,Aloo Samosa,1.85
-Dahi Baray,3,Screenshot 2025-12-16 204029.png,Dahi Baray,73.04,✓,Dahi Baray,73.04,Gulaab Jamun,2.52,Nihari,2.25,Paratha,2.03,Kheer,1.82
-Dahi Baray,4,Screenshot 2025-12-16 204102.png,Dahi Baray,76.17,✓,Dahi Baray,76.17,Pakora,3.02,Aloo Samosa,2.12,Gulaab Jamun,1.93,Seekh Kebab,1.73
-Dahi Baray,5,Screenshot 2025-12-16 204144.png,Dahi Baray,74.84,✓,Dahi Baray,74.84,Gulaab Jamun,3.99,Pakora,1.93,Nihari,1.63,Aloo Samosa,1.57
-Dahi Baray,6,Screenshot 2025-12-16 204250.png,Dahi Baray,80.58,✓,Dahi Baray,80.58,Kheer,3.61,Gulaab Jamun,2.62,Nihari,1.57,Saag,1.56
-Dahi Baray,7,Screenshot 2025-12-16 204454.png,Dahi Baray,25.98,✓,Dahi Baray,25.98,Chicken Karahi,19.84,Chana Chaat,14.37,Haleem,4.52,Chicken Biryani,4.36
-Dahi Baray,8,Screenshot 2025-12-16 204533.png,Dahi Baray,76.54,✓,Dahi Baray,76.54,Kulfi,4.83,Gulaab Jamun,4.62,Seekh Kebab,2.2,Jalebi,1.17
-Dahi Baray,9,Screenshot 2025-12-16 204601.png,Dahi Baray,65.57,✓,Dahi Baray,65.57,Gulaab Jamun,3.25,Pakora,3.18,Saag,2.34,Kulfi,2.3
-Seekh Kebab,1,Screenshot 2025-12-16 204633.png,Seekh Kebab,35.95,✓,Seekh Kebab,35.95,Chapli Kebab,34.63,Saag,2.39,Kulfi,2.37,Aloo Samosa,2.3
-Seekh Kebab,2,Screenshot 2025-12-16 204651.png,Seekh Kebab,58.98,✓,Seekh Kebab,58.98,Chana Chaat,15.45,Kheer,3.65,Sajji,2.84,Aloo Samosa,2.09
-Seekh Kebab,3,Screenshot 2025-12-16 204709.png,Seekh Kebab,84.54,✓,Seekh Kebab,84.54,Paratha,3.35,Chapli Kebab,2.31,Gulaab Jamun,1.9,Chana Chaat,1.1
-Seekh Kebab,4,Screenshot 2025-12-16 204720.png,Seekh Kebab,78.99,✓,Seekh Kebab,78.99,Gulaab Jamun,3.66,Paratha,1.74,Jalebi,1.52,Sajji,1.45
-Seekh Kebab,5,Screenshot 2025-12-16 204733.png,Seekh Kebab,64.06,✓,Seekh Kebab,64.06,Kulfi,11.28,Paratha,3.64,Gulaab Jamun,2.28,Sajji,1.89
-Seekh Kebab,6,Screenshot 2025-12-16 204752.png,Seekh Kebab,69.27,✓,Seekh Kebab,69.27,Aloo Samosa,14.26,Gajar ka Halwa,2.2,Pakora,2.03,Jalebi,1.41
-Seekh Kebab,7,Screenshot 2025-12-16 204810.png,Seekh Kebab,49.26,✓,Seekh Kebab,49.26,Chapli Kebab,29.48,Gulaab Jamun,3.98,Kulfi,2.26,Aloo Samosa,2.0
-Seekh Kebab,8,Screenshot 2025-12-16 204846.png,Seekh Kebab,58.22,✓,Seekh Kebab,58.22,Aloo Samosa,5.94,Gulaab Jamun,3.22,Jalebi,2.99,Saag,2.97
-Seekh Kebab,9,Screenshot 2025-12-16 204902.png,Seekh Kebab,81.89,✓,Seekh Kebab,81.89,Aloo Samosa,1.99,Chicken Karahi,1.59,Gulaab Jamun,1.52,Pakora,1.46
-Jalebi,1,Screenshot 2025-12-16 204956.png,Jalebi,78.94,✓,Jalebi,78.94,Gulaab Jamun,2.72,Kulfi,1.84,Paratha,1.43,Dahi Baray,1.35
-Jalebi,2,Screenshot 2025-12-16 205026.png,Jalebi,77.17,✓,Jalebi,77.17,Dahi Baray,2.6,Nihari,2.01,Gulaab Jamun,1.89,Saag,1.77
-Jalebi,3,Screenshot 2025-12-16 205046.png,Jalebi,76.68,✓,Jalebi,76.68,Aloo Samosa,3.43,White Chicken Pulao,2.65,Gulaab Jamun,2.06,Seekh Kebab,1.83
-Jalebi,4,Screenshot 2025-12-16 205115.png,Jalebi,71.13,✓,Jalebi,71.13,Gulaab Jamun,3.58,Saag,2.64,Paratha,2.21,Haleem,1.86
-Jalebi,5,Screenshot 2025-12-16 205132.png,Jalebi,73.56,✓,Jalebi,73.56,Gulaab Jamun,3.69,Paratha,2.56,Aloo Samosa,2.42,White Chicken Pulao,1.93
-Jalebi,6,Screenshot 2025-12-16 205154.png,Jalebi,80.19,✓,Jalebi,80.19,Gulaab Jamun,2.05,Kulfi,1.82,Aloo Samosa,1.76,Paratha,1.33
-Jalebi,7,Screenshot 2025-12-16 205213.png,Jalebi,84.76,✓,Jalebi,84.76,White Chicken Pulao,3.03,Aloo Samosa,1.94,Kulfi,1.0,Haleem,0.96
-Jalebi,8,Screenshot 2025-12-16 205232.png,Jalebi,80.89,✓,Jalebi,80.89,Gulaab Jamun,3.99,Paratha,2.16,Aloo Samosa,1.86,Haleem,1.16
-Jalebi,9,Screenshot 2025-12-16 205511.png,Jalebi,72.22,✓,Jalebi,72.22,Gulaab Jamun,3.1,Paratha,2.59,Saag,2.38,Kheer,1.84
-Jalebi,10,Screenshot 2025-12-16 205614.png,Jalebi,80.25,✓,Jalebi,80.25,Aloo Samosa,1.69,Haleem,1.66,Chapli Kebab,1.55,Paratha,1.51
-Gajar ka Halwa,1,Screenshot 2025-12-16 205746.png,Gajar ka Halwa,75.25,✓,Gajar ka Halwa,75.25,Dahi Baray,2.56,Gulaab Jamun,2.22,Seekh Kebab,1.77,Aloo Samosa,1.61
-Gajar ka Halwa,2,Screenshot 2025-12-16 205821.png,Gajar ka Halwa,71.23,✓,Gajar ka Halwa,71.23,Gulaab Jamun,5.27,Chana Chaat,3.96,Paratha,2.04,Kheer,1.61
-Gajar ka Halwa,3,Screenshot 2025-12-16 205900.png,Gajar ka Halwa,76.03,✓,Gajar ka Halwa,76.03,Gulaab Jamun,2.35,Aloo Samosa,2.19,Pakora,2.16,Seekh Kebab,1.91
-Gajar ka Halwa,4,Screenshot 2025-12-16 205918.png,Gajar ka Halwa,58.56,✓,Gajar ka Halwa,58.56,Kheer,5.25,Gulaab Jamun,4.49,Seekh Kebab,3.19,Aloo Samosa,3.15
-Gajar ka Halwa,5,Screenshot 2025-12-16 210006.png,Gajar ka Halwa,70.15,✓,Gajar ka Halwa,70.15,Gulaab Jamun,3.24,Aloo Samosa,2.45,Pakora,2.09,Seekh Kebab,1.82
-Gajar ka Halwa,6,Screenshot 2025-12-16 210034.png,Gajar ka Halwa,45.3,✓,Gajar ka Halwa,45.3,Zarda,19.89,Gulaab Jamun,4.78,Chana Chaat,3.23,Dahi Baray,2.97
-Gajar ka Halwa,7,Screenshot 2025-12-16 210057.png,Gajar ka Halwa,78.43,✓,Gajar ka Halwa,78.43,Gulaab Jamun,2.66,Seekh Kebab,2.18,Chana Chaat,2.13,Chicken Karahi,1.76
-Gajar ka Halwa,8,Screenshot 2025-12-16 210139.png,Gajar ka Halwa,86.12,✓,Gajar ka Halwa,86.12,Gulaab Jamun,1.48,Chana Chaat,1.27,Nihari,1.13,Jalebi,1.05
-Gajar ka Halwa,9,Screenshot 2025-12-16 210210.png,Gajar ka Halwa,65.96,✓,Gajar ka Halwa,65.96,Gulaab Jamun,7.17,Zarda,2.93,Saag,2.88,Haleem,2.6
-Gajar ka Halwa,10,Screenshot 2025-12-16 210234.png,Gajar ka Halwa,53.95,✓,Gajar ka Halwa,53.95,Haleem,7.85,Zarda,7.45,Gulaab Jamun,4.75,Kulfi,4.7
-Kulfi,1,Screenshot 2025-12-16 210333.png,Kulfi,81.64,✓,Kulfi,81.64,Gulaab Jamun,2.25,Jalebi,1.45,Saag,1.36,Seekh Kebab,1.23
-Kulfi,2,Screenshot 2025-12-16 210402.png,Kulfi,78.79,✓,Kulfi,78.79,Aloo Samosa,2.61,Gulaab Jamun,1.63,Seekh Kebab,1.4,Pakora,1.25
-Kulfi,3,Screenshot 2025-12-16 210430.png,Kulfi,65.4,✓,Kulfi,65.4,Haleem,2.74,Nihari,2.33,Seekh Kebab,2.3,Paratha,2.21
-Kulfi,4,Screenshot 2025-12-16 210442.png,Kulfi,76.05,✓,Kulfi,76.05,Sajji,3.78,Saag,2.17,Gulaab Jamun,1.85,Haleem,1.68
-Kulfi,5,Screenshot 2025-12-16 210501.png,Kulfi,73.58,✓,Kulfi,73.58,Seekh Kebab,2.95,Gulaab Jamun,2.27,Sajji,2.22,Chapli Kebab,2.04
-Kulfi,6,Screenshot 2025-12-16 210549.png,Kulfi,72.49,✓,Kulfi,72.49,Chana Chaat,2.46,Gulaab Jamun,2.07,Kheer,2.0,Haleem,1.98
-Kulfi,7,Screenshot 2025-12-16 210703.png,Kulfi,58.49,✓,Kulfi,58.49,Gulaab Jamun,4.62,Paratha,4.06,Chapli Kebab,3.24,Saag,3.1
-Kulfi,8,Screenshot 2025-12-16 210732.png,Kulfi,75.78,✓,Kulfi,75.78,Gulaab Jamun,2.8,Chapli Kebab,2.07,Paratha,1.69,Haleem,1.55
-Kulfi,9,Screenshot 2025-12-16 210751.png,Kulfi,75.84,✓,Kulfi,75.84,Aloo Samosa,5.63,Gulaab Jamun,3.16,Paratha,1.82,Saag,1.52
-Kulfi,10,Screenshot 2025-12-16 210838.png,Kulfi,64.76,✓,Kulfi,64.76,Gulaab Jamun,3.76,Paratha,3.28,Pakora,2.84,Kheer,2.52
-Kulfi,11,Screenshot 2025-12-16 210913.png,Kulfi,74.0,✓,Kulfi,74.0,Gulaab Jamun,2.51,Pakora,1.96,Haleem,1.77,Jalebi,1.66
-Paratha,1,Screenshot 2025-12-16 210944.png,Paratha,73.74,✓,Paratha,73.74,White Chicken Pulao,2.06,Gulaab Jamun,2.02,Jalebi,1.81,Kulfi,1.76
-Paratha,2,Screenshot 2025-12-16 211017.png,Paratha,83.99,✓,Paratha,83.99,Aloo Samosa,2.38,Seekh Kebab,2.28,Dahi Baray,1.34,Gulaab Jamun,1.28
-Paratha,3,Screenshot 2025-12-16 211035.png,Paratha,85.69,✓,Paratha,85.69,Haleem,3.58,Gulaab Jamun,1.08,Gajar ka Halwa,0.77,Aloo Samosa,0.76
-Paratha,4,Screenshot 2025-12-16 211057.png,Paratha,80.47,✓,Paratha,80.47,Jalebi,8.6,Gulaab Jamun,1.66,Gajar ka Halwa,1.63,Kheer,0.88
-Paratha,5,Screenshot 2025-12-16 211114.png,Paratha,79.15,✓,Paratha,79.15,Aloo Samosa,2.81,Gulaab Jamun,1.84,Dahi Baray,1.59,Jalebi,1.54
-Paratha,6,Screenshot 2025-12-16 211130.png,Paratha,79.05,✓,Paratha,79.05,Kheer,2.3,Kulfi,1.73,Gulaab Jamun,1.62,Dahi Baray,1.39
-Paratha,7,Screenshot 2025-12-16 211200.png,Paratha,80.46,✓,Paratha,80.46,Gulaab Jamun,2.59,Jalebi,2.19,Kulfi,1.89,Aloo Samosa,1.34
-Paratha,8,Screenshot 2025-12-16 211218.png,Paratha,38.14,✓,Paratha,38.14,Kheer,11.59,Dahi Baray,9.05,Kulfi,8.64,White Chicken Pulao,5.71
-Paratha,9,Screenshot 2025-12-16 211258.png,Paratha,76.54,✓,Paratha,76.54,Jalebi,3.37,Aloo Samosa,2.03,Kulfi,1.8,Gulaab Jamun,1.76
-Paratha,10,Screenshot 2025-12-16 211321.png,Paratha,72.19,✓,Paratha,72.19,Kulfi,2.54,Aloo Samosa,2.52,Zarda,2.24,Haleem,2.1
-Zarda,1,Screenshot 2025-12-16 211611.png,Zarda,61.86,✓,Zarda,61.86,Pakora,8.48,White Chicken Pulao,6.79,Aloo Samosa,2.73,Gulaab Jamun,2.11
-Zarda,2,Screenshot 2025-12-16 212002.png,Zarda,56.84,✓,Zarda,56.84,Kheer,16.03,Dahi Baray,3.85,Gulaab Jamun,2.26,Kulfi,2.22
-Zarda,3,Screenshot 2025-12-16 212018.png,Zarda,59.41,✓,Zarda,59.41,White Chicken Pulao,10.61,Gulaab Jamun,4.25,Kheer,4.02,Chana Chaat,2.78
-Zarda,4,Screenshot 2025-12-16 212042.png,Zarda,41.18,✓,Zarda,41.18,White Chicken Pulao,27.84,Gulaab Jamun,6.55,Dahi Baray,3.02,Kheer,2.36
-Zarda,5,Screenshot 2025-12-16 212146.png,Zarda,64.43,✓,Zarda,64.43,Jalebi,4.47,Gulaab Jamun,3.1,Kheer,2.92,Kulfi,2.8
-Zarda,6,Screenshot 2025-12-16 212249.png,Zarda,48.13,✓,Zarda,48.13,Dahi Baray,9.9,Gajar ka Halwa,7.96,Chana Chaat,4.74,Gulaab Jamun,4.12
-Zarda,7,Screenshot 2025-12-16 212328.png,Zarda,49.32,✓,Zarda,49.32,White Chicken Pulao,13.08,Kheer,3.82,Gulaab Jamun,3.43,Aloo Samosa,3.39
-Zarda,8,Screenshot 2025-12-16 212412.png,Zarda,69.84,✓,Zarda,69.84,Gulaab Jamun,3.59,Kheer,2.54,Aloo Samosa,2.36,Dahi Baray,1.86
-Zarda,9,Screenshot 2025-12-16 212501.png,Zarda,61.93,✓,Zarda,61.93,Kheer,3.78,Chana Chaat,3.72,Gulaab Jamun,3.19,Chapli Kebab,2.73
-Zarda,10,Screenshot 2025-12-16 212542.png,Zarda,36.12,✓,Zarda,36.12,White Chicken Pulao,26.95,Kheer,9.8,Gulaab Jamun,8.59,Chana Chaat,4.47
+Chicken Biryani,1,image 1.png,Chicken Biryani,24.03,✓,Chicken Biryani,24.03,Zarda,20.22,White Chicken Pulao,11.38,Chana Chaat,7.74,Gulaab Jamun,4.94
+Chicken Biryani,2,image 10.png,Zarda,31.2,✗,Zarda,31.2,Chicken Biryani,17.96,Pakora,10.21,Chana Chaat,7.38,White Chicken Pulao,4.5
+Chicken Biryani,3,image 2.png,Chicken Biryani,28.81,✓,Chicken Biryani,28.81,Paratha,14.8,Zarda,12.61,White Chicken Pulao,6.21,Kulfi,5.17
+Chicken Biryani,4,image 3.png,Chicken Biryani,70.68,✓,Chicken Biryani,70.68,Pakora,6.28,Chana Chaat,3.41,Gulaab Jamun,2.95,Chicken Karahi,2.0
+Chicken Biryani,5,image 4.png,Chicken Biryani,24.48,✓,Chicken Biryani,24.48,Gajar ka Halwa,19.31,Sajji,11.02,Haleem,7.19,Chicken Karahi,6.44
+Chicken Biryani,6,image 5.png,Chicken Biryani,50.69,✓,Chicken Biryani,50.69,Zarda,17.77,Haleem,3.77,Gulaab Jamun,3.2,White Chicken Pulao,3.1
+Chicken Biryani,7,image 6.png,Chicken Biryani,66.7,✓,Chicken Biryani,66.7,Gulaab Jamun,4.3,Kulfi,2.46,Haleem,2.42,Paratha,2.4
+Chicken Biryani,8,image 7.png,Chicken Biryani,61.81,✓,Chicken Biryani,61.81,White Chicken Pulao,4.56,Gulaab Jamun,4.11,Kulfi,2.62,Pakora,2.5
+Chicken Biryani,9,image 8.png,White Chicken Pulao,21.65,✗,White Chicken Pulao,21.65,Chicken Biryani,18.81,Zarda,13.31,Pakora,6.35,Chana Chaat,5.35
+Chicken Biryani,10,image 9.png,Chicken Biryani,81.78,✓,Chicken Biryani,81.78,Kulfi,1.9,Gulaab Jamun,1.85,Kheer,1.65,Paratha,1.35
+Chicken Karahi,1,image 1.png,Chicken Karahi,66.85,✓,Chicken Karahi,66.85,Gajar ka Halwa,9.48,Pakora,8.82,Gulaab Jamun,1.79,Chicken Biryani,1.23
+Chicken Karahi,2,image 10.png,Chicken Karahi,49.13,✓,Chicken Karahi,49.13,Pakora,12.27,Nihari,6.2,Saag,4.94,Haleem,4.19
+Chicken Karahi,3,image 2.png,Chicken Karahi,65.15,✓,Chicken Karahi,65.15,Haleem,7.65,Gajar ka Halwa,4.12,Gulaab Jamun,2.11,Chana Chaat,2.09
+Chicken Karahi,4,image 3.png,Chicken Karahi,84.27,✓,Chicken Karahi,84.27,Jalebi,2.14,Pakora,1.79,White Chicken Pulao,1.22,Sajji,1.05
+Chicken Karahi,5,image 4.png,Chicken Karahi,71.26,✓,Chicken Karahi,71.26,Pakora,6.92,Gulaab Jamun,2.75,Jalebi,2.04,Haleem,1.52
+Chicken Karahi,6,image 5.png,Chicken Karahi,52.78,✓,Chicken Karahi,52.78,Nihari,16.12,Haleem,8.63,Gulaab Jamun,4.05,Chana Chaat,3.01
+Chicken Karahi,7,image 6.png,Chicken Karahi,56.44,✓,Chicken Karahi,56.44,Nihari,7.39,Gulaab Jamun,7.05,Gajar ka Halwa,5.15,Jalebi,4.06
+Chicken Karahi,8,image 7.png,Chicken Karahi,60.6,✓,Chicken Karahi,60.6,Aloo Samosa,4.64,White Chicken Pulao,3.99,Kulfi,3.73,Haleem,3.04
+Chicken Karahi,9,image 8.png,Chicken Karahi,78.39,✓,Chicken Karahi,78.39,Haleem,3.68,Gulaab Jamun,1.96,Chana Chaat,1.76,Jalebi,1.63
+Chicken Karahi,10,image 9.png,Nihari,49.98,✗,Nihari,49.98,Chicken Karahi,32.22,Haleem,3.05,Zarda,2.47,Pakora,1.98
+White Chicken Pulao,1,image 1.png,White Chicken Pulao,66.71,✓,White Chicken Pulao,66.71,Chana Chaat,2.91,Gulaab Jamun,2.81,Seekh Kebab,2.62,Saag,2.34
+White Chicken Pulao,2,image 10.png,White Chicken Pulao,60.58,✓,White Chicken Pulao,60.58,Saag,4.15,Jalebi,3.67,Gajar ka Halwa,3.58,Gulaab Jamun,2.91
+White Chicken Pulao,3,image 2.png,White Chicken Pulao,52.6,✓,White Chicken Pulao,52.6,Zarda,21.48,Jalebi,3.64,Paratha,3.5,Kheer,2.86
+White Chicken Pulao,4,image 3.png,White Chicken Pulao,51.32,✓,White Chicken Pulao,51.32,Zarda,6.11,Chana Chaat,4.32,Gajar ka Halwa,3.82,Gulaab Jamun,3.79
+White Chicken Pulao,5,image 4.png,White Chicken Pulao,81.12,✓,White Chicken Pulao,81.12,Saag,2.38,Chana Chaat,2.24,Gulaab Jamun,1.74,Chicken Karahi,1.56
+White Chicken Pulao,6,image 5.png,White Chicken Pulao,63.92,✓,White Chicken Pulao,63.92,Chana Chaat,6.68,Saag,4.05,Gajar ka Halwa,2.38,Aloo Samosa,2.16
+White Chicken Pulao,7,image 6.png,White Chicken Pulao,69.34,✓,White Chicken Pulao,69.34,Seekh Kebab,4.31,Chicken Karahi,3.63,Pakora,3.23,Zarda,2.46
+White Chicken Pulao,8,image 7.png,White Chicken Pulao,59.07,✓,White Chicken Pulao,59.07,Zarda,5.03,Gulaab Jamun,4.72,Aloo Samosa,3.37,Saag,2.78
+White Chicken Pulao,9,image 8.png,White Chicken Pulao,72.19,✓,White Chicken Pulao,72.19,Saag,4.06,Gajar ka Halwa,3.51,Zarda,3.1,Kulfi,2.32
+White Chicken Pulao,10,image 9.png,White Chicken Pulao,44.31,✓,White Chicken Pulao,44.31,Kulfi,10.31,Chicken Biryani,8.07,Zarda,4.76,Haleem,3.9
+Nihari,1,image 1.png,Nihari,60.07,✓,Nihari,60.07,Jalebi,5.46,Haleem,4.07,Gajar ka Halwa,3.32,Saag,3.06
+Nihari,2,image 10.png,Nihari,73.14,✓,Nihari,73.14,Gulaab Jamun,2.9,Zarda,2.86,Aloo Samosa,1.91,Jalebi,1.9
+Nihari,3,image 2.png,Gulaab Jamun,22.88,✗,Gulaab Jamun,22.88,Nihari,20.76,Kulfi,20.31,Jalebi,9.23,Saag,4.16
+Nihari,4,image 3.png,Nihari,48.8,✓,Nihari,48.8,Gulaab Jamun,9.47,Jalebi,4.45,Kheer,4.4,Saag,3.67
+Nihari,5,image 4.png,Nihari,69.39,✓,Nihari,69.39,Jalebi,5.45,Kulfi,4.47,Sajji,3.89,Haleem,3.35
+Nihari,6,image 5.png,Nihari,68.6,✓,Nihari,68.6,Jalebi,5.19,Saag,4.19,Haleem,3.68,Gajar ka Halwa,3.42
+Nihari,7,image 6.png,Nihari,66.98,✓,Nihari,66.98,Gulaab Jamun,4.07,Chicken Karahi,3.99,Jalebi,2.53,Aloo Samosa,2.49
+Nihari,8,image 7.png,Nihari,43.85,✓,Nihari,43.85,Kheer,11.06,Gulaab Jamun,9.68,Gajar ka Halwa,7.31,Chana Chaat,6.55
+Nihari,9,image 8.png,Nihari,80.71,✓,Nihari,80.71,Kulfi,3.35,Saag,1.74,Seekh Kebab,1.47,Gulaab Jamun,1.39
+Nihari,10,image 9.png,Nihari,67.96,✓,Nihari,67.96,Haleem,3.79,Saag,2.81,Gulaab Jamun,2.33,Pakora,2.23
+Haleem,1,image 1.png,Kheer,48.81,✗,Kheer,48.81,Haleem,22.19,Saag,6.25,Nihari,2.44,Pakora,2.42
+Haleem,2,image 10.png,Kheer,33.8,✗,Kheer,33.8,Haleem,26.0,Chicken Karahi,4.99,White Chicken Pulao,4.97,Zarda,3.76
+Haleem,3,image 2.png,Haleem,91.43,✓,Haleem,91.43,Paratha,1.09,Saag,0.78,Gulaab Jamun,0.75,White Chicken Pulao,0.67
+Haleem,4,image 3.png,Haleem,68.55,✓,Haleem,68.55,Nihari,10.42,Zarda,3.0,Jalebi,2.63,Gulaab Jamun,1.68
+Haleem,5,image 4.png,Haleem,67.12,✓,Haleem,67.12,Saag,14.11,Gajar ka Halwa,3.04,Chana Chaat,2.71,Aloo Samosa,1.66
+Haleem,6,image 5.png,Haleem,73.93,✓,Haleem,73.93,Aloo Samosa,7.09,Kulfi,3.11,Jalebi,2.39,Chicken Karahi,2.06
+Haleem,7,image 6.png,Saag,25.79,✗,Saag,25.79,Kheer,19.44,Haleem,13.9,Paratha,10.2,Jalebi,5.81
+Haleem,8,image 7.png,Haleem,83.86,✓,Haleem,83.86,Paratha,2.02,Gajar ka Halwa,1.12,Aloo Samosa,1.1,Jalebi,1.08
+Haleem,9,image 8.png,Haleem,81.26,✓,Haleem,81.26,Nihari,5.79,Dahi Baray,2.22,Jalebi,1.59,Aloo Samosa,1.24
+Haleem,10,image 9.png,Haleem,83.36,✓,Haleem,83.36,Kheer,1.84,Pakora,1.44,Chana Chaat,1.35,Seekh Kebab,1.03
+Saag,1,Screenshot 2025-12-12 035230.png,Saag,82.11,✓,Saag,82.11,Paratha,2.19,Gulaab Jamun,1.99,Kheer,1.82,Kulfi,1.52
+Saag,2,Screenshot 2025-12-12 035316.png,Saag,71.76,✓,Saag,71.76,Kulfi,3.3,Paratha,3.08,Zarda,2.21,Gulaab Jamun,2.11
+Saag,3,Screenshot 2025-12-12 035351.png,Saag,78.34,✓,Saag,78.34,Jalebi,4.84,Gulaab Jamun,1.99,White Chicken Pulao,1.74,Nihari,1.45
+Saag,4,Screenshot 2025-12-12 035416.png,Gajar ka Halwa,30.73,✗,Gajar ka Halwa,30.73,Chapli Kebab,11.53,Zarda,10.82,Aloo Samosa,8.52,Jalebi,5.56
+Saag,5,Screenshot 2025-12-12 035427.png,Saag,80.94,✓,Saag,80.94,Kulfi,5.05,Gulaab Jamun,1.94,White Chicken Pulao,1.65,Paratha,1.47
+Saag,6,Screenshot 2025-12-12 035448.png,Saag,84.23,✓,Saag,84.23,Kulfi,1.9,White Chicken Pulao,1.43,Gulaab Jamun,1.4,Aloo Samosa,1.29
+Saag,7,Screenshot 2025-12-12 035512.png,Saag,80.93,✓,Saag,80.93,Gulaab Jamun,3.79,White Chicken Pulao,2.23,Nihari,1.33,Aloo Samosa,1.27
+Saag,8,Screenshot 2025-12-12 035519.png,Saag,76.86,✓,Saag,76.86,Jalebi,2.54,White Chicken Pulao,2.24,Paratha,1.65,Gulaab Jamun,1.5
+Saag,9,Screenshot 2025-12-12 035555.png,Saag,56.15,✓,Saag,56.15,Jalebi,15.55,Nihari,5.45,Zarda,3.1,Gajar ka Halwa,3.07
+Saag,10,Screenshot 2025-12-12 035624.png,Saag,44.85,✓,Saag,44.85,Haleem,31.51,Jalebi,3.31,Nihari,3.06,Gajar ka Halwa,2.62
+Saag,11,Screenshot 2025-12-12 035642.png,Saag,84.52,✓,Saag,84.52,Paratha,1.81,Kulfi,1.56,Jalebi,1.54,Haleem,1.33
+Kheer,1,Screenshot 2025-12-12 040614.png,Kheer,36.16,✓,Kheer,36.16,White Chicken Pulao,32.45,Zarda,4.66,Kulfi,4.42,Saag,2.46
+Kheer,2,Screenshot 2025-12-12 040629.png,Kheer,63.17,✓,Kheer,63.17,White Chicken Pulao,11.79,Aloo Samosa,3.49,Zarda,2.1,Pakora,1.96
+Kheer,3,Screenshot 2025-12-12 040653.png,Kheer,67.59,✓,Kheer,67.59,Gulaab Jamun,2.94,Pakora,2.88,Aloo Samosa,2.82,Kulfi,2.43
+Kheer,4,Screenshot 2025-12-12 040711.png,Kheer,80.12,✓,Kheer,80.12,Zarda,4.31,White Chicken Pulao,2.82,Kulfi,1.71,Paratha,1.66
+Kheer,5,Screenshot 2025-12-12 040740.png,Kheer,76.5,✓,Kheer,76.5,White Chicken Pulao,2.28,Gulaab Jamun,2.24,Paratha,1.97,Nihari,1.42
+Kheer,6,Screenshot 2025-12-12 040800.png,Kheer,76.76,✓,Kheer,76.76,Gulaab Jamun,3.03,Pakora,2.35,Aloo Samosa,2.27,Kulfi,1.84
+Kheer,7,Screenshot 2025-12-12 040816.png,Kheer,81.67,✓,Kheer,81.67,Gulaab Jamun,1.5,Aloo Samosa,1.46,Saag,1.3,Nihari,1.29
+Kheer,8,Screenshot 2025-12-12 040839.png,Kheer,77.38,✓,Kheer,77.38,Zarda,4.41,Kulfi,4.28,Aloo Samosa,1.37,White Chicken Pulao,1.29
+Kheer,9,Screenshot 2025-12-12 040905.png,Kheer,76.98,✓,Kheer,76.98,Dahi Baray,3.33,Saag,1.87,Nihari,1.62,Chicken Karahi,1.53
+Kheer,10,Screenshot 2025-12-12 040917.png,Kheer,62.3,✓,Kheer,62.3,Kulfi,6.35,Chapli Kebab,3.44,Aloo Samosa,2.82,Gulaab Jamun,2.44
+Kheer,11,Screenshot 2025-12-12 040943.png,Kheer,77.68,✓,Kheer,77.68,Paratha,2.54,Zarda,1.79,Gulaab Jamun,1.6,Chana Chaat,1.49
+Gulaab Jamun,1,Screenshot 2025-12-12 034151.png,Gulaab Jamun,76.98,✓,Gulaab Jamun,76.98,Kulfi,1.98,Sajji,1.9,Kheer,1.88,Seekh Kebab,1.86
+Gulaab Jamun,2,Screenshot 2025-12-12 034208.png,Gulaab Jamun,45.83,✓,Gulaab Jamun,45.83,Kulfi,21.14,Kheer,5.12,Nihari,2.94,Pakora,2.61
+Gulaab Jamun,3,Screenshot 2025-12-12 034252.png,Gulaab Jamun,79.83,✓,Gulaab Jamun,79.83,Seekh Kebab,1.61,Chana Chaat,1.41,Aloo Samosa,1.4,Haleem,1.32
+Gulaab Jamun,4,Screenshot 2025-12-12 034310.png,Gulaab Jamun,88.13,✓,Gulaab Jamun,88.13,Saag,0.99,Seekh Kebab,0.94,Kulfi,0.92,Kheer,0.77
+Gulaab Jamun,5,Screenshot 2025-12-12 034426.png,Gulaab Jamun,75.59,✓,Gulaab Jamun,75.59,Gajar ka Halwa,3.63,Seekh Kebab,2.94,Jalebi,2.83,Aloo Samosa,2.58
+Gulaab Jamun,6,Screenshot 2025-12-12 034438.png,Gulaab Jamun,82.12,✓,Gulaab Jamun,82.12,Aloo Samosa,1.98,Seekh Kebab,1.29,Paratha,1.13,Nihari,1.12
+Gulaab Jamun,7,Screenshot 2025-12-12 034459.png,Gulaab Jamun,79.45,✓,Gulaab Jamun,79.45,Jalebi,1.76,Seekh Kebab,1.69,Kulfi,1.46,Kheer,1.36
+Gulaab Jamun,8,Screenshot 2025-12-12 034527.png,Gulaab Jamun,87.9,✓,Gulaab Jamun,87.9,Kulfi,1.26,White Chicken Pulao,0.89,Seekh Kebab,0.82,Sajji,0.81
+Gulaab Jamun,9,Screenshot 2025-12-12 034539.png,Gulaab Jamun,54.77,✓,Gulaab Jamun,54.77,Jalebi,27.94,Aloo Samosa,3.81,Gajar ka Halwa,3.46,Sajji,1.07
+Gulaab Jamun,10,Screenshot 2025-12-12 034557.png,Gulaab Jamun,81.47,✓,Gulaab Jamun,81.47,Kulfi,3.13,Jalebi,1.22,Seekh Kebab,1.1,Aloo Samosa,1.08
+Gulaab Jamun,11,Screenshot 2025-12-12 034613.png,Gulaab Jamun,86.76,✓,Gulaab Jamun,86.76,Saag,2.33,Kheer,1.81,Nihari,0.76,Seekh Kebab,0.69
+Chana Chaat,1,Screenshot 2025-12-12 035830.png,Chana Chaat,70.91,✓,Chana Chaat,70.91,Pakora,4.8,Seekh Kebab,2.87,White Chicken Pulao,2.03,Saag,1.92
+Chana Chaat,2,Screenshot 2025-12-12 035846.png,Chana Chaat,69.94,✓,Chana Chaat,69.94,Saag,3.13,Gulaab Jamun,2.47,Gajar ka Halwa,2.46,Paratha,2.3
+Chana Chaat,3,Screenshot 2025-12-12 035924.png,Chana Chaat,70.74,✓,Chana Chaat,70.74,Gulaab Jamun,11.19,Kheer,2.03,Zarda,1.97,Paratha,1.86
+Chana Chaat,4,Screenshot 2025-12-12 035955.png,Zarda,33.16,✗,Zarda,33.16,Chana Chaat,29.92,Kulfi,9.35,Pakora,3.91,White Chicken Pulao,2.99
+Chana Chaat,5,Screenshot 2025-12-12 040018.png,Chana Chaat,69.02,✓,Chana Chaat,69.02,Gulaab Jamun,2.72,Chapli Kebab,2.66,Kulfi,2.57,Jalebi,2.53
+Chana Chaat,6,Screenshot 2025-12-12 040027.png,Chana Chaat,62.15,✓,Chana Chaat,62.15,Saag,7.27,Gulaab Jamun,5.2,Seekh Kebab,2.82,Chicken Karahi,2.17
+Chana Chaat,7,Screenshot 2025-12-12 040036.png,Chana Chaat,43.74,✓,Chana Chaat,43.74,Chicken Karahi,14.11,Jalebi,9.44,Gajar ka Halwa,6.61,Gulaab Jamun,6.41
+Chana Chaat,8,Screenshot 2025-12-12 040046.png,Chana Chaat,66.58,✓,Chana Chaat,66.58,Chicken Karahi,4.42,Seekh Kebab,4.4,Jalebi,2.65,Nihari,2.3
+Chana Chaat,9,Screenshot 2025-12-12 040155.png,Chana Chaat,36.66,✓,Chana Chaat,36.66,Jalebi,20.45,Haleem,12.61,Zarda,4.97,Kulfi,2.94
+Chana Chaat,10,Screenshot 2025-12-12 040207.png,Chana Chaat,37.87,✓,Chana Chaat,37.87,Jalebi,15.07,Kulfi,6.34,Haleem,6.31,Aloo Samosa,5.74
+Chana Chaat,11,Screenshot 2025-12-12 040219.png,Chana Chaat,50.25,✓,Chana Chaat,50.25,Nihari,5.14,Gulaab Jamun,4.77,Kheer,3.82,Haleem,3.52
+Chana Chaat,12,Screenshot 2025-12-12 040248.png,Chana Chaat,74.76,✓,Chana Chaat,74.76,Gulaab Jamun,3.19,Kulfi,2.31,Paratha,2.03,Aloo Samosa,1.74
+Chana Chaat,13,Screenshot 2025-12-12 040319.png,Chana Chaat,57.07,✓,Chana Chaat,57.07,Jalebi,7.24,Haleem,5.81,Gulaab Jamun,3.62,Aloo Samosa,2.76
+Chapli Kebab,1,Screenshot 2025-12-12 041208.png,Chapli Kebab,40.17,✓,Chapli Kebab,40.17,Pakora,39.82,Gulaab Jamun,4.17,Kulfi,1.48,Gajar ka Halwa,1.41
+Chapli Kebab,2,Screenshot 2025-12-12 041221.png,Chapli Kebab,57.48,✓,Chapli Kebab,57.48,Saag,10.25,Paratha,4.35,Chana Chaat,3.53,Gulaab Jamun,3.1
+Chapli Kebab,3,Screenshot 2025-12-12 041235.png,Chapli Kebab,33.45,✓,Chapli Kebab,33.45,Kulfi,14.32,Gajar ka Halwa,9.26,Aloo Samosa,7.96,Saag,6.5
+Chapli Kebab,4,Screenshot 2025-12-12 041303.png,Chapli Kebab,69.95,✓,Chapli Kebab,69.95,Seekh Kebab,3.34,Saag,2.93,Gulaab Jamun,2.63,Paratha,2.6
+Chapli Kebab,5,Screenshot 2025-12-12 041317.png,Chapli Kebab,69.04,✓,Chapli Kebab,69.04,Chana Chaat,4.26,Seekh Kebab,3.24,Kulfi,2.24,Aloo Samosa,2.0
+Chapli Kebab,6,Screenshot 2025-12-12 041335.png,Chapli Kebab,66.2,✓,Chapli Kebab,66.2,Kulfi,2.56,Chana Chaat,2.47,Seekh Kebab,2.31,Aloo Samosa,2.2
+Chapli Kebab,7,Screenshot 2025-12-12 041353.png,Chapli Kebab,72.43,✓,Chapli Kebab,72.43,Haleem,2.29,Kulfi,2.27,Chana Chaat,1.83,Gulaab Jamun,1.77
+Chapli Kebab,8,Screenshot 2025-12-12 041406.png,Chapli Kebab,55.12,✓,Chapli Kebab,55.12,Gulaab Jamun,4.24,Chana Chaat,3.62,Aloo Samosa,3.41,Kulfi,3.39
+Chapli Kebab,9,Screenshot 2025-12-12 041442.png,Chapli Kebab,87.93,✓,Chapli Kebab,87.93,Pakora,2.52,Kulfi,1.04,Paratha,0.85,Gulaab Jamun,0.84
+Chapli Kebab,10,Screenshot 2025-12-12 041612.png,Chapli Kebab,40.13,✓,Chapli Kebab,40.13,Kulfi,20.52,Kheer,11.65,Gulaab Jamun,9.81,Pakora,3.51
+Chapli Kebab,11,Screenshot 2025-12-12 041636.png,Chapli Kebab,36.9,✓,Chapli Kebab,36.9,Seekh Kebab,30.25,Pakora,6.14,Chicken Karahi,4.42,Aloo Samosa,3.38
+Sajji,1,image.png,Sajji,37.81,✓,Sajji,37.81,Gajar ka Halwa,24.93,Pakora,4.94,Aloo Samosa,4.75,Seekh Kebab,4.4
+Sajji,2,image10.png,Sajji,67.65,✓,Sajji,67.65,Pakora,10.96,Aloo Samosa,3.45,Jalebi,3.15,Chicken Biryani,1.97
+Sajji,3,image2.png,Sajji,31.61,✓,Sajji,31.61,Chicken Biryani,27.24,White Chicken Pulao,9.77,Gulaab Jamun,4.07,Chicken Karahi,3.42
+Sajji,4,image3.png,Sajji,75.42,✓,Sajji,75.42,Chana Chaat,2.11,Chicken Biryani,1.98,Gulaab Jamun,1.69,Zarda,1.63
+Sajji,5,image4.png,Sajji,72.15,✓,Sajji,72.15,Seekh Kebab,4.87,Aloo Samosa,4.7,Kulfi,2.9,Gajar ka Halwa,2.8
+Sajji,6,image5.png,Sajji,64.41,✓,Sajji,64.41,Pakora,9.83,Jalebi,6.27,Kulfi,2.43,Seekh Kebab,2.3
+Sajji,7,image6.png,Sajji,54.97,✓,Sajji,54.97,Aloo Samosa,11.77,Pakora,4.74,Chapli Kebab,3.76,Gajar ka Halwa,3.52
+Sajji,8,image7.png,Aloo Samosa,24.55,✗,Aloo Samosa,24.55,Sajji,23.7,Chicken Karahi,15.72,Pakora,6.77,Jalebi,4.86
+Sajji,9,image8.png,Zarda,47.56,✗,Zarda,47.56,Chapli Kebab,11.38,Chicken Biryani,8.81,Gulaab Jamun,4.38,Sajji,3.84
+Sajji,10,image9.png,White Chicken Pulao,42.75,✗,White Chicken Pulao,42.75,Aloo Samosa,20.98,Sajji,16.77,Pakora,4.67,Chicken Biryani,2.13
+Aloo Samosa,1,Screenshot 2025-12-16 202132.png,Aloo Samosa,39.33,✓,Aloo Samosa,39.33,Gulaab Jamun,32.78,Dahi Baray,5.91,Sajji,4.05,Kulfi,2.28
+Aloo Samosa,2,Screenshot 2025-12-16 202152.png,Aloo Samosa,78.08,✓,Aloo Samosa,78.08,Gulaab Jamun,3.08,Kulfi,2.78,Saag,2.12,Gajar ka Halwa,1.43
+Aloo Samosa,3,Screenshot 2025-12-16 202235.png,Aloo Samosa,71.57,✓,Aloo Samosa,71.57,Dahi Baray,5.57,White Chicken Pulao,3.04,Paratha,2.47,Kulfi,2.3
+Aloo Samosa,4,Screenshot 2025-12-16 202300.png,Aloo Samosa,82.58,✓,Aloo Samosa,82.58,Kulfi,2.44,Gulaab Jamun,2.17,Jalebi,1.38,Seekh Kebab,1.15
+Aloo Samosa,5,Screenshot 2025-12-16 202340.png,Aloo Samosa,42.58,✓,Aloo Samosa,42.58,Kulfi,32.67,Gajar ka Halwa,2.54,Jalebi,2.38,Kheer,2.21
+Aloo Samosa,6,Screenshot 2025-12-16 202412.png,Aloo Samosa,80.05,✓,Aloo Samosa,80.05,Kulfi,2.82,Haleem,2.79,Nihari,1.64,Kheer,1.61
+Aloo Samosa,7,Screenshot 2025-12-16 202449.png,Aloo Samosa,69.61,✓,Aloo Samosa,69.61,Gulaab Jamun,5.68,Kulfi,2.66,Gajar ka Halwa,2.38,Jalebi,2.16
+Aloo Samosa,8,Screenshot 2025-12-16 202533.png,Aloo Samosa,53.26,✓,Aloo Samosa,53.26,Pakora,12.92,Gulaab Jamun,6.85,Chana Chaat,4.6,Kulfi,4.17
+Aloo Samosa,9,Screenshot 2025-12-16 202606.png,Aloo Samosa,72.93,✓,Aloo Samosa,72.93,Gulaab Jamun,5.05,Kulfi,4.27,White Chicken Pulao,2.31,Sajji,1.87
+Aloo Samosa,10,Screenshot 2025-12-16 202644.png,Aloo Samosa,77.95,✓,Aloo Samosa,77.95,Gulaab Jamun,3.01,Nihari,1.75,Dahi Baray,1.36,White Chicken Pulao,1.34
+Pakora,1,Screenshot 2025-12-16 202753.png,Pakora,72.14,✓,Pakora,72.14,Paratha,2.87,Kulfi,2.3,Seekh Kebab,2.21,Kheer,2.1
+Pakora,2,Screenshot 2025-12-16 202837.png,Pakora,75.19,✓,Pakora,75.19,Gulaab Jamun,2.35,Kheer,1.89,Seekh Kebab,1.68,Haleem,1.59
+Pakora,3,Screenshot 2025-12-16 202859.png,Pakora,59.42,✓,Pakora,59.42,Paratha,3.3,Aloo Samosa,3.1,Kulfi,3.0,Nihari,2.66
+Pakora,4,Screenshot 2025-12-16 202915.png,Pakora,62.21,✓,Pakora,62.21,Gulaab Jamun,3.34,Haleem,3.33,Nihari,3.21,Paratha,2.58
+Pakora,5,Screenshot 2025-12-16 202947.png,Pakora,65.43,✓,Pakora,65.43,Paratha,3.31,Aloo Samosa,2.67,Nihari,2.42,Haleem,2.22
+Pakora,6,Screenshot 2025-12-16 203026.png,Pakora,78.82,✓,Pakora,78.82,Gajar ka Halwa,4.51,Jalebi,3.91,Aloo Samosa,1.84,Zarda,1.63
+Pakora,7,Screenshot 2025-12-16 203057.png,Pakora,67.27,✓,Pakora,67.27,Nihari,2.85,Haleem,2.51,Kulfi,2.41,Paratha,2.14
+Pakora,8,Screenshot 2025-12-16 203126.png,Pakora,67.05,✓,Pakora,67.05,Paratha,3.44,Nihari,3.12,White Chicken Pulao,3.11,Aloo Samosa,2.84
+Pakora,9,Screenshot 2025-12-16 203210.png,Pakora,66.37,✓,Pakora,66.37,Aloo Samosa,3.57,Chapli Kebab,3.39,Gulaab Jamun,2.89,White Chicken Pulao,2.55
+Pakora,10,Screenshot 2025-12-16 203304.png,Pakora,80.19,✓,Pakora,80.19,Aloo Samosa,3.19,Nihari,1.59,Gulaab Jamun,1.46,Jalebi,1.25
+Dahi Baray,1,Screenshot 2025-12-16 203907.png,Dahi Baray,74.55,✓,Dahi Baray,74.55,Kulfi,3.62,White Chicken Pulao,2.1,Gulaab Jamun,1.73,Seekh Kebab,1.65
+Dahi Baray,2,Screenshot 2025-12-16 204011.png,Dahi Baray,75.8,✓,Dahi Baray,75.8,Nihari,2.18,Gulaab Jamun,2.14,Pakora,1.86,Kheer,1.73
+Dahi Baray,3,Screenshot 2025-12-16 204029.png,Dahi Baray,73.56,✓,Dahi Baray,73.56,Gulaab Jamun,2.4,Nihari,2.3,Paratha,2.16,Kheer,1.93
+Dahi Baray,4,Screenshot 2025-12-16 204102.png,Dahi Baray,79.08,✓,Dahi Baray,79.08,Pakora,2.46,Aloo Samosa,1.73,Gulaab Jamun,1.67,Paratha,1.65
+Dahi Baray,5,Screenshot 2025-12-16 204144.png,Dahi Baray,77.61,✓,Dahi Baray,77.61,Gulaab Jamun,3.56,Pakora,1.54,Nihari,1.52,Paratha,1.38
+Dahi Baray,6,Screenshot 2025-12-16 204250.png,Dahi Baray,83.61,✓,Dahi Baray,83.61,Kheer,3.49,Gulaab Jamun,2.23,Nihari,1.37,Saag,1.19
+Dahi Baray,7,Screenshot 2025-12-16 204454.png,Chicken Karahi,25.02,✗,Chicken Karahi,25.02,Dahi Baray,23.12,Chana Chaat,13.05,Haleem,4.23,Chicken Biryani,4.07
+Dahi Baray,8,Screenshot 2025-12-16 204533.png,Dahi Baray,77.75,✓,Dahi Baray,77.75,Kulfi,4.74,Gulaab Jamun,4.48,Seekh Kebab,2.11,Jalebi,1.07
+Dahi Baray,9,Screenshot 2025-12-16 204601.png,Dahi Baray,68.46,✓,Dahi Baray,68.46,Gulaab Jamun,2.96,Pakora,2.59,Kulfi,2.13,Saag,2.12
+Seekh Kebab,1,Screenshot 2025-12-16 204633.png,Seekh Kebab,36.59,✓,Seekh Kebab,36.59,Chapli Kebab,36.2,Kulfi,2.28,Saag,2.21,Aloo Samosa,2.11
+Seekh Kebab,2,Screenshot 2025-12-16 204651.png,Seekh Kebab,59.02,✓,Seekh Kebab,59.02,Chana Chaat,15.06,Kheer,3.44,Sajji,3.1,Aloo Samosa,1.97
+Seekh Kebab,3,Screenshot 2025-12-16 204709.png,Seekh Kebab,85.57,✓,Seekh Kebab,85.57,Paratha,3.13,Chapli Kebab,2.13,Gulaab Jamun,1.89,Saag,0.96
+Seekh Kebab,4,Screenshot 2025-12-16 204720.png,Seekh Kebab,80.74,✓,Seekh Kebab,80.74,Gulaab Jamun,3.37,Paratha,1.75,Sajji,1.4,Jalebi,1.38
+Seekh Kebab,5,Screenshot 2025-12-16 204733.png,Seekh Kebab,66.45,✓,Seekh Kebab,66.45,Kulfi,11.0,Paratha,3.72,Gulaab Jamun,2.0,Sajji,1.81
+Seekh Kebab,6,Screenshot 2025-12-16 204752.png,Seekh Kebab,73.86,✓,Seekh Kebab,73.86,Aloo Samosa,10.49,Gajar ka Halwa,2.09,Pakora,1.89,Gulaab Jamun,1.3
+Seekh Kebab,7,Screenshot 2025-12-16 204810.png,Seekh Kebab,46.42,✓,Seekh Kebab,46.42,Chapli Kebab,33.62,Gulaab Jamun,3.84,Kulfi,2.17,Aloo Samosa,1.88
+Seekh Kebab,8,Screenshot 2025-12-16 204846.png,Seekh Kebab,58.3,✓,Seekh Kebab,58.3,Aloo Samosa,5.48,Gulaab Jamun,3.3,Saag,3.11,Jalebi,3.02
+Seekh Kebab,9,Screenshot 2025-12-16 204902.png,Seekh Kebab,83.53,✓,Seekh Kebab,83.53,Aloo Samosa,1.68,Chicken Karahi,1.45,Gulaab Jamun,1.38,Pakora,1.34
+Jalebi,1,Screenshot 2025-12-16 204956.png,Jalebi,78.61,✓,Jalebi,78.61,Gulaab Jamun,2.68,Kulfi,1.91,Paratha,1.52,Saag,1.39
+Jalebi,2,Screenshot 2025-12-16 205026.png,Jalebi,77.11,✓,Jalebi,77.11,Dahi Baray,2.57,Nihari,2.18,Saag,1.91,Gulaab Jamun,1.84
+Jalebi,3,Screenshot 2025-12-16 205046.png,Jalebi,76.17,✓,Jalebi,76.17,Aloo Samosa,3.08,White Chicken Pulao,2.89,Gulaab Jamun,2.04,Kulfi,1.85
+Jalebi,4,Screenshot 2025-12-16 205115.png,Jalebi,70.63,✓,Jalebi,70.63,Gulaab Jamun,3.49,Saag,3.03,Paratha,2.35,Haleem,1.89
+Jalebi,5,Screenshot 2025-12-16 205132.png,Jalebi,73.1,✓,Jalebi,73.1,Gulaab Jamun,3.69,Paratha,2.8,Aloo Samosa,2.3,White Chicken Pulao,2.01
+Jalebi,6,Screenshot 2025-12-16 205154.png,Jalebi,79.7,✓,Jalebi,79.7,Gulaab Jamun,2.01,Kulfi,1.96,Aloo Samosa,1.6,Paratha,1.48
+Jalebi,7,Screenshot 2025-12-16 205213.png,Jalebi,84.85,✓,Jalebi,84.85,White Chicken Pulao,3.12,Aloo Samosa,1.6,Kulfi,1.1,Gulaab Jamun,1.0
+Jalebi,8,Screenshot 2025-12-16 205232.png,Jalebi,80.86,✓,Jalebi,80.86,Gulaab Jamun,3.91,Paratha,2.28,Aloo Samosa,1.68,Saag,1.18
+Jalebi,9,Screenshot 2025-12-16 205511.png,Jalebi,72.22,✓,Jalebi,72.22,Gulaab Jamun,3.08,Paratha,2.7,Saag,2.61,Kheer,1.82
+Jalebi,10,Screenshot 2025-12-16 205614.png,Jalebi,79.83,✓,Jalebi,79.83,Haleem,1.68,Chapli Kebab,1.66,Paratha,1.63,Aloo Samosa,1.56
+Gajar ka Halwa,1,Screenshot 2025-12-16 205746.png,Gajar ka Halwa,75.6,✓,Gajar ka Halwa,75.6,Dahi Baray,2.44,Gulaab Jamun,2.24,Seekh Kebab,1.76,Kheer,1.55
+Gajar ka Halwa,2,Screenshot 2025-12-16 205821.png,Gajar ka Halwa,70.92,✓,Gajar ka Halwa,70.92,Gulaab Jamun,5.6,Chana Chaat,4.21,Paratha,2.08,Kheer,1.61
+Gajar ka Halwa,3,Screenshot 2025-12-16 205900.png,Gajar ka Halwa,75.74,✓,Gajar ka Halwa,75.74,Gulaab Jamun,2.36,Pakora,2.07,Aloo Samosa,2.06,Seekh Kebab,1.93
+Gajar ka Halwa,4,Screenshot 2025-12-16 205918.png,Gajar ka Halwa,59.33,✓,Gajar ka Halwa,59.33,Kheer,5.33,Gulaab Jamun,4.41,Seekh Kebab,3.06,Aloo Samosa,2.85
+Gajar ka Halwa,5,Screenshot 2025-12-16 210006.png,Gajar ka Halwa,69.87,✓,Gajar ka Halwa,69.87,Gulaab Jamun,3.16,Aloo Samosa,2.38,Pakora,2.13,Seekh Kebab,1.85
+Gajar ka Halwa,6,Screenshot 2025-12-16 210034.png,Gajar ka Halwa,45.71,✓,Gajar ka Halwa,45.71,Zarda,20.03,Gulaab Jamun,4.72,Chana Chaat,2.99,Dahi Baray,2.84
+Gajar ka Halwa,7,Screenshot 2025-12-16 210057.png,Gajar ka Halwa,77.64,✓,Gajar ka Halwa,77.64,Gulaab Jamun,2.69,Seekh Kebab,2.14,Chana Chaat,2.14,Chicken Karahi,1.8
+Gajar ka Halwa,8,Screenshot 2025-12-16 210139.png,Gajar ka Halwa,85.43,✓,Gajar ka Halwa,85.43,Gulaab Jamun,1.6,Chana Chaat,1.31,Nihari,1.2,Jalebi,1.08
+Gajar ka Halwa,9,Screenshot 2025-12-16 210210.png,Gajar ka Halwa,66.89,✓,Gajar ka Halwa,66.89,Gulaab Jamun,6.57,Saag,2.9,Zarda,2.88,Haleem,2.61
+Gajar ka Halwa,10,Screenshot 2025-12-16 210234.png,Gajar ka Halwa,55.89,✓,Gajar ka Halwa,55.89,Haleem,7.33,Zarda,7.19,Kulfi,4.76,Gulaab Jamun,4.62
+Kulfi,1,Screenshot 2025-12-16 210333.png,Kulfi,82.67,✓,Kulfi,82.67,Gulaab Jamun,2.09,Jalebi,1.38,Saag,1.28,Paratha,1.21
+Kulfi,2,Screenshot 2025-12-16 210402.png,Kulfi,80.28,✓,Kulfi,80.28,Aloo Samosa,2.32,Gulaab Jamun,1.55,Seekh Kebab,1.28,Kheer,1.16
+Kulfi,3,Screenshot 2025-12-16 210430.png,Kulfi,66.93,✓,Kulfi,66.93,Haleem,2.58,Nihari,2.35,Paratha,2.2,Seekh Kebab,2.15
+Kulfi,4,Screenshot 2025-12-16 210442.png,Kulfi,78.36,✓,Kulfi,78.36,Sajji,3.56,Saag,2.0,Gulaab Jamun,1.66,Haleem,1.45
+Kulfi,5,Screenshot 2025-12-16 210501.png,Kulfi,74.82,✓,Kulfi,74.82,Seekh Kebab,2.82,Sajji,2.28,Gulaab Jamun,2.2,Chapli Kebab,1.98
+Kulfi,6,Screenshot 2025-12-16 210549.png,Kulfi,73.98,✓,Kulfi,73.98,Chana Chaat,2.23,Gulaab Jamun,2.06,Haleem,1.9,Kheer,1.84
+Kulfi,7,Screenshot 2025-12-16 210703.png,Kulfi,60.85,✓,Kulfi,60.85,Gulaab Jamun,4.39,Paratha,4.06,Chapli Kebab,2.96,Saag,2.82
+Kulfi,8,Screenshot 2025-12-16 210732.png,Kulfi,77.81,✓,Kulfi,77.81,Gulaab Jamun,2.59,Chapli Kebab,1.86,Paratha,1.65,Haleem,1.43
+Kulfi,9,Screenshot 2025-12-16 210751.png,Kulfi,78.43,✓,Kulfi,78.43,Aloo Samosa,3.69,Gulaab Jamun,3.2,Paratha,1.82,Saag,1.45
+Kulfi,10,Screenshot 2025-12-16 210838.png,Kulfi,65.45,✓,Kulfi,65.45,Gulaab Jamun,3.85,Paratha,3.46,Pakora,2.58,Kheer,2.57
+Kulfi,11,Screenshot 2025-12-16 210913.png,Kulfi,74.85,✓,Kulfi,74.85,Gulaab Jamun,2.37,Pakora,1.72,Haleem,1.69,Jalebi,1.63
+Paratha,1,Screenshot 2025-12-16 210944.png,Paratha,74.63,✓,Paratha,74.63,White Chicken Pulao,2.01,Gulaab Jamun,1.92,Jalebi,1.71,Kulfi,1.7
+Paratha,2,Screenshot 2025-12-16 211017.png,Paratha,86.2,✓,Paratha,86.2,Seekh Kebab,2.1,Aloo Samosa,1.69,Gulaab Jamun,1.17,Dahi Baray,1.14
+Paratha,3,Screenshot 2025-12-16 211035.png,Paratha,85.4,✓,Paratha,85.4,Haleem,3.69,Gulaab Jamun,1.1,Gajar ka Halwa,0.76,Nihari,0.76
+Paratha,4,Screenshot 2025-12-16 211057.png,Paratha,80.61,✓,Paratha,80.61,Jalebi,8.98,Gajar ka Halwa,1.57,Gulaab Jamun,1.56,Kheer,0.84
+Paratha,5,Screenshot 2025-12-16 211114.png,Paratha,79.69,✓,Paratha,79.69,Aloo Samosa,2.71,Gulaab Jamun,1.78,Dahi Baray,1.51,Jalebi,1.42
+Paratha,6,Screenshot 2025-12-16 211130.png,Paratha,79.33,✓,Paratha,79.33,Kheer,2.16,Kulfi,1.75,Gulaab Jamun,1.56,Dahi Baray,1.35
+Paratha,7,Screenshot 2025-12-16 211200.png,Paratha,81.06,✓,Paratha,81.06,Gulaab Jamun,2.49,Jalebi,2.05,Kulfi,1.9,Aloo Samosa,1.26
+Paratha,8,Screenshot 2025-12-16 211218.png,Paratha,40.43,✓,Paratha,40.43,Kheer,10.14,Kulfi,9.31,Dahi Baray,8.39,White Chicken Pulao,6.24
+Paratha,9,Screenshot 2025-12-16 211258.png,Paratha,77.68,✓,Paratha,77.68,Jalebi,3.14,Aloo Samosa,1.84,Kulfi,1.77,Gulaab Jamun,1.66
+Paratha,10,Screenshot 2025-12-16 211321.png,Paratha,72.81,✓,Paratha,72.81,Kulfi,2.53,Zarda,2.37,Aloo Samosa,2.31,Haleem,2.09
+Zarda,1,Screenshot 2025-12-16 211611.png,Zarda,62.32,✓,Zarda,62.32,Pakora,7.97,White Chicken Pulao,6.7,Aloo Samosa,2.7,Gulaab Jamun,2.09
+Zarda,2,Screenshot 2025-12-16 212002.png,Zarda,61.21,✓,Zarda,61.21,Kheer,12.95,Dahi Baray,3.57,Gulaab Jamun,2.19,Kulfi,2.15
+Zarda,3,Screenshot 2025-12-16 212018.png,Zarda,59.13,✓,Zarda,59.13,White Chicken Pulao,10.58,Gulaab Jamun,4.18,Kheer,3.94,Chana Chaat,2.7
+Zarda,4,Screenshot 2025-12-16 212042.png,Zarda,40.64,✓,Zarda,40.64,White Chicken Pulao,28.77,Gulaab Jamun,6.07,Dahi Baray,2.86,Kheer,2.33
+Zarda,5,Screenshot 2025-12-16 212146.png,Zarda,63.62,✓,Zarda,63.62,Jalebi,4.52,Gulaab Jamun,3.1,Kheer,2.95,Kulfi,2.94
+Zarda,6,Screenshot 2025-12-16 212249.png,Zarda,48.75,✓,Zarda,48.75,Dahi Baray,8.98,Gajar ka Halwa,8.2,Chana Chaat,4.83,Gulaab Jamun,4.16
+Zarda,7,Screenshot 2025-12-16 212328.png,Zarda,51.05,✓,Zarda,51.05,White Chicken Pulao,12.2,Kheer,3.5,Gulaab Jamun,3.26,Aloo Samosa,3.2
+Zarda,8,Screenshot 2025-12-16 212412.png,Zarda,70.13,✓,Zarda,70.13,Gulaab Jamun,3.52,Kheer,2.48,Aloo Samosa,2.27,Dahi Baray,1.89
+Zarda,9,Screenshot 2025-12-16 212501.png,Zarda,62.85,✓,Zarda,62.85,Kheer,3.69,Chana Chaat,3.58,Gulaab Jamun,3.12,Chapli Kebab,2.58
+Zarda,10,Screenshot 2025-12-16 212542.png,Zarda,37.63,✓,Zarda,37.63,White Chicken Pulao,27.39,Gulaab Jamun,8.68,Kheer,8.21,Chana Chaat,4.12
