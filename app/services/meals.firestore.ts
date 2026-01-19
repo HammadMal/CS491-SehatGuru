@@ -4,6 +4,8 @@ import {
   query,
   where,
   addDoc,
+  deleteDoc,
+  doc,
 } from "firebase/firestore";
 import { db } from "./firebase";
 import type { Meal } from "../types/meal.types";
@@ -37,6 +39,16 @@ export async function saveMealToFirestore(meal: Meal) {
     console.log("🔥 Meal saved to Firestore");
   } catch (error) {
     console.error("❌ Firestore write failed:", error);
+    throw error;
+  }
+}
+
+export async function deleteMealFromFirestore(mealId: string) {
+  try {
+    await deleteDoc(doc(db, "meals", mealId));
+    console.log("🗑️ Meal deleted from Firestore");
+  } catch (error) {
+    console.error("❌ Firestore delete failed:", error);
     throw error;
   }
 }
