@@ -6,6 +6,7 @@ type MealState = {
   hydrated: boolean;
   addMeal: (meal: Meal) => void;
   setMeals: (meals: Meal[]) => void;
+  deleteMeal: (mealId: string) => void;
   clearMeals: () => void;
 };
 
@@ -23,6 +24,11 @@ export const useMealStore = create<MealState>((set) => ({
       meals,
       hydrated: true,
     }),
+
+  deleteMeal: (mealId) =>
+    set((state) => ({
+      meals: state.meals.filter((meal) => meal.id !== mealId),
+    })),
 
   clearMeals: () =>
     set({
