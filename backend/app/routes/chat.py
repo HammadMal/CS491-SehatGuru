@@ -6,6 +6,7 @@ from app.models.chat import (
 )
 from app.services.gemini_service import gemini_service
 from app.services.rag_service import rag_service
+from app.services.intent_router import route_and_respond
 from app.middleware.auth import get_current_active_user
 
 router = APIRouter(prefix="/chat", tags=["Chat"])
@@ -41,16 +42,29 @@ async def send_chat_message(
         if request.user_context:
             user_context_dict = request.user_context.model_dump(exclude_none=True)
 
-        # Generate response using Gemini service with RAG
+        if request.use_rag:
+            # Use intent router for RAG-enabled requests
+            result = await route_and_respond(
+                message=request.message,
+                user_context=user_context_dict,
+                use_rag=True,
+            )
+            return ChatMessageResponse(
+                response=result["response"],
+                rag_used=result["rag_used"],
+                intent=result["intent"],
+            )
+
+        # Fall back to existing Gemini service when RAG is disabled
         response_text = await gemini_service.generate_chat_response(
             message=request.message,
             user_context=user_context_dict,
-            use_rag=request.use_rag
+            use_rag=False,
         )
 
         return ChatMessageResponse(
             response=response_text,
-            rag_used=request.use_rag
+            rag_used=False,
         )
 
     except Exception as e:
@@ -92,17 +106,31 @@ async def send_chat_message_with_history(
                 for msg in request.chat_history
             ]
 
-        # Generate response with history
+        if request.use_rag:
+            # Use intent router for RAG-enabled requests
+            result = await route_and_respond(
+                message=request.message,
+                user_context=user_context_dict,
+                chat_history=chat_history,
+                use_rag=True,
+            )
+            return ChatMessageResponse(
+                response=result["response"],
+                rag_used=result["rag_used"],
+                intent=result["intent"],
+            )
+
+        # Fall back to existing Gemini service when RAG is disabled
         response_text = await gemini_service.generate_chat_response_with_history(
             message=request.message,
             chat_history=chat_history,
             user_context=user_context_dict,
-            use_rag=request.use_rag
+            use_rag=False,
         )
 
         return ChatMessageResponse(
             response=response_text,
-            rag_used=request.use_rag
+            rag_used=False,
         )
 
     except Exception as e:

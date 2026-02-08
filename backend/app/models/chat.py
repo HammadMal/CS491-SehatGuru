@@ -81,3 +81,7 @@ class ChatMessageResponse(BaseModel):
         True,
         description="Whether RAG context was used in the response"
     )
+    intent: Optional[str] = Field(
+        None,
+        description="Classified intent: 'nutritional_advice' or 'meal_plan_generation'"
+    )
