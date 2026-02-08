@@ -40,7 +40,7 @@ async def lifespan(app: FastAPI):
         model_path = os.path.join(
             os.path.dirname(os.path.dirname(__file__)),
             "model",
-            "final_effnet_enhanced.pth"
+            "SehatGuru_ConvNeXt_Final.pth"
         )
         print(f"Loading food detection model from: {model_path}")
         initialize_detector(model_path)
