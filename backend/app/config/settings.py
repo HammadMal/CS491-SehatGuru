@@ -67,6 +67,15 @@ class Settings(BaseSettings):
     GEMINI_API_KEY: str = ""
     GEMINI_MODEL: str = "gemini-2.0-flash-exp"
 
+    # RAG Configuration
+    RAG_COLLECTION_KNOWLEDGE_BASE: str = "pakistani_dietary_guidelines"
+    RAG_COLLECTION_DISHES: str = "pakistani_dishes"
+    CHROMA_PERSIST_DIR: str = "./chroma_db"
+    RAG_CHUNK_SIZE: int = 1000
+    RAG_CHUNK_OVERLAP: int = 200
+    RAG_TOP_K: int = 5
+    EMBEDDING_MODEL: str = "models/embedding-001"
+
     class Config:
         env_file = ".env"
         case_sensitive = True
