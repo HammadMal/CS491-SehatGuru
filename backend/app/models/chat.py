@@ -70,6 +70,14 @@ class ChatWithHistoryRequest(BaseModel):
     )
 
 
+class ValidationScores(BaseModel):
+    """Validation scores for response quality."""
+    safety: float = Field(..., ge=0.0, le=1.0, description="Safety score (0.0-1.0)")
+    accuracy: float = Field(..., ge=0.0, le=1.0, description="Accuracy score (0.0-1.0)")
+    personalization: float = Field(..., ge=0.0, le=1.0, description="Personalization score (0.0-1.0)")
+    cultural: float = Field(..., ge=0.0, le=1.0, description="Cultural appropriateness score (0.0-1.0)")
+
+
 class ChatMessageResponse(BaseModel):
     """Response model for chat messages"""
 
@@ -84,4 +92,17 @@ class ChatMessageResponse(BaseModel):
     intent: Optional[str] = Field(
         None,
         description="Classified intent: 'nutritional_advice' or 'meal_plan_generation'"
+    )
+    # NEW VALIDATION FIELDS
+    validation_scores: Optional[ValidationScores] = Field(
+        None,
+        description="Validation scores if validation was enabled"
+    )
+    validation_passed: Optional[bool] = Field(
+        None,
+        description="Whether response passed validation thresholds"
+    )
+    retry_count: Optional[int] = Field(
+        None,
+        description="Number of regeneration attempts (0 = first attempt)"
     )

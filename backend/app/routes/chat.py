@@ -48,11 +48,15 @@ async def send_chat_message(
                 message=request.message,
                 user_context=user_context_dict,
                 use_rag=True,
+                use_validation=True,  # NEW: Enable validation by default
             )
             return ChatMessageResponse(
                 response=result["response"],
                 rag_used=result["rag_used"],
                 intent=result["intent"],
+                validation_scores=result.get("validation_scores"),  # NEW
+                validation_passed=result.get("validation_passed"),  # NEW
+                retry_count=result.get("retry_count"),              # NEW
             )
 
         # Fall back to existing Gemini service when RAG is disabled
@@ -113,11 +117,15 @@ async def send_chat_message_with_history(
                 user_context=user_context_dict,
                 chat_history=chat_history,
                 use_rag=True,
+                use_validation=True,  # NEW: Enable validation by default
             )
             return ChatMessageResponse(
                 response=result["response"],
                 rag_used=result["rag_used"],
                 intent=result["intent"],
+                validation_scores=result.get("validation_scores"),  # NEW
+                validation_passed=result.get("validation_passed"),  # NEW
+                retry_count=result.get("retry_count"),              # NEW
             )
 
         # Fall back to existing Gemini service when RAG is disabled
