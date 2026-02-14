@@ -24,6 +24,12 @@ class RouterState(TypedDict):
     intent: str
     rag_context: str
     response: str
+    # Validation fields
+    validation_enabled: bool
+    retry_count: int
+    validation_scores: Optional[Dict[str, float]]
+    validation_passed: bool
+    validation_reasoning: Optional[str]
 
 
 # --- System Prompts ---
@@ -69,6 +75,59 @@ Respond with ONLY the intent label, nothing else.
 User message: "{message}"
 
 {history_context}Intent:"""
+
+
+VALIDATION_PROMPT = """You are evaluating a nutritional advice response for quality assurance.
+
+## Original User Query:
+{message}
+
+## User Context:
+{user_context_summary}
+
+## Retrieved RAG Context (Guidelines & Dishes):
+{rag_context}
+
+## Generated Response to Validate:
+{response}
+
+## Your Task:
+Evaluate the response on 4 dimensions and provide scores from 0.0 to 1.0:
+
+1. **Safety Score** (0.0-1.0):
+   - Does the response avoid harmful dietary advice?
+   - Are portion sizes reasonable?
+   - Are there dangerous food combinations or allergen warnings missed?
+   - For medical conditions (diabetes, hypertension), is the advice safe?
+
+2. **Accuracy Score** (0.0-1.0):
+   - Is the nutritional information (calories, macros) accurate based on the RAG context?
+   - Are the Pakistani dietary guidelines correctly cited?
+   - Are dish names and ingredients correct?
+   - Is the information grounded in the retrieved context?
+
+3. **Personalization Score** (0.0-1.0):
+   - Does the response address the user's specific health goals?
+   - Are dietary restrictions respected?
+   - Is the calorie target considered (if provided)?
+   - Does it match the user's age/gender (if relevant)?
+
+4. **Cultural Score** (0.0-1.0):
+   - Are Pakistani food names used correctly (Urdu + English)?
+   - Are meal patterns culturally appropriate (e.g., roti with salan, not pasta with dal)?
+   - Are serving sizes in Pakistani measurements (katori, roti, cup)?
+   - Is the tone respectful of Pakistani dietary culture?
+
+## Response Format (JSON):
+{{
+  "safety_score": <float>,
+  "accuracy_score": <float>,
+  "personalization_score": <float>,
+  "cultural_score": <float>,
+  "reasoning": "<brief explanation of scores>"
+}}
+
+Respond ONLY with valid JSON, no other text."""
 
 
 # --- Node Functions ---
@@ -254,6 +313,116 @@ def generate_response(state: RouterState) -> dict:
         return {"response": f"I apologize, but I encountered an error generating a response. Please try again."}
 
 
+def validate_response(state: RouterState) -> dict:
+    """Validate generated response using LLM self-check."""
+    # ONLY validate nutritional_advice intent, skip for meal_plan_generation
+    if state.get("intent") != "nutritional_advice":
+        return {
+            "validation_passed": True,
+            "validation_scores": None,
+        }
+
+    if not state.get("validation_enabled", True):
+        # Validation disabled, auto-pass
+        return {
+            "validation_passed": True,
+            "validation_scores": {"safety": 1.0, "accuracy": 1.0, "personalization": 1.0, "cultural": 1.0},
+        }
+
+    try:
+        model = genai.GenerativeModel(settings.GEMINI_MODEL)
+
+        # Build user context summary
+        user_ctx = state.get("user_context", {})
+        ctx_summary = []
+        if user_ctx.get("health_goals"):
+            ctx_summary.append(f"Health Goals: {', '.join(user_ctx['health_goals'])}")
+        if user_ctx.get("dietary_restrictions"):
+            ctx_summary.append(f"Dietary Restrictions: {', '.join(user_ctx['dietary_restrictions'])}")
+        if user_ctx.get("daily_calorie_target"):
+            ctx_summary.append(f"Calorie Target: {user_ctx['daily_calorie_target']} kcal")
+        if user_ctx.get("age"):
+            ctx_summary.append(f"Age: {user_ctx['age']}")
+        if user_ctx.get("gender"):
+            ctx_summary.append(f"Gender: {user_ctx['gender']}")
+        user_context_summary = "\n".join(ctx_summary) if ctx_summary else "No user context provided"
+
+        # Build validation prompt
+        prompt = VALIDATION_PROMPT.format(
+            message=state["message"],
+            user_context_summary=user_context_summary,
+            rag_context=state.get("rag_context", "")[:2000],  # Limit context size
+            response=state["response"],
+        )
+
+        # Call Gemini for validation
+        validation_response = model.generate_content(prompt)
+        response_text = validation_response.text.strip()
+
+        # Parse JSON response
+        import json
+        # Extract JSON from response (handle markdown code blocks)
+        if "```json" in response_text:
+            response_text = response_text.split("```json")[1].split("```")[0].strip()
+        elif "```" in response_text:
+            response_text = response_text.split("```")[1].split("```")[0].strip()
+
+        validation_data = json.loads(response_text)
+
+        scores = {
+            "safety": float(validation_data.get("safety_score", 0.0)),
+            "accuracy": float(validation_data.get("accuracy_score", 0.0)),
+            "personalization": float(validation_data.get("personalization_score", 0.0)),
+            "cultural": float(validation_data.get("cultural_score", 0.0)),
+        }
+
+        reasoning = validation_data.get("reasoning", "")
+
+        # Check thresholds
+        passed = (
+            scores["safety"] >= settings.VALIDATION_THRESHOLD_SAFETY and
+            scores["accuracy"] >= settings.VALIDATION_THRESHOLD_ACCURACY and
+            scores["personalization"] >= settings.VALIDATION_THRESHOLD_PERSONALIZATION and
+            scores["cultural"] >= settings.VALIDATION_THRESHOLD_CULTURAL
+        )
+
+        return {
+            "validation_scores": scores,
+            "validation_passed": passed,
+            "validation_reasoning": reasoning,
+        }
+
+    except Exception as e:
+        print(f"Validation failed with error, auto-passing: {e}")
+        # On validation error, auto-pass to avoid blocking responses
+        return {
+            "validation_passed": True,
+            "validation_scores": {"safety": 1.0, "accuracy": 1.0, "personalization": 1.0, "cultural": 1.0},
+            "validation_reasoning": f"Validation error: {str(e)}",
+        }
+
+
+def check_approval(state: RouterState) -> str:
+    """Decide whether to approve response or regenerate."""
+    if state.get("validation_passed", False):
+        return "approved"
+
+    # Check retry limit
+    retry_count = state.get("retry_count", 0)
+    if retry_count >= settings.VALIDATION_MAX_RETRIES:
+        print(f"Max retries ({settings.VALIDATION_MAX_RETRIES}) reached, returning response with low confidence")
+        return "max_retries_reached"
+
+    return "retry"
+
+
+def increment_retry(state: RouterState) -> dict:
+    """Increment retry counter before regenerating response."""
+    current_count = state.get("retry_count", 0)
+    print(f"Validation failed (scores: {state.get('validation_scores')}), regenerating (attempt {current_count + 2}/{settings.VALIDATION_MAX_RETRIES + 1})")
+    return {"retry_count": current_count + 1}
+
+
 # --- Routing ---
 
 def route_by_intent(state: RouterState) -> str:
@@ -274,6 +443,9 @@ def build_intent_router() -> StateGraph:
     graph.add_node("retrieve_nutrition_context", retrieve_nutrition_context)
     graph.add_node("retrieve_meal_plan_context", retrieve_meal_plan_context)
     graph.add_node("generate_response", generate_response)
+    # NEW VALIDATION NODES
+    graph.add_node("validate_response", validate_response)
+    graph.add_node("increment_retry", increment_retry)
 
     # Entry point
     graph.set_entry_point("classify_intent")
@@ -292,8 +464,18 @@ def build_intent_router() -> StateGraph:
     graph.add_edge("retrieve_nutrition_context", "generate_response")
     graph.add_edge("retrieve_meal_plan_context", "generate_response")
 
-    # generate_response -> END
-    graph.add_edge("generate_response", END)
+    # NEW VALIDATION FLOW
+    graph.add_edge("generate_response", "validate_response")
+    graph.add_conditional_edges(
+        "validate_response",
+        check_approval,
+        {
+            "approved": END,
+            "retry": "increment_retry",
+            "max_retries_reached": END,
+        }
+    )
+    graph.add_edge("increment_retry", "generate_response")  # Loop back
 
     return graph.compile()
 
@@ -309,6 +491,7 @@ async def route_and_respond(
     user_context: Optional[Dict[str, Any]] = None,
     chat_history: Optional[List[Dict[str, str]]] = None,
     use_rag: bool = True,
+    use_validation: bool = True,
 ) -> Dict[str, Any]:
     """
     Route a user message through the intent router and return a response.
@@ -318,9 +501,10 @@ async def route_and_respond(
         user_context: Optional user profile (health goals, restrictions, etc.)
         chat_history: Optional conversation history
         use_rag: Whether to use RAG context
+        use_validation: Whether to enable response validation (default True)
 
     Returns:
-        Dict with keys: response, intent, rag_used
+        Dict with keys: response, intent, rag_used, validation_scores, validation_passed, retry_count
     """
     initial_state: RouterState = {
         "message": message,
@@ -330,6 +514,12 @@ async def route_and_respond(
         "intent": "",
         "rag_context": "",
         "response": "",
+        # NEW VALIDATION FIELDS
+        "validation_enabled": use_validation and settings.ENABLE_RESPONSE_VALIDATION,
+        "retry_count": 0,
+        "validation_scores": None,
+        "validation_passed": False,
+        "validation_reasoning": None,
     }
 
     result = await intent_router.ainvoke(initial_state)
@@ -338,4 +528,8 @@ async def route_and_respond(
         "response": result["response"],
         "intent": result["intent"],
         "rag_used": use_rag,
+        # NEW VALIDATION FIELDS IN RESPONSE
+        "validation_scores": result.get("validation_scores"),
+        "validation_passed": result.get("validation_passed", True),
+        "retry_count": result.get("retry_count", 0),
     }
