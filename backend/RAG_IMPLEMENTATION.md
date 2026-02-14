@@ -204,27 +204,150 @@ curl -X GET http://localhost:8000/chat/rag/status \
 
 ---
 
-## Phase 3: Advanced Features 🔲 FUTURE
+## Phase 3: Intent Router (LangGraph) ✅ COMPLETED
 
-### 3.1 Meal Plan Generation
-- Use RAG to find dishes matching calorie/macro targets
-- Generate weekly meal plans based on user goals
-- Consider variety and Pakistani food preferences
+### Goal
+Route user messages through an **intent classification** step so that different types of questions get different RAG retrieval ratios and different system prompts — instead of treating every message the same way.
 
-### 3.2 Food Logging with RAG
+### How It Works
+
+```
+User message
+     │
+     ▼
+┌──────────────────┐
+│  classify_intent  │  ← Lightweight Gemini call classifies the message
+└────────┬─────────┘
+         │
+    route_by_intent()   ← Conditional edge
+    ┌────┴────┐
+    ▼         ▼
+┌────────┐ ┌──────────┐
+│nutrition│ │meal_plan │
+│_context │ │_context  │   ← Different RAG retrieval ratios per intent
+│guidel=5 │ │dishes=8  │
+│dishes=3 │ │guidel=2  │
+└────┬───┘ └────┬─────┘
+     │          │
+     ▼          ▼
+┌──────────────────┐
+│ generate_response │  ← Intent-specific system prompt + Gemini call
+└────────┬─────────┘
+         ▼
+        END
+```
+
+### Two Intents
+
+| Intent | When | RAG Ratios | System Prompt Tone |
+|--------|------|------------|--------------------|
+| `nutritional_advice` | Nutrition questions, calorie queries, diet tips, food info | guidelines=5, dishes=3 | Advisory, cites guidelines, explains health impacts |
+| `meal_plan_generation` | "Create a meal plan", "weekly menu", "daily eating schedule" | guidelines=2, dishes=8 | Structured format (Breakfast/Lunch/Dinner/Snacks), calorie breakdowns |
+
+### Technology Stack
+
+- **LangGraph** (`langgraph>=0.0.28`) — Orchestrates the flow as a `StateGraph`. Handles node sequencing, conditional routing, and async execution via `ainvoke()`.
+- **Google Generative AI SDK** (`google.generativeai`) — Used directly inside each node for Gemini API calls. No LangChain wrappers — matches existing codebase pattern.
+
+### Files Changed
+
+| Action | File | What |
+|--------|------|------|
+| **CREATE** | `backend/app/services/intent_router.py` | LangGraph StateGraph with 4 nodes, conditional routing, two system prompts, singleton compiled graph, `route_and_respond()` public API |
+| **MODIFY** | `backend/requirements.txt` | Added `langgraph>=0.0.28` |
+| **MODIFY** | `backend/app/models/chat.py` | Added `intent: Optional[str]` field to `ChatMessageResponse` |
+| **MODIFY** | `backend/app/routes/chat.py` | Both `/chat/message` and `/chat/message/with-history` now call `route_and_respond()` when `use_rag=True`, fall back to `gemini_service` when `use_rag=False` |
+| **MODIFY** | `backend/app/services/__init__.py` | Exported `intent_router` and `route_and_respond` |
+
+### Key Design Decisions
+
+1. **`use_rag=False` bypasses the intent router entirely** — No point classifying if there's no RAG to customize. Falls back to existing `gemini_service` methods.
+2. **`intent` is `Optional[str]` in the response** — Backward compatible. Frontend doesn't break. Returns `null` when RAG is disabled.
+3. **Classification defaults to `nutritional_advice` on error** — Safe fallback if Gemini returns something unexpected.
+4. **Singleton pattern** — Graph is compiled once at module load (`intent_router = build_intent_router()`), reused via `ainvoke()` per request.
+5. **Last 2 chat history messages** sent to classification prompt for context (e.g., if the user says "make it a plan" after a nutrition question).
+
+### State Schema
+
+```python
+class RouterState(TypedDict):
+    message: str                                    # User's input message
+    user_context: Optional[Dict[str, Any]]          # Onboarding data (health_goals, age, etc.)
+    chat_history: Optional[List[Dict[str, str]]]    # Previous conversation messages
+    use_rag: bool                                   # Whether RAG is enabled
+    intent: str                                     # Classified intent label
+    rag_context: str                                # Retrieved RAG context string
+    response: str                                   # Final generated response
+```
+
+### Public API
+
+```python
+from app.services.intent_router import route_and_respond
+
+result = await route_and_respond(
+    message="Create a 1500 calorie meal plan",
+    user_context={"health_goals": ["weight_loss"], "daily_calorie_target": 1500},
+    chat_history=[{"role": "user", "content": "I want to lose weight"}],
+    use_rag=True,
+)
+# result = {"response": "...", "intent": "meal_plan_generation", "rag_used": True}
+```
+
+### API Response (updated)
+
+Both `/chat/message` and `/chat/message/with-history` now return:
+
+```json
+{
+  "response": "Biryani typically contains approximately 197 kcal...",
+  "rag_used": true,
+  "intent": "nutritional_advice"
+}
+```
+
+### Performance
+
+- Adds ~200-400ms for the classification Gemini call (short prompt, `gemini-2.0-flash`)
+- RAG retrieval stays async via `asyncio.gather` inside `hybrid_search_async`
+- Graph compiled once at startup, no per-request compilation overhead
+
+### Testing
+
+```powershell
+cd backend
+
+# Should classify as nutritional_advice
+python -c "from app.services.intent_router import route_and_respond; import asyncio; r = asyncio.run(route_and_respond('How many calories in biryani?')); print(r['intent'], '-', r['response'][:100])"
+
+# Should classify as meal_plan_generation
+python -c "from app.services.intent_router import route_and_respond; import asyncio; r = asyncio.run(route_and_respond('Create a 1500 calorie meal plan for the day')); print(r['intent'], '-', r['response'][:100])"
+```
+
+Or via Swagger at `http://localhost:8000/docs` after starting the server.
+
+---
+
+## Phase 4: Advanced Features 🔲 FUTURE
+
+### 4.1 Food Logging with RAG
 - When user logs "biryani", retrieve exact nutritional info
 - Handle variations (chicken biryani vs beef biryani)
 - Suggest portion sizes based on guidelines
 
-### 3.3 Personalized Recommendations
+### 4.2 Personalized Recommendations
 - Filter dishes by dietary restrictions (diabetic, hypertension)
 - Recommend based on nutritional gaps
 - Consider user's past meals
 
-### 3.4 Hybrid Search Improvements
+### 4.3 Hybrid Search Improvements
 - Combine semantic search with keyword matching
 - Add filters (meal_type, calorie range, cuisine type)
 - Re-ranking based on user preferences
+
+### 4.4 Additional Intents
+- `food_logging` — Optimized for identifying and logging specific foods
+- `health_tracking` — Optimized for progress queries and health metrics
 
 ---
 
@@ -333,43 +456,55 @@ Expected output:
                           │
                           ▼
 ┌─────────────────────────────────────────────────────────────┐
-│                     RAG Service                             │
-│  ┌─────────────────┐     ┌─────────────────┐               │
-│  │ Embedding       │     │ Vector Store    │               │
-│  │ Service         │────▶│ (ChromaDB)      │               │
-│  │ (Gemini API)    │     │                 │               │
-│  └─────────────────┘     └────────┬────────┘               │
-└───────────────────────────────────┼─────────────────────────┘
-                                    │
-                    ┌───────────────┴───────────────┐
-                    │                               │
-                    ▼                               ▼
-        ┌───────────────────┐           ┌───────────────────┐
-        │ Knowledge Base    │           │ Dishes Collection │
-        │ (PDF Guidelines)  │           │ (1025 foods)      │
-        └─────────┬─────────┘           └─────────┬─────────┘
-                  │                               │
-                  └───────────────┬───────────────┘
-                                  │
-                                  ▼
-                    ┌───────────────────────┐
-                    │   Retrieved Context   │
-                    │ - Glycemic index info │
-                    │ - Low-sugar dishes    │
-                    └───────────┬───────────┘
-                                │
-                                ▼
-                    ┌───────────────────────┐
-                    │   Gemini LLM          │
-                    │   + Context           │
-                    └───────────┬───────────┘
-                                │
-                                ▼
-                    ┌───────────────────────┐
-                    │   Informed Response   │
-                    │   with Pakistani      │
-                    │   dietary advice      │
-                    └───────────────────────┘
+│                  Intent Router (LangGraph)                   │
+│                                                             │
+│  ┌──────────────────┐                                       │
+│  │ classify_intent   │ ← Gemini flash (lightweight call)    │
+│  └────────┬─────────┘                                       │
+│           │                                                 │
+│     ┌─────┴─────┐                                           │
+│     ▼           ▼                                           │
+│  nutrition   meal_plan                                      │
+│  _advice     _generation                                    │
+│     │           │                                           │
+│     ▼           ▼                                           │
+│  ┌─────────────────────────────────────────────────────┐    │
+│  │                  RAG Service                         │    │
+│  │  ┌─────────────────┐     ┌─────────────────┐       │    │
+│  │  │ Embedding       │     │ Vector Store    │       │    │
+│  │  │ Service         │────▶│ (ChromaDB)      │       │    │
+│  │  │ (Gemini API)    │     │                 │       │    │
+│  │  └─────────────────┘     └────────┬────────┘       │    │
+│  └───────────────────────────────────┼─────────────────┘    │
+│                                      │                      │
+│                      ┌───────────────┴───────────────┐      │
+│                      │                               │      │
+│                      ▼                               ▼      │
+│          ┌───────────────────┐           ┌───────────────┐  │
+│          │ Knowledge Base    │           │ Dishes        │  │
+│          │ (PDF Guidelines)  │           │ (1025 foods)  │  │
+│          │ top_k varies by   │           │ top_k varies  │  │
+│          │ intent (2 or 5)   │           │ by intent     │  │
+│          └─────────┬─────────┘           └─────┬────────┘  │
+│                    │                           │            │
+│                    └─────────────┬─────────────┘            │
+│                                  │                          │
+│                                  ▼                          │
+│                    ┌───────────────────────┐                │
+│                    │   generate_response    │                │
+│                    │   Intent-specific      │                │
+│                    │   system prompt +      │                │
+│                    │   Gemini call          │                │
+│                    └───────────┬───────────┘                │
+│                                │                            │
+└────────────────────────────────┼────────────────────────────┘
+                                 │
+                                 ▼
+                   ┌───────────────────────┐
+                   │   Response + Intent   │
+                   │   {response, intent,  │
+                   │    rag_used}          │
+                   └───────────────────────┘
 ```
 
 ---
@@ -387,3 +522,9 @@ Expected output:
 | | | Updated: models/chat.py with UserContext, ChatWithHistoryRequest |
 | | | Updated: routes/chat.py with /message/with-history and /rag/status endpoints |
 | | | React Native app now receives RAG-enhanced responses |
+| 2026-02-09 | Phase 3 | Intent Router - LangGraph-based intent classification |
+| | | Created: intent_router.py with StateGraph (4 nodes, conditional routing) |
+| | | Added: langgraph dependency to requirements.txt |
+| | | Updated: models/chat.py with `intent` field in ChatMessageResponse |
+| | | Updated: routes/chat.py to use `route_and_respond()` when RAG enabled |
+| | | Updated: services/__init__.py with intent_router exports |
