@@ -28,6 +28,7 @@ export interface UserResponse {
   email_verified: boolean;
   created_at?: string;
   photo_url?: string;
+  daily_calorie_goal?: number;  // Personalized daily calorie target
 }
 
 export interface MessageResponse {

@@ -4,6 +4,7 @@ export interface User {
   fullName?: string;
   photoUrl?: string;
   emailVerified?: boolean;
+  daily_calorie_goal?: number;  // Personalized daily calorie target
 }
 
 export interface AuthContextType {
