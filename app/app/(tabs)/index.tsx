@@ -11,25 +11,25 @@ import { useAuth } from "../../hooks/useAuth";
 
 
 export default function Dashboard() {
-const meals = useMealStore((s) => s.meals);
-const setMeals = useMealStore((s) => s.setMeals);
-const deleteMeal = useMealStore((s) => s.deleteMeal);
-const hydrated = useMealStore((s) => s.hydrated);
-const clearMeals = useMealStore((s) => s.clearMeals);
-const { user } = useAuth();
+  const meals = useMealStore((s) => s.meals);
+  const setMeals = useMealStore((s) => s.setMeals);
+  const deleteMeal = useMealStore((s) => s.deleteMeal);
+  const hydrated = useMealStore((s) => s.hydrated);
+  const clearMeals = useMealStore((s) => s.clearMeals);
+  const { user } = useAuth();
 
-const [selectedDate, setSelectedDate] = useState(new Date());
-const [showDatePicker, setShowDatePicker] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
-useEffect(() => {
-  if (!user?.id || hydrated) return;
+  useEffect(() => {
+    if (!user?.id || hydrated) return;
 
-  fetchMealsForUser(user.id).then(setMeals).catch(console.error);
-}, [user?.id, hydrated, setMeals]);
+    fetchMealsForUser(user.id).then(setMeals).catch(console.error);
+  }, [user?.id, hydrated, setMeals]);
 
-useEffect(() => {
-  if (!user) clearMeals();
-}, [user, clearMeals]);
+  useEffect(() => {
+    if (!user) clearMeals();
+  }, [user, clearMeals]);
 
   // Helper function to check if a date is the same day (using local timezone)
   const isSameDay = (date1: Date, date2: Date) => {
@@ -100,7 +100,8 @@ useEffect(() => {
 
 
   /* ===== TOTALS ===== */
- const calorieGoal = 2819;
+  // Use personalized calorie goal from user profile, fallback to 2000
+  const calorieGoal = user?.daily_calorie_goal || 2000;
 
   // Calories → whole numbers (using filtered meals)
   const eaten = Math.round(
@@ -122,8 +123,8 @@ useEffect(() => {
     filteredMeals.reduce((sum, meal) => sum + meal.fat, 0).toFixed(1)
   );
 
-// // Progress for circle
-// const progress = Math.min(1, eaten / calorieGoal);
+  // // Progress for circle
+  // const progress = Math.min(1, eaten / calorieGoal);
 
 
   /* ===== GROUP BY MEAL TYPE ===== */
@@ -289,10 +290,10 @@ useEffect(() => {
 const SummaryBox = ({ label, value }: { label: string; value: number }) => (
   <View style={styles.summaryBox}>
     <View style={styles.summaryIconContainer}>
-      <Ionicons 
-        name={label === "Eaten" ? "restaurant" : label === "Remaining" ? "time" : "flame"} 
-        size={20} 
-        color={label === "Eaten" ? "#3b82f6" : label === "Remaining" ? "#22c55e" : "#ef4444"} 
+      <Ionicons
+        name={label === "Eaten" ? "restaurant" : label === "Remaining" ? "time" : "flame"}
+        size={20}
+        color={label === "Eaten" ? "#3b82f6" : label === "Remaining" ? "#22c55e" : "#ef4444"}
       />
     </View>
     <Text style={styles.summaryNumber}>{value}</Text>
@@ -441,8 +442,8 @@ const styles = StyleSheet.create({
   remainingText: { fontSize: 36, fontWeight: "800", color: "#111" },
   kcalLabel: { fontSize: 14, color: "#666", marginTop: 4 },
 
-  summaryRow: { 
-    flexDirection: "row", 
+  summaryRow: {
+    flexDirection: "row",
     justifyContent: "space-between",
     marginTop: 8,
   },
@@ -530,14 +531,14 @@ const styles = StyleSheet.create({
     borderColor: "#F3F4F6",
   },
 
-  mealText: { 
-    fontSize: 17, 
+  mealText: {
+    fontSize: 17,
     fontWeight: "700",
     color: "#111",
     marginBottom: 4,
   },
-  emptyText: { 
-    color: "#999", 
+  emptyText: {
+    color: "#999",
     marginTop: 6,
     fontSize: 14,
     fontStyle: "italic",
@@ -552,7 +553,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#F9FAFB",
     borderRadius: 8,
   },
-  mealItem: { 
+  mealItem: {
     flex: 1,
     fontSize: 14,
     color: "#374151",
@@ -563,7 +564,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     backgroundColor: "#FEE2E2",
   },
-  sectionTotal: { 
+  sectionTotal: {
     marginTop: 10,
     fontWeight: "700",
     color: "#22c55e",
