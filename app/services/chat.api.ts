@@ -12,23 +12,18 @@ export const chatAPI = {
    * @param message - User's message
    * @param userContext - Optional user context for personalized responses
    * @param useRag - Whether to use RAG (default true)
+   * @param chatHistory - Optional session history (last N messages)
    */
   sendMessage: async (
     message: string,
     userContext?: UserContext,
-    useRag: boolean = true
+    useRag: boolean = true,
+    chatHistory?: { role: string; content: string }[],
   ): Promise<ChatResponse> => {
-    const requestBody: ChatRequest = {
-      message,
-      use_rag: useRag,
-    };
-
-    // Add user context if provided
-    if (userContext) {
-      requestBody.user_context = userContext;
-    }
-
-    const response = await apiClient.post('/api/chat/message', requestBody);
+    const body: any = { message, use_rag: useRag };
+    if (userContext) body.user_context = userContext;
+    if (chatHistory?.length) body.chat_history = chatHistory;
+    const response = await apiClient.post('/api/chat/message/with-history', body);
     return response.data;
   },
 

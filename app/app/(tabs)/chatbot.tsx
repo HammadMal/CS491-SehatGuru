@@ -99,8 +99,14 @@ export default function ChatbotScreen() {
     setLoading(true);
 
     try {
-      // Call API to get bot response with user context for personalized RAG responses
-      const response = await chatAPI.sendMessage(currentMessage, userContext);
+      // Build session history from current messages (excluding the just-added user message)
+      const chatHistory = messages.slice(0, -1).map((m) => ({
+        role: m.sender === 'user' ? 'user' : 'assistant',
+        content: m.content,
+      }));
+
+      // Call API with user context and session history
+      const response = await chatAPI.sendMessage(currentMessage, userContext, true, chatHistory);
 
       // Add bot response to store
       const botMessage: Message = {

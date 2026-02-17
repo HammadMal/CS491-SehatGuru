@@ -24,6 +24,7 @@ class RouterState(TypedDict):
     intent: str
     rag_context: str
     response: str
+    user_memory: Optional[str]  # preference summary from past conversations
     # Validation fields
     validation_enabled: bool
     retry_count: int
@@ -136,6 +137,44 @@ Score the response on 4 dimensions (0.0 to 1.0):
   "cultural_score": <float>,
   "reasoning": "<one sentence explaining the lowest score>"
 }}"""
+
+
+# --- Summary Prompt ---
+
+SUMMARY_PROMPT = """You are a memory assistant for SehatGuru, a Pakistani nutrition chatbot.
+
+From the conversation below, extract key facts about the user's food preferences, dietary choices, and health-related statements that would be useful for future nutritional advice.
+
+Rules:
+- Be concise (2-4 sentences max)
+- Only include facts the user explicitly stated
+- Focus on: food likes/dislikes, dietary restrictions mentioned in chat, foods to avoid, personal health goals
+- Do NOT include generic bot advice
+
+Conversation:
+{conversation}
+
+Write a short summary paragraph of the user's personal food preferences and health facts (or return empty string if no personal facts were mentioned):"""
+
+
+async def generate_preference_summary(recent_messages: list) -> str:
+    """Generate a preference summary from recent messages using Gemini."""
+    print(f"[MEMORY] Generating preference summary from {len(recent_messages)} messages...")
+    try:
+        conversation = "\n".join(
+            f"{'User' if m['role'] == 'user' else 'SehatGuru'}: {m['content']}"
+            for m in recent_messages
+        )
+        model = genai.GenerativeModel(settings.GEMINI_MODEL)
+        response = model.generate_content(
+            SUMMARY_PROMPT.format(conversation=conversation)
+        )
+        summary = response.text.strip()
+        print(f"[MEMORY] Generated summary: {summary[:200]}{'...' if len(summary) > 200 else ''}")
+        return summary
+    except Exception as e:
+        print(f"[MEMORY] Summary generation failed: {e}")
+        return ""
 
 
 # --- Node Functions ---
@@ -319,6 +358,16 @@ def generate_response(state: RouterState) -> dict:
         else:
             print("[DEBUG] no user_context — LLM will respond without personalization")
 
+        # Inject cross-session user memory (preference summary from past conversations)
+        if state.get("user_memory"):
+            print(f"[MEMORY] Injecting user memory into prompt: {state['user_memory'][:120]}{'...' if len(state['user_memory']) > 120 else ''}")
+            prompt_parts.append(
+                f"\n## User Memory (from past conversations):\n{state['user_memory']}\n"
+                "(These are facts the user has stated before — use them to personalize advice.)"
+            )
+        else:
+            print("[MEMORY] No user memory available for this request")
+
         # Add RAG context
         if state.get("rag_context"):
             prompt_parts.append(f"\n## Retrieved Context:\n{state['rag_context']}")
@@ -327,7 +376,7 @@ def generate_response(state: RouterState) -> dict:
         chat_history = state.get("chat_history")
         if chat_history:
             prompt_parts.append("\n## Conversation History:")
-            for msg in chat_history[-5:]:
+            for msg in chat_history[-15:]:
                 role = "User" if msg.get("role") == "user" else "SehatGuru"
                 prompt_parts.append(f"{role}: {msg.get('content', '')}")
 
@@ -532,6 +581,7 @@ async def route_and_respond(
     chat_history: Optional[List[Dict[str, str]]] = None,
     use_rag: bool = True,
     use_validation: bool = True,
+    user_memory: Optional[str] = None,
 ) -> Dict[str, Any]:
     """
     Route a user message through the intent router and return a response.
@@ -554,7 +604,8 @@ async def route_and_respond(
         "intent": "",
         "rag_context": "",
         "response": "",
-        # NEW VALIDATION FIELDS
+        "user_memory": user_memory,
+        # VALIDATION FIELDS
         "validation_enabled": use_validation and settings.ENABLE_RESPONSE_VALIDATION,
         "retry_count": 0,
         "validation_scores": None,
