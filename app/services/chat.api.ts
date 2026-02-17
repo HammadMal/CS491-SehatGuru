@@ -45,7 +45,7 @@ export const chatAPI = {
       glutenFree?: boolean;
       other?: string;
     };
-  }): UserContext => {
+  }, dailyCalorieGoal?: number): UserContext => {
     const context: UserContext = {};
 
     // Add health goals
@@ -84,6 +84,10 @@ export const chatAPI = {
     }
     if (restrictions.length > 0) {
       context.dietary_restrictions = restrictions;
+    }
+
+    if (dailyCalorieGoal) {
+      context.daily_calorie_target = dailyCalorieGoal;
     }
 
     return context;

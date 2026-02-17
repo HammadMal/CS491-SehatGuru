@@ -22,6 +22,7 @@ import { chatAPI } from '../../services/chat.api';
 import { ChatMessage } from '../../components/ChatMessage';
 import { Colors } from '../../constants/colors';
 import { OnboardingContext } from '../../context/OnboardingContext';
+import { AuthContext } from '../../context/AuthContext';
 import type { Message, UserContext } from '../../types/chat.types';
 
 export default function ChatbotScreen() {
@@ -32,12 +33,16 @@ export default function ChatbotScreen() {
 
   const { messages, isLoading, addMessage, setLoading } = useChatStore();
   const onboardingContext = useContext(OnboardingContext);
+  const authContext = useContext(AuthContext);
 
   // Build user context from onboarding data for personalized RAG responses
   const userContext: UserContext | undefined = useMemo(() => {
     if (!onboardingContext?.onboardingData) return undefined;
-    return chatAPI.buildUserContext(onboardingContext.onboardingData);
-  }, [onboardingContext?.onboardingData]);
+    return chatAPI.buildUserContext(
+      onboardingContext.onboardingData,
+      authContext?.user?.daily_calorie_goal ?? undefined,
+    );
+  }, [onboardingContext?.onboardingData, authContext?.user?.daily_calorie_goal]);
 
   // Keyboard listeners for better scroll handling
   useEffect(() => {

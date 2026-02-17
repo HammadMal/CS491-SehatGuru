@@ -49,17 +49,24 @@ If the context doesn't contain relevant information, use your general knowledge 
 
 MEAL_PLAN_PROMPT = """You are SehatGuru, an AI nutritionist specializing in Pakistani cuisine and meal planning.
 
-You are creating a MEAL PLAN. Focus on:
-- Structuring the plan clearly (Breakfast / Lunch / Dinner / Snacks)
-- Including specific Pakistani dishes from the retrieved context
-- Providing calorie and macro breakdowns (protein, carbs, fat) for each meal
-- Ensuring the plan meets the user's calorie target and health goals
-- Balancing variety across meals using traditional Pakistani foods
-- Using Urdu food names alongside English when helpful
-- Including portion sizes in Pakistani measurements (roti, katori, cup, etc.)
+You are creating a ONE-DAY MEAL PLAN. Structure it as:
+- **Breakfast** (~25% of daily calories)
+- **Lunch** (~35% of daily calories)
+- **Dinner** (~30% of daily calories)
+- **Snacks** (~10% of daily calories)
 
-Format the meal plan in a structured, easy-to-follow layout with totals.
-If the context doesn't contain enough dishes, supplement with your knowledge of Pakistani cuisine."""
+For each meal:
+- List 1-2 specific Pakistani dishes from the retrieved options
+- Provide portion sizes in Pakistani measurements (roti count, katori, cup, etc.)
+- Show calories and macros (protein/carbs/fat) per dish
+
+At the bottom, include a **Daily Total** row with sum of all meals' calories, protein, carbs, fat.
+
+CALORIE RULE: If the user has a daily calorie target, the daily total MUST be within ±10% of that target.
+If no target is given, aim for a balanced 1800-2200 kcal day.
+
+Use Urdu food names alongside English where helpful (e.g., "Dal Chawal (Lentils & Rice)").
+Only use dishes listed in the retrieved context; supplement with your knowledge of Pakistani cuisine if a meal slot has no suitable options."""
 
 
 # --- Classification Prompt ---
@@ -203,31 +210,54 @@ async def retrieve_nutrition_context(state: RouterState) -> dict:
 
 
 async def retrieve_meal_plan_context(state: RouterState) -> dict:
-    """Retrieve RAG context optimized for meal plan generation (heavy on dishes)."""
+    """Retrieve RAG context for meal plan generation using per-meal-slot queries."""
+    import asyncio
     try:
         user_ctx = state.get("user_context")
-        results = await rag_service.hybrid_search_async(
-            query=state["message"],
-            user_context=user_ctx,
-            guidelines_top_k=2,
-            dishes_top_k=8,
+        base_query = state["message"]
+
+        # Four concurrent queries — one per meal slot for appropriate dish variety
+        breakfast_r, lunch_r, dinner_r, snacks_r = await asyncio.gather(
+            rag_service.hybrid_search_async(
+                query=f"breakfast morning dishes {base_query}",
+                user_context=user_ctx, guidelines_top_k=0, dishes_top_k=3,
+            ),
+            rag_service.hybrid_search_async(
+                query=f"lunch dishes {base_query}",
+                user_context=user_ctx, guidelines_top_k=0, dishes_top_k=3,
+            ),
+            rag_service.hybrid_search_async(
+                query=f"dinner main course dishes {base_query}",
+                user_context=user_ctx, guidelines_top_k=0, dishes_top_k=3,
+            ),
+            rag_service.hybrid_search_async(
+                query=f"snacks light snack dishes {base_query}",
+                user_context=user_ctx, guidelines_top_k=1, dishes_top_k=2,
+            ),
         )
 
         context_parts = []
+        for slot, results in [
+            ("Breakfast Options", breakfast_r),
+            ("Lunch Options", lunch_r),
+            ("Dinner Options", dinner_r),
+            ("Snack Options", snacks_r),
+        ]:
+            dishes = results.get("dishes", [])
+            if dishes:
+                context_parts.append(f"\n## {slot}:\n")
+                for d in dishes:
+                    context_parts.append(
+                        f"- **{d['name']}**: {d['calories']:.0f} kcal | "
+                        f"P: {d['protein_g']:.1f}g | "
+                        f"C: {d['carbs_g']:.1f}g | "
+                        f"F: {d['fat_g']:.1f}g\n"
+                    )
 
-        if results.get("dishes"):
-            context_parts.append("## Available Pakistani Dishes for Meal Planning:\n")
-            for d in results["dishes"]:
-                context_parts.append(
-                    f"- **{d['name']}**: {d['calories']:.0f} kcal | "
-                    f"P: {d['protein_g']:.1f}g | "
-                    f"C: {d['carbs_g']:.1f}g | "
-                    f"F: {d['fat_g']:.1f}g\n"
-                )
-
-        if results.get("guidelines"):
+        guidelines = snacks_r.get("guidelines", [])
+        if guidelines:
             context_parts.append("\n## Key Dietary Guidelines:\n")
-            for g in results["guidelines"]:
+            for g in guidelines:
                 context_parts.append(f"- {g['content']}\n")
 
         return {"rag_context": "".join(context_parts)}
