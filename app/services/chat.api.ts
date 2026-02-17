@@ -32,7 +32,15 @@ export const chatAPI = {
    * Helper function to convert app's onboarding data to API format
    */
   buildUserContext: (onboardingData: {
-    basicInfo?: { age?: string; gender?: string };
+    basicInfo?: {
+      age?: string;
+      gender?: string;
+      height?: string;
+      heightUnit?: 'cm' | 'ft';
+      weight?: string;
+      weightUnit?: 'kg' | 'lbs';
+    };
+    activityLevel?: string;
     healthGoals?: string[];
     dietaryPreferences?: {
       vegetarian?: boolean;
@@ -59,6 +67,31 @@ export const chatAPI = {
     // Add gender
     if (onboardingData.basicInfo?.gender) {
       context.gender = onboardingData.basicInfo.gender;
+    }
+
+    // Add weight (convert lbs → kg if needed)
+    if (onboardingData.basicInfo?.weight) {
+      const w = parseFloat(onboardingData.basicInfo.weight);
+      if (!isNaN(w)) {
+        context.weight_kg = onboardingData.basicInfo.weightUnit === 'lbs'
+          ? Math.round(w * 0.453592 * 10) / 10
+          : w;
+      }
+    }
+
+    // Add height (convert ft → cm if needed)
+    if (onboardingData.basicInfo?.height) {
+      const h = parseFloat(onboardingData.basicInfo.height);
+      if (!isNaN(h)) {
+        context.height_cm = onboardingData.basicInfo.heightUnit === 'ft'
+          ? Math.round(h * 30.48 * 10) / 10
+          : h;
+      }
+    }
+
+    // Add activity level
+    if (onboardingData.activityLevel) {
+      context.activity_level = onboardingData.activityLevel;
     }
 
     // Build dietary restrictions from preferences

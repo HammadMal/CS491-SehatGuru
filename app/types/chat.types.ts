@@ -11,6 +11,9 @@ export interface UserContext {
   daily_calorie_target?: number;
   age?: number;
   gender?: string;
+  weight_kg?: number;
+  height_cm?: number;
+  activity_level?: string;
 }
 
 export interface ChatRequest {

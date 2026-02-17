@@ -350,6 +350,15 @@ def generate_response(state: RouterState) -> dict:
             if user_ctx.get("gender"):
                 user_info_parts.append(f"Gender: {user_ctx['gender']}")
 
+            if user_ctx.get("weight_kg"):
+                user_info_parts.append(f"Weight: {user_ctx['weight_kg']} kg")
+
+            if user_ctx.get("height_cm"):
+                user_info_parts.append(f"Height: {user_ctx['height_cm']} cm")
+
+            if user_ctx.get("activity_level"):
+                user_info_parts.append(f"Activity Level: {user_ctx['activity_level']}")
+
             if user_info_parts:
                 print(f"[DEBUG] user profile being sent to LLM: {user_info_parts}")
                 prompt_parts.append(f"\n## User Profile:\n" + "\n".join(user_info_parts))

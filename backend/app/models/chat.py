@@ -19,6 +19,9 @@ class UserContext(BaseModel):
     )
     age: Optional[int] = Field(None, description="User's age")
     gender: Optional[str] = Field(None, description="User's gender")
+    weight_kg: Optional[float] = Field(None, description="User's weight in kilograms")
+    height_cm: Optional[float] = Field(None, description="User's height in centimeters")
+    activity_level: Optional[str] = Field(None, description="User's activity level (e.g., 'sedentary', 'moderately-active')")
 
 
 class ChatMessageRequest(BaseModel):
