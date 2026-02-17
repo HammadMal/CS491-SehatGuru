@@ -65,7 +65,24 @@ class Settings(BaseSettings):
 
     # Gemini AI
     GEMINI_API_KEY: str = ""
-    GEMINI_MODEL: str = "gemini-2.0-flash-exp"
+    GEMINI_MODEL: str = "gemini-2.0-flash"
+
+    # RAG Configuration
+    RAG_COLLECTION_KNOWLEDGE_BASE: str = "pakistani_dietary_guidelines"
+    RAG_COLLECTION_DISHES: str = "pakistani_dishes"
+    CHROMA_PERSIST_DIR: str = "./chroma_db"
+    RAG_CHUNK_SIZE: int = 1000
+    RAG_CHUNK_OVERLAP: int = 200
+    RAG_TOP_K: int = 5
+    EMBEDDING_MODEL: str = "models/gemini-embedding-001"
+
+    # Self-Validation Settings (Strict Mode)
+    ENABLE_RESPONSE_VALIDATION: bool = True
+    VALIDATION_MAX_RETRIES: int = 3
+    VALIDATION_THRESHOLD_SAFETY: float = 0.9      # Must be >= 0.9 (critical - very strict)
+    VALIDATION_THRESHOLD_ACCURACY: float = 0.85   # Must be >= 0.85 (high accuracy required)
+    VALIDATION_THRESHOLD_PERSONALIZATION: float = 0.8  # Must be >= 0.8 (strong personalization)
+    VALIDATION_THRESHOLD_CULTURAL: float = 0.85   # Must be >= 0.85 (high cultural appropriateness)
 
     class Config:
         env_file = ".env"

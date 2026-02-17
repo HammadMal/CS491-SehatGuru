@@ -35,6 +35,16 @@ pandas==2.1.4
 
 # AI/LLM
 google-generativeai>=0.3.0
+langgraph>=0.0.28
+
+# RAG (Retrieval Augmented Generation)
+chromadb>=0.4.22
+langchain>=0.1.0
+langchain-google-genai>=0.0.6
+pypdf>=3.17.0
+sentence-transformers>=2.2.2
+tiktoken>=0.5.2
+transformers>=4.36.0,<4.46.0  # Pin compatible version with torch 2.1.2
 
 # Machine Learning
 torch==2.1.2

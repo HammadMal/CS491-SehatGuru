@@ -4,8 +4,7 @@
 // For physical device, use your computer's IP address
 
 // API Configuration
-export const API_BASE_URL = 'http://192.168.0.163:8000';
-
+export const API_BASE_URL = 'http://192.168.18.130:8000';
 
 
 // Google OAuth Configuration
