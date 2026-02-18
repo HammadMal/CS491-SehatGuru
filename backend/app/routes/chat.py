@@ -21,10 +21,10 @@ router = APIRouter(prefix="/chat", tags=["Chat"])
 logger = logging.getLogger(__name__)
 
 
-async def _regenerate_summary(user_id: str, recent_messages: list) -> None:
-    """Background task to regenerate preference summary."""
+async def _regenerate_summary(user_id: str, recent_messages: list, existing_summary: str | None = None) -> None:
+    """Background task to regenerate preference summary, preserving existing facts."""
     try:
-        summary = await generate_preference_summary(recent_messages)
+        summary = await generate_preference_summary(recent_messages, existing_summary)
         if summary:
             update_preference_summary(user_id, summary)
             logger.info(f"Summary regenerated for user {user_id}")
@@ -160,7 +160,11 @@ async def send_chat_message_with_history(
                     logger.info(f"[MEMORY] Threshold hit at count={new_count} — firing background summary task")
                     updated_memory = get_user_memory(current_user["uid"])
                     asyncio.create_task(
-                        _regenerate_summary(current_user["uid"], updated_memory["recent_messages"])
+                        _regenerate_summary(
+                            current_user["uid"],
+                            updated_memory["recent_messages"],
+                            updated_memory.get("preference_summary"),
+                        )
                     )
             except Exception as e:
                 logger.warning(f"[MEMORY] Failed to save user memory: {e}")

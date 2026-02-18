@@ -143,38 +143,54 @@ Score the response on 4 dimensions (0.0 to 1.0):
 
 SUMMARY_PROMPT = """You are a memory assistant for SehatGuru, a Pakistani nutrition chatbot.
 
-From the conversation below, extract key facts about the user's food preferences, dietary choices, and health-related statements that would be useful for future nutritional advice.
+Your job is to maintain an accurate, up-to-date summary of the user's food preferences and health facts.
+{existing_summary_section}
+From the new conversation below, extract any NEW facts about the user's food preferences, dietary choices, and health-related statements.
 
 Rules:
-- Be concise (2-4 sentences max)
+- Be concise (2-5 sentences max)
 - Only include facts the user explicitly stated
-- Focus on: food likes/dislikes, dietary restrictions mentioned in chat, foods to avoid, personal health goals
+- PRESERVE all facts from the existing summary unless the user explicitly contradicts them
+- Focus on: food likes/dislikes, foods to avoid, dietary restrictions mentioned in chat, personal health goals
 - Do NOT include generic bot advice
 
-Conversation:
+New Conversation:
 {conversation}
 
-Write a short summary paragraph of the user's personal food preferences and health facts (or return empty string if no personal facts were mentioned):"""
+Write an updated summary that combines the existing facts with any new facts. If no new personal facts were mentioned, return the existing summary unchanged. If there is no existing summary and no personal facts were mentioned, return an empty string:"""
 
 
-async def generate_preference_summary(recent_messages: list) -> str:
-    """Generate a preference summary from recent messages using Gemini."""
-    print(f"[MEMORY] Generating preference summary from {len(recent_messages)} messages...")
+async def generate_preference_summary(recent_messages: list, existing_summary: Optional[str] = None) -> str:
+    """Generate a preference summary from recent messages using Gemini.
+
+    Passes the existing summary into the prompt so previously captured preferences
+    (e.g. 'I don't like biryani') are preserved even after they scroll out of
+    the recent_messages window.
+    """
+    print(f"[MEMORY] Generating preference summary from {len(recent_messages)} messages (has_existing={bool(existing_summary)})...")
     try:
         conversation = "\n".join(
             f"{'User' if m['role'] == 'user' else 'SehatGuru'}: {m['content']}"
             for m in recent_messages
         )
+        if existing_summary:
+            existing_summary_section = f"## Existing Summary (preserve these facts):\n{existing_summary}\n"
+        else:
+            existing_summary_section = ""
+
         model = genai.GenerativeModel(settings.GEMINI_MODEL)
         response = model.generate_content(
-            SUMMARY_PROMPT.format(conversation=conversation)
+            SUMMARY_PROMPT.format(
+                existing_summary_section=existing_summary_section,
+                conversation=conversation,
+            )
         )
         summary = response.text.strip()
         print(f"[MEMORY] Generated summary: {summary[:200]}{'...' if len(summary) > 200 else ''}")
         return summary
     except Exception as e:
         print(f"[MEMORY] Summary generation failed: {e}")
-        return ""
+        return existing_summary or ""
 
 
 # --- Node Functions ---
