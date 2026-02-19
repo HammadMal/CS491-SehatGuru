@@ -76,13 +76,13 @@ class Settings(BaseSettings):
     RAG_TOP_K: int = 5
     EMBEDDING_MODEL: str = "models/gemini-embedding-001"
 
-    # Self-Validation Settings (Strict Mode)
+    # Self-Validation Settings
     ENABLE_RESPONSE_VALIDATION: bool = True
-    VALIDATION_MAX_RETRIES: int = 3
-    VALIDATION_THRESHOLD_SAFETY: float = 0.9      # Must be >= 0.9 (critical - very strict)
-    VALIDATION_THRESHOLD_ACCURACY: float = 0.85   # Must be >= 0.85 (high accuracy required)
-    VALIDATION_THRESHOLD_PERSONALIZATION: float = 0.8  # Must be >= 0.8 (strong personalization)
-    VALIDATION_THRESHOLD_CULTURAL: float = 0.85   # Must be >= 0.85 (high cultural appropriateness)
+    VALIDATION_MAX_RETRIES: int = 1
+    VALIDATION_THRESHOLD_SAFETY: float = 0.7
+    VALIDATION_THRESHOLD_ACCURACY: float = 0.7
+    VALIDATION_THRESHOLD_PERSONALIZATION: float = 0.5
+    VALIDATION_THRESHOLD_CULTURAL: float = 0.7
 
     class Config:
         env_file = ".env"

@@ -4,6 +4,7 @@ import { getItem, setItem, removeItem, getObject, setObject, STORAGE_KEYS } from
 import { authAPI } from '../services/auth.api';
 import { userAPI } from '../services/user.api';
 import apiClient from '../services/api';
+import { useChatStore } from '../store/useChatStore';
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -356,6 +357,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setUser(null);
       setHasCompletedOnboarding(false);
       setHasAcceptedConsent(false);
+      useChatStore.getState().clearMessages();
       await removeItem(STORAGE_KEYS.AUTH_TOKEN);
       await removeItem(STORAGE_KEYS.REFRESH_TOKEN);
       await removeItem(STORAGE_KEYS.USER_PROFILE);
