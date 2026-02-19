@@ -130,14 +130,19 @@ async def send_chat_message_with_history(
                 for msg in request.chat_history
             ]
 
-        # Load user memory from Firestore (cross-session preference summary)
-        try:
-            memory = get_user_memory(current_user["uid"])
-            preference_summary = memory.get("preference_summary")
-            logger.info(f"[MEMORY] Loaded for uid={current_user['uid']}: has_summary={bool(preference_summary)}, msg_count={memory.get('message_count', 0)}")
-        except Exception as e:
-            logger.warning(f"[MEMORY] Failed to load user memory: {e}")
-            preference_summary = None
+        # Load user memory — use override if provided (test mode), otherwise load from Firestore
+        is_test_mode = bool(request.user_memory_override is not None)
+        if is_test_mode:
+            preference_summary = request.user_memory_override
+            logger.info(f"[MEMORY] Using user_memory_override (test mode) for uid={current_user['uid']}")
+        else:
+            try:
+                memory = get_user_memory(current_user["uid"])
+                preference_summary = memory.get("preference_summary")
+                logger.info(f"[MEMORY] Loaded for uid={current_user['uid']}: has_summary={bool(preference_summary)}, msg_count={memory.get('message_count', 0)}")
+            except Exception as e:
+                logger.warning(f"[MEMORY] Failed to load user memory: {e}")
+                preference_summary = None
 
         if request.use_rag:
             # Use intent router for RAG-enabled requests
@@ -150,32 +155,36 @@ async def send_chat_message_with_history(
                 user_memory=preference_summary,
             )
 
-            # Save turn and trigger re-summarization if needed
-            try:
-                new_count = save_user_memory(
-                    current_user["uid"], request.message, result["response"]
-                )
-                logger.info(f"[MEMORY] Turn saved for uid={current_user['uid']}, new message_count={new_count}")
-                if new_count % MEMORY_SUMMARIZE_EVERY_N == 0:
-                    logger.info(f"[MEMORY] Threshold hit at count={new_count} — firing background summary task")
-                    updated_memory = get_user_memory(current_user["uid"])
-                    asyncio.create_task(
-                        _regenerate_summary(
-                            current_user["uid"],
-                            updated_memory["recent_messages"],
-                            updated_memory.get("preference_summary"),
-                        )
+            # Skip memory save in test mode or when blocked by guard rails
+            if not is_test_mode and result.get("guard_result", "ok") == "ok":
+                try:
+                    new_count = save_user_memory(
+                        current_user["uid"], request.message, result["response"]
                     )
-            except Exception as e:
-                logger.warning(f"[MEMORY] Failed to save user memory: {e}")
+                    logger.info(f"[MEMORY] Turn saved for uid={current_user['uid']}, new message_count={new_count}")
+                    if new_count % MEMORY_SUMMARIZE_EVERY_N == 0:
+                        logger.info(f"[MEMORY] Threshold hit at count={new_count} — firing background summary task")
+                        updated_memory = get_user_memory(current_user["uid"])
+                        asyncio.create_task(
+                            _regenerate_summary(
+                                current_user["uid"],
+                                updated_memory["recent_messages"],
+                                updated_memory.get("preference_summary"),
+                            )
+                        )
+                except Exception as e:
+                    logger.warning(f"[MEMORY] Failed to save user memory: {e}")
+            else:
+                logger.info(f"[GUARD] Skipping memory save for blocked message (guard_result={result.get('guard_result')})")
 
             return ChatMessageResponse(
                 response=result["response"],
                 rag_used=result["rag_used"],
-                intent=result["intent"],
+                intent=result.get("intent"),
                 validation_scores=result.get("validation_scores"),
                 validation_passed=result.get("validation_passed"),
                 retry_count=result.get("retry_count"),
+                guard_result=result.get("guard_result"),
             )
 
         # Fall back to existing Gemini service when RAG is disabled

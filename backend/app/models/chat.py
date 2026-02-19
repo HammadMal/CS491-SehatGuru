@@ -71,6 +71,10 @@ class ChatWithHistoryRequest(BaseModel):
         True,
         description="Whether to use RAG for context retrieval"
     )
+    user_memory_override: Optional[str] = Field(
+        None,
+        description="If set, use this preference summary instead of loading from Firestore. Also skips memory save. For testing only."
+    )
 
 
 class ValidationScores(BaseModel):
@@ -108,4 +112,8 @@ class ChatMessageResponse(BaseModel):
     retry_count: Optional[int] = Field(
         None,
         description="Number of regeneration attempts (0 = first attempt)"
+    )
+    guard_result: Optional[str] = Field(
+        None,
+        description="Guard rail result: 'ok', 'off_topic', 'harmful', or 'dangerous_medical'"
     )
