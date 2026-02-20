@@ -68,7 +68,7 @@ class Settings(BaseSettings):
     GEMINI_MODEL: str = "gemini-2.0-flash-exp"
 
     class Config:
-        env_file = ".env"
+        env_file = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), ".env")
         case_sensitive = True
 
 
