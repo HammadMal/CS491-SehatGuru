@@ -63,8 +63,8 @@ async def detect_food(
         # Get detector
         detector = get_detector()
 
-        # Run prediction
-        predictions = detector.predict_from_bytes(image_bytes, top_k=1)
+        # Run prediction (detector may return new safety-dict or legacy list)
+        predictions = detector.predict_from_bytes(image_bytes, top_k=3)
 
         if not predictions:
             raise HTTPException(
@@ -72,20 +72,53 @@ async def detect_food(
                 detail="Model failed to generate predictions"
             )
 
-        # Get top prediction
-        food_name, confidence = predictions[0]
+        # Normalize outputs from new SafeFoodPredictor (dict) or legacy list
+        if isinstance(predictions, dict):
+            # New safety format
+            status = predictions.get("status")
+            if status == "CONFIRMED":
+                food_name = predictions.get("dish")
+                confidence = float(predictions.get("confidence", 0.0))
+                # predictor returns percentage (0-100); normalize to 0-1
+                if confidence > 1.0:
+                    confidence = confidence / 100.0
+                is_low_confidence = confidence < 0.7
+            else:
+                # ASK_USER: pick first prediction and show its confidence
+                preds = predictions.get("predictions", [])
+                if preds:
+                    food_name = preds[0].get("dish", "")
+                    confidence = float(preds[0].get("confidence", 0.0))
+                else:
+                    # Fallback to old format if predictions not available
+                    options = predictions.get("options", [])
+                    food_name = options[0] if options else ""
+                    confidence = float(predictions.get("confidence", 0.0))
+                # predictor returns percentage (0-100); normalize to 0-1
+                if confidence > 1.0:
+                    confidence = confidence / 100.0
+                is_low_confidence = True
 
-        # Determine if confidence is low (threshold: 0.7)
-        CONFIDENCE_THRESHOLD = 0.7
-        is_low_confidence = confidence < CONFIDENCE_THRESHOLD
+            logger.info(
+                f"Detected food (safe API): {food_name} "
+                f"(confidence: {confidence:.2%}, low: {is_low_confidence})"
+            )
 
-        logger.info(
-            f"Detected food: {food_name} "
-            f"(confidence: {confidence:.2%}, low: {is_low_confidence})"
-        )
+        else:
+            # Legacy list format [(name, confidence), ...]
+            food_name, confidence = predictions[0]
+            # Ensure confidence in 0-1 range
+            if confidence > 1.0:
+                confidence = float(confidence) / 100.0
+            is_low_confidence = confidence < 0.7
+
+            logger.info(
+                f"Detected food: {food_name} "
+                f"(confidence: {confidence:.2%}, low: {is_low_confidence})"
+            )
 
         # Look up nutrients from CSV
-        nutrients = get_macros(food_name)
+        nutrients = get_macros(food_name) if food_name else None
 
         return FoodDetectionResponse(
             food_name=food_name,
@@ -94,7 +127,8 @@ async def detect_food(
             nutrients=nutrients
         )
 
-
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Error during food detection: {str(e)}")
         raise HTTPException(
@@ -135,7 +169,7 @@ async def detect_food_detailed(
         # Get detector
         detector = get_detector()
 
-        # Run prediction
+        # Run prediction (may return safety-dict or legacy list)
         predictions = detector.predict_from_bytes(image_bytes, top_k=top_k)
 
         if not predictions:
@@ -144,21 +178,85 @@ async def detect_food_detailed(
                 detail="Model failed to generate predictions"
             )
 
-        # Format predictions
-        formatted_predictions = [
-            {
-                "food_name": name,
-                "confidence": conf,
-                "is_low_confidence": conf < 0.7
-            }
-            for name, conf in predictions
-        ]
+        formatted_predictions = []
+
+        if isinstance(predictions, dict):
+            # New SafeFoodPredictor returned a dict
+            status = predictions.get("status")
+            
+            # Extract predictions list (available for both CONFIRMED and ASK_USER)
+            preds = predictions.get("predictions", [])
+            
+            if preds:
+                # Use the predictions list with individual confidence scores
+                for pred in preds:
+                    dish = pred.get("dish", "")
+                    conf = float(pred.get("confidence", 0.0))
+                    if conf > 1.0:
+                        conf = conf / 100.0
+                    # Look up nutrients for this food item
+                    nutrients = get_macros(dish) if dish else None
+                    formatted_predictions.append({
+                        "food_name": dish,
+                        "confidence": conf,
+                        "is_low_confidence": (status == "ASK_USER") or (conf < 0.7),
+                        "nutrients": nutrients
+                    })
+            elif status == "CONFIRMED":
+                # Fallback for old format (single dish)
+                dish = predictions.get("dish")
+                conf = float(predictions.get("confidence", 0.0))
+                if conf > 1.0:
+                    conf = conf / 100.0
+                # Look up nutrients for this food item
+                nutrients = get_macros(dish) if dish else None
+                formatted_predictions.append({
+                    "food_name": dish,
+                    "confidence": conf,
+                    "is_low_confidence": conf < 0.7,
+                    "nutrients": nutrients
+                })
+            else:
+                # Fallback: ASK_USER with old options format
+                options = predictions.get("options", [])
+                conf = float(predictions.get("confidence", 0.0))
+                if conf > 1.0:
+                    conf = conf / 100.0
+                for opt in options:
+                    # Look up nutrients for this food item
+                    nutrients = get_macros(opt) if opt else None
+                    formatted_predictions.append({
+                        "food_name": opt,
+                        "confidence": conf,
+                        "is_low_confidence": True,
+                        "nutrients": nutrients
+                    })
+
+            # Ensure we have at least one top_prediction
+            if not formatted_predictions:
+                raise HTTPException(status_code=500, detail="Model returned no usable predictions")
+
+        else:
+            # Legacy list format
+            for name, conf in predictions:
+                if conf > 1.0:
+                    conf = float(conf) / 100.0
+                # Look up nutrients for this food item
+                nutrients = get_macros(name) if name else None
+                formatted_predictions.append({
+                    "food_name": name,
+                    "confidence": conf,
+                    "is_low_confidence": conf < 0.7,
+                    "nutrients": nutrients
+                })
 
         return FoodDetectionDetailedResponse(
             predictions=formatted_predictions,
             top_prediction=formatted_predictions[0]
         )
 
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Error during food detection: {str(e)}")
         raise HTTPException(

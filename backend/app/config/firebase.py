@@ -10,6 +10,7 @@ class FirebaseClient:
 
     _instance = None
     _db = None
+    _initialized = False
 
     def __new__(cls):
         if cls._instance is None:
@@ -26,7 +27,8 @@ class FirebaseClient:
                 if settings.FIREBASE_CREDENTIALS_PATH and os.path.exists(settings.FIREBASE_CREDENTIALS_PATH):
                     cred = credentials.Certificate(settings.FIREBASE_CREDENTIALS_PATH)
                     firebase_admin.initialize_app(cred)
-                    print("Firebase initialized with service account file")
+                    print("✓ Firebase initialized with service account file")
+                    self._initialized = True
                 # Otherwise, use environment variables
                 elif settings.FIREBASE_PROJECT_ID and settings.FIREBASE_PRIVATE_KEY:
                     # Construct service account dictionary from environment variables
@@ -44,34 +46,41 @@ class FirebaseClient:
                     }
                     cred = credentials.Certificate(service_account_info)
                     firebase_admin.initialize_app(cred)
-                    print("Firebase initialized with environment variables")
+                    print("✓ Firebase initialized with environment variables")
+                    self._initialized = True
                 else:
-                    raise ValueError(
-                        "Firebase credentials not found. Please provide either "
-                        "FIREBASE_CREDENTIALS_PATH or Firebase environment variables."
-                    )
+                    print("⚠ Warning: Firebase credentials not found. Firebase features will be disabled.")
+                    print("  Food detection endpoints will still work for testing.")
+                    return
 
             # Initialize Firestore client
             self._db = firestore.client()
-            print("Firestore client initialized successfully")
+            print("✓ Firestore client initialized successfully")
 
         except Exception as e:
-            print(f"Error initializing Firebase: {str(e)}")
-            raise
+            print(f"⚠ Warning: Error initializing Firebase: {str(e)}")
+            print("  Firebase features will be disabled. Food detection endpoints will still work.")
+            self._initialized = False
 
     @property
     def db(self):
         """Get Firestore database client"""
+        if not self._initialized:
+            raise RuntimeError("Firebase is not initialized. Please configure Firebase credentials.")
         if self._db is None:
             self._db = firestore.client()
         return self._db
 
     def get_auth(self):
         """Get Firebase Auth instance"""
+        if not self._initialized:
+            raise RuntimeError("Firebase is not initialized. Please configure Firebase credentials.")
         return auth
 
     def verify_id_token(self, id_token: str):
         """Verify Firebase ID token"""
+        if not self._initialized:
+            raise RuntimeError("Firebase is not initialized. Please configure Firebase credentials.")
         try:
             decoded_token = auth.verify_id_token(id_token)
             return decoded_token

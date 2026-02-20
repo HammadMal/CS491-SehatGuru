@@ -12,6 +12,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import apiClient from '../../services/api';
 import AddMealModal from "../../components/AddMealModal";
+import FoodSelectionModal from "../../components/FoodSelectionModal";
 import { router, useLocalSearchParams } from "expo-router";
 import { useMealStore } from "../../store/useMealStore";
 import { Meal } from "../../types/meal.types";
@@ -37,6 +38,13 @@ interface FoodDetectionResult {
   nutrients?: Nutrition;
 }
 
+interface FoodOption {
+  food_name: string;
+  confidence: number;
+  is_low_confidence: boolean;
+  nutrients?: Nutrition;
+}
+
 export default function CameraScreen({ navigation }: any) {
   const { mealType: urlMealType } = useLocalSearchParams<{ mealType?: string }>();
   const [image, setImage] = useState<string | null>(null);
@@ -45,6 +53,8 @@ export default function CameraScreen({ navigation }: any) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
+  const [selectionModalVisible, setSelectionModalVisible] = useState(false);
+  const [foodOptions, setFoodOptions] = useState<FoodOption[]>([]);
   const { addMeal } = useMealStore();
   const { user } = useAuth();
 
@@ -69,8 +79,9 @@ export default function CameraScreen({ navigation }: any) {
       setDetection(null);
       setNutrients(null);
       setError(null);
-
-      setModalVisible(true);
+      setFoodOptions([]); // Clear previous options
+      setSelectionModalVisible(false); // Ensure closed
+      setModalVisible(false); // Don't open yet, wait for results
 
       await detectFood(imageUri);
     }
@@ -78,12 +89,26 @@ export default function CameraScreen({ navigation }: any) {
 
     const handleModalClose = () => {
     setModalVisible(false);
+    setSelectionModalVisible(false);
     setImage(null);
     setDetection(null);
     setNutrients(null);
+    setFoodOptions([]);
     setError(null);
   };
 
+  const handleFoodSelection = (selectedFood: FoodOption) => {
+    // Close selection modal and open regular modal with selected food
+    setSelectionModalVisible(false);
+    setDetection({
+      food_name: selectedFood.food_name,
+      confidence: selectedFood.confidence,
+      is_low_confidence: false,
+      nutrients: selectedFood.nutrients,
+    });
+    setNutrients(selectedFood.nutrients || null);
+    setModalVisible(true);
+  };
 
   const handleRetake = () => {
       handleModalClose();
@@ -137,6 +162,8 @@ export default function CameraScreen({ navigation }: any) {
 
   const detectFood = async (imageUri: string) => {
     setLoading(true);
+    setModalVisible(true); // Open loading modal
+    
     try {
       const formData = new FormData();
       const filename = imageUri.split('/').pop() || 'food.jpg';
@@ -149,25 +176,53 @@ export default function CameraScreen({ navigation }: any) {
         type,
       } as any);
 
-      const response = await apiClient.post("/api/food/detect", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      // Always call detailed endpoint to get top 3 predictions
+      const response = await apiClient.post(
+        "/api/food/detect/detailed?top_k=3",
+        formData,
+        { headers: { "Content-Type": "multipart/form-data" } }
+      );
 
-      setDetection(response.data);
-      setNutrients(response.data.nutrients || null);
-      // // Only show the modal if we have a detection result
-      // if (response.data) {
-      //   setModalVisible(true);
-      // }
+      if (response.data.predictions && response.data.predictions.length > 0) {
+        const firstPrediction = response.data.predictions[0];
+        
+        console.log('API Response - predictions:', response.data.predictions);
+        console.log('First prediction is_low_confidence:', firstPrediction.is_low_confidence);
+        
+        // Check if we need to show multiple options
+        if (firstPrediction.is_low_confidence) {
+          console.log('ASK_USER triggered, showing selection modal');
+          console.log('Options to set:', response.data.predictions);
+          
+          setLoading(false);
+          setError(null);
+          setDetection(null);
+          setModalVisible(false); // Close loading modal
+          
+          // Set options and open selection modal
+          setFoodOptions(response.data.predictions);
+          setSelectionModalVisible(true);
+          
+          console.log('State updates complete');
+          return;
+        }
 
+        // High confidence: show single result in AddMealModal
+        setError(null);
+        setDetection(firstPrediction);
+        setNutrients(firstPrediction.nutrients || null);
+        setLoading(false);
+        // modalVisible is already true, so AddMealModal will show content
+      } else {
+        throw new Error("No predictions returned");
+      }
 
     } catch (err: any) {
       const errorMsg =
         err.response?.data?.detail || err.message || "Failed to detect food.";
       setError(errorMsg);
-      Alert.alert("Error", errorMsg);
-    } finally {
       setLoading(false);
+      Alert.alert("Error", errorMsg);
     }
   };
 
@@ -231,6 +286,18 @@ export default function CameraScreen({ navigation }: any) {
         />
 
       </ScrollView>
+
+      {selectionModalVisible && (
+        <FoodSelectionModal
+          visible={selectionModalVisible}
+          onClose={handleModalClose}
+          onRetake={handleRetake}
+          onManual={handleManual}
+          onSelect={handleFoodSelection}
+          options={foodOptions}
+          image={image}
+        />
+      )}
     </SafeAreaView>
   );
 }

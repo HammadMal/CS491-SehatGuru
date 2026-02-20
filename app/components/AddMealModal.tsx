@@ -80,8 +80,8 @@ export default function AddMealModal({
               </Text>
             </View>
 
-          ) : !foodName ? (
-            /* ================= ERROR ================= */
+          ) : false ? (
+            /* ================= ERROR - DISABLED ================= */
             <View style={styles.errorState}>
               <Ionicons name="alert-circle-outline" size={42} color="#dc2626" />
               <Text style={styles.errorTitle}>Couldn’t identify food</Text>
@@ -102,7 +102,7 @@ export default function AddMealModal({
               </View>
             </View>
 
-          ) : (
+          ) : foodName ? (
           <>
             {/* FOOD IMAGE */}
             {!isManual && image && (
@@ -216,7 +216,7 @@ export default function AddMealModal({
               </TouchableOpacity>
             </View>
           </>
-        )}
+        ) : null}
       </View>
     </View>
   </Modal>

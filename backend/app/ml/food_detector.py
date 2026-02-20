@@ -180,6 +180,139 @@ class FlexibleConvNeXt(nn.Module):
         )
 
 
+class SafeFoodPredictor:
+    """Safety-layered predictor that wraps a model and enforces checks before confirming."""
+
+    def __init__(self, model: nn.Module, class_names: list, device: Optional[str] = None):
+        self.model = model
+        self.class_names = class_names
+        self.device = device or ("cuda" if torch.cuda.is_available() else "cpu")
+
+        # Safety Thresholds (adjusted to reduce false positives)
+        self.confidence_threshold = 60.0  # Lowered from 75% - catches truly low confidence
+        self.ambiguity_gap = 10.0  # Only trigger when predictions are VERY close
+        self.color_confidence_min = 50.0  # Grayscale must be confident to matter
+
+    def preprocess(self, image: Image.Image) -> torch.Tensor:
+        transform = transforms.Compose([
+            transforms.Resize((292, 292)),
+            transforms.CenterCrop(260),
+            transforms.ToTensor(),
+            transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
+        ])
+        return transform(image).unsqueeze(0).to(self.device)
+
+    def _forward(self, input_tensor: torch.Tensor) -> torch.Tensor:
+        outputs = self.model(input_tensor)
+        if isinstance(outputs, tuple):
+            logits = outputs[0]
+        elif torch.is_tensor(outputs):
+            logits = outputs
+        else:
+            raise ValueError(f"Unexpected model output type: {type(outputs)}")
+        return logits
+
+    def predict_with_safeguards(self, original_image: Image.Image, top_k: int = 3) -> dict:
+        # PHASE 1: RGB prediction
+        input_rgb = self.preprocess(original_image)
+        with torch.no_grad():
+            logits = self._forward(input_rgb)
+            probs = torch.softmax(logits, dim=1)
+
+            # Get top_k predictions (ensure we don't exceed available classes)
+            k = min(top_k, len(self.class_names))
+            topk = torch.topk(probs, k, dim=1)
+            topk_probs = topk.values[0]
+            topk_idx = topk.indices[0]
+
+            # Extract top predictions and their confidences
+            all_predictions = []
+            for i in range(k):
+                raw_prob = float(topk_probs[i].item())
+                conf_pct = raw_prob * 100.0
+                all_predictions.append({
+                    "dish": self.class_names[topk_idx[i].item()],
+                    "confidence": conf_pct
+                })
+                logger.info(f"SafePredictor: DEBUG pred[{i}] raw={raw_prob:.6f}, pct={conf_pct:.2f}")
+            
+            # For safety checks, we need at least top 2
+            conf_1 = all_predictions[0]["confidence"]
+            dish_1 = all_predictions[0]["dish"]
+            conf_2 = all_predictions[1]["confidence"] if len(all_predictions) > 1 else 0.0
+            dish_2 = all_predictions[1]["dish"] if len(all_predictions) > 1 else ""
+
+        logger.info(f"SafePredictor: Top predictions: 1={dish_1} ({conf_1:.2f}%), 2={dish_2} ({conf_2:.2f}%)")
+
+        # Run all safety checks and count failures
+        failed_checks = []
+        
+        # CHECK 1: Ambiguity trap - predictions too close
+        gap = conf_1 - conf_2
+        logger.info(f"SafePredictor: CHECK 1 - Ambiguity gap: {gap:.2f}% (threshold: {self.ambiguity_gap}%)")
+        if gap < self.ambiguity_gap:
+            failed_checks.append("Ambiguous")
+            logger.info(f"SafePredictor: CHECK 1 FAILED - Predictions too close")
+        else:
+            logger.info(f"SafePredictor: CHECK 1 PASSED")
+
+        # CHECK 2: Confidence threshold
+        logger.info(f"SafePredictor: CHECK 2 - Confidence {conf_1:.2f}% vs threshold {self.confidence_threshold}%")
+        if conf_1 < self.confidence_threshold:
+            failed_checks.append("Low Confidence")
+            logger.info(f"SafePredictor: CHECK 2 FAILED - Below confidence threshold")
+        else:
+            logger.info(f"SafePredictor: CHECK 2 PASSED")
+
+        # CHECK 3: Color Stress Test (RGB vs Grayscale)
+        img_bw = original_image.convert("L").convert("RGB")
+        input_bw = self.preprocess(img_bw)
+        with torch.no_grad():
+            logits_bw = self._forward(input_bw)
+            probs_bw = torch.softmax(logits_bw, dim=1)
+            idx_bw = torch.argmax(probs_bw, dim=1)[0].item()
+            conf_bw = float(probs_bw[0][idx_bw].item() * 100.0)
+            dish_bw = self.class_names[idx_bw]
+
+        logger.info(f"SafePredictor: CHECK 3 - Color test: RGB={dish_1}, Grayscale={dish_bw} ({conf_bw:.2f}%)")
+        # Only count as failure if grayscale is confident AND different
+        if dish_1 != dish_bw and conf_bw > self.color_confidence_min:
+            failed_checks.append("Color Bias")
+            logger.info(f"SafePredictor: CHECK 3 FAILED - Significant color bias detected")
+        else:
+            logger.info(f"SafePredictor: CHECK 3 PASSED")
+
+        # CHECK 4: Second prediction too high (viable alternative exists)
+        second_pred_threshold = 20.0  # If 2nd prediction > 20%, there's real ambiguity
+        logger.info(f"SafePredictor: CHECK 4 - Second prediction confidence: {conf_2:.2f}% (threshold: {second_pred_threshold}%)")
+        if conf_2 > second_pred_threshold:
+            failed_checks.append("Viable Alternative")
+            logger.info(f"SafePredictor: CHECK 4 FAILED - Second option has significant confidence")
+        else:
+            logger.info(f"SafePredictor: CHECK 4 PASSED")
+
+        # DECISION: Only ASK_USER if 2+ checks failed (consensus approach)
+        if len(failed_checks) >= 2:
+            reason = " + ".join(failed_checks)
+            logger.info(f"SafePredictor: FINAL DECISION - ASK_USER ({len(failed_checks)} checks failed: {reason})")
+            return {
+                "status": "ASK_USER",
+                "reason": reason,
+                "message": f"I see multiple possibilities. Please confirm.",
+                "predictions": all_predictions,
+                "confidence": conf_1,
+            }
+
+        # SUCCESS - high confidence or only 1 minor concern
+        logger.info(f"SafePredictor: FINAL DECISION - CONFIRMED (passed {4 - len(failed_checks)}/4 checks)")
+        return {
+            "status": "CONFIRMED",
+            "dish": dish_1,
+            "confidence": conf_1,
+            "predictions": all_predictions
+        }
+
+
 class FoodDetector:
     """Food detection service using ConvNeXt Tiny model"""
 
@@ -483,101 +616,28 @@ class FoodDetector:
 
         return tensor.to(self.device)
 
-    def predict(self, image: Image.Image, top_k: int = 1) -> list:
+    def predict(self, image: Image.Image, top_k: int = 3) -> list:
         """
         Predict food class from image
 
         Args:
             image: PIL Image
-            top_k: Number of top predictions to return
+            top_k: Number of top predictions to return (default: 3)
 
         Returns:
-            List of tuples (class_name, confidence) sorted by confidence
+            Dictionary with safety status and predictions
         """
-        try:
-            with torch.no_grad():
-                # Preprocess
-                input_tensor = self.preprocess_image(image)
-                print(f"[DEBUG] Input tensor shape: {input_tensor.shape}")
-                logger.info(f"Input tensor shape: {input_tensor.shape}")
+        # Use SafeFoodPredictor to apply safety checks before confirming
+        predictor = SafeFoodPredictor(self.model, self.class_names, device=self.device)
+        return predictor.predict_with_safeguards(image, top_k=top_k)
 
-                # Run inference
-                outputs = self.model(input_tensor)
-                print(f"[DEBUG] Raw outputs type: {type(outputs)}")
-                print(f"[DEBUG] Raw outputs shape: {outputs.shape if hasattr(outputs, 'shape') else 'N/A'}")
-                logger.info(f"Raw outputs type: {type(outputs)}, shape: {outputs.shape if hasattr(outputs, 'shape') else 'N/A'}")
-
-                # Handle different output formats
-                if isinstance(outputs, tuple):
-                    # Model returns tuple (logits, aux_outputs)
-                    logits = outputs[0]
-                    print(f"[DEBUG] Model returned tuple, using first element")
-                elif torch.is_tensor(outputs):
-                    # Model returns tensor directly
-                    logits = outputs
-                    print(f"[DEBUG] Model returned tensor directly")
-                else:
-                    raise ValueError(f"Unexpected output type: {type(outputs)}")
-
-                print(f"[DEBUG] Logits shape before squeeze: {logits.shape}")
-                print(f"[DEBUG] Number of class names: {len(self.class_names)}")
-
-                # Remove batch dimension if present
-                if len(logits.shape) > 1:
-                    logits = logits.squeeze(0)
-
-                print(f"[DEBUG] Logits shape after squeeze: {logits.shape}")
-                logger.info(f"Logits shape after processing: {logits.shape}")
-
-                # Get probabilities
-                probabilities = torch.nn.functional.softmax(logits, dim=0)
-                print(f"[DEBUG] Probabilities shape: {probabilities.shape}")
-                logger.info(f"Probabilities shape: {probabilities.shape}")
-
-                # Get top k predictions
-                top_k_count = min(top_k, len(self.class_names), len(probabilities))
-                print(f"[DEBUG] Getting top {top_k_count} predictions")
-                top_probs, top_indices = torch.topk(probabilities, top_k_count)
-
-                print(f"[DEBUG] Top indices: {top_indices}")
-                print(f"[DEBUG] Top probs: {top_probs}")
-
-                # Format results
-                results = []
-                for prob, idx in zip(top_probs, top_indices):
-                    idx_val = idx.item()
-                    print(f"[DEBUG] Processing index {idx_val}, prob {prob.item():.4f}")
-                    print(f"[DEBUG] Class names length: {len(self.class_names)}")
-
-                    if idx_val < len(self.class_names):
-                        class_name = self.class_names[idx_val]
-                        confidence = prob.item()
-                        results.append((class_name, confidence))
-                        print(f"[DEBUG] Added prediction: {class_name} ({confidence:.4f})")
-                        logger.info(f"Prediction: {class_name} ({confidence:.4f})")
-                    else:
-                        print(f"[DEBUG] WARNING: Index {idx_val} out of range!")
-                        logger.warning(f"Index {idx_val} out of range for class_names (len={len(self.class_names)})")
-
-                print(f"[DEBUG] Total results: {len(results)}")
-
-                if not results:
-                    logger.error("No valid predictions generated")
-                    raise ValueError("Model produced no valid predictions")
-
-                return results
-
-        except Exception as e:
-            logger.error(f"Error in predict method: {str(e)}", exc_info=True)
-            raise
-
-    def predict_from_bytes(self, image_bytes: bytes, top_k: int = 1) -> list:
+    def predict_from_bytes(self, image_bytes: bytes, top_k: int = 3) -> list:
         """
         Predict food class from image bytes
 
         Args:
             image_bytes: Image file bytes
-            top_k: Number of top predictions to return
+            top_k: Number of top predictions to return (default: 3)
 
         Returns:
             List of tuples (class_name, confidence) sorted by confidence
