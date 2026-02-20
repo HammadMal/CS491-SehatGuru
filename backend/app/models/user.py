@@ -64,6 +64,14 @@ class UserProfileResponse(BaseModel):
     onboarding_completed: bool = Field(default=False)
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
+    
+    # Calorie calculation fields
+    daily_calorie_goal: Optional[int] = Field(default=None, description="Personalized daily calorie target")
+    bmr: Optional[float] = Field(default=None, description="Basal Metabolic Rate (calories/day)")
+    tdee: Optional[float] = Field(default=None, description="Total Daily Energy Expenditure (calories/day)")
+    goal_adjustment: Optional[int] = Field(default=None, description="Calorie adjustment for health goals")
+    calculation_method: Optional[str] = Field(default=None, description="Algorithm used for calculation")
+    calorie_last_calculated_at: Optional[datetime] = Field(default=None, description="When calories were last calculated")
 
     class Config:
         json_encoders = {
