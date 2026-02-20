@@ -282,6 +282,15 @@ class SafeFoodPredictor:
         else:
             logger.info(f"SafePredictor: CHECK 3 PASSED")
 
+        # CHECK 4: Second prediction too high (viable alternative exists)
+        second_pred_threshold = 20.0  # If 2nd prediction > 20%, there's real ambiguity
+        logger.info(f"SafePredictor: CHECK 4 - Second prediction confidence: {conf_2:.2f}% (threshold: {second_pred_threshold}%)")
+        if conf_2 > second_pred_threshold:
+            failed_checks.append("Viable Alternative")
+            logger.info(f"SafePredictor: CHECK 4 FAILED - Second option has significant confidence")
+        else:
+            logger.info(f"SafePredictor: CHECK 4 PASSED")
+
         # DECISION: Only ASK_USER if 2+ checks failed (consensus approach)
         if len(failed_checks) >= 2:
             reason = " + ".join(failed_checks)
@@ -295,7 +304,7 @@ class SafeFoodPredictor:
             }
 
         # SUCCESS - high confidence or only 1 minor concern
-        logger.info(f"SafePredictor: FINAL DECISION - CONFIRMED (passed {3 - len(failed_checks)}/3 checks)")
+        logger.info(f"SafePredictor: FINAL DECISION - CONFIRMED (passed {4 - len(failed_checks)}/4 checks)")
         return {
             "status": "CONFIRMED",
             "dish": dish_1,
@@ -607,13 +616,13 @@ class FoodDetector:
 
         return tensor.to(self.device)
 
-    def predict(self, image: Image.Image, top_k: int = 1) -> list:
+    def predict(self, image: Image.Image, top_k: int = 3) -> list:
         """
         Predict food class from image
 
         Args:
             image: PIL Image
-            top_k: Number of top predictions to return
+            top_k: Number of top predictions to return (default: 3)
 
         Returns:
             Dictionary with safety status and predictions
@@ -622,13 +631,13 @@ class FoodDetector:
         predictor = SafeFoodPredictor(self.model, self.class_names, device=self.device)
         return predictor.predict_with_safeguards(image, top_k=top_k)
 
-    def predict_from_bytes(self, image_bytes: bytes, top_k: int = 1) -> list:
+    def predict_from_bytes(self, image_bytes: bytes, top_k: int = 3) -> list:
         """
         Predict food class from image bytes
 
         Args:
             image_bytes: Image file bytes
-            top_k: Number of top predictions to return
+            top_k: Number of top predictions to return (default: 3)
 
         Returns:
             List of tuples (class_name, confidence) sorted by confidence

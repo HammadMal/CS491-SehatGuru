@@ -1,13 +1,11 @@
 import {
-  Modal,
   View,
   Text,
   Image,
   TouchableOpacity,
   StyleSheet,
-  ScrollView,
 } from "react-native";
-import React, { useState } from "react";
+import React from "react";
 import { Ionicons } from "@expo/vector-icons";
 
 interface Nutrients {
@@ -42,21 +40,16 @@ export default function FoodSelectionModal({
   options,
   image,
 }: FoodSelectionModalProps) {
-  const [selectedOption, setSelectedOption] = useState<FoodOption | null>(null);
+  const topTwoOptions = options.slice(0, 2);
 
   const handleOptionPress = (option: FoodOption) => {
-    setSelectedOption(option);
+    onSelect(option);
   };
 
-  const handleConfirm = () => {
-    if (selectedOption) {
-      onSelect(selectedOption);
-      setSelectedOption(null); // Reset for next time
-    }
-  };
+  if (!visible) return null;
 
   return (
-    <Modal visible={visible} transparent animationType="slide">
+    <View style={styles.fullscreen}>
       <View style={styles.overlay}>
         <View style={styles.sheet}>
           {/* CLOSE BUTTON */}
@@ -74,35 +67,28 @@ export default function FoodSelectionModal({
             <Ionicons name="help-circle-outline" size={32} color="#f59e0b" />
             <Text style={styles.title}>Confirm what you photographed</Text>
             <Text style={styles.subtitle}>
-              We detected multiple possibilities. Please select the correct dish:
+              Tap the dish you photographed:
             </Text>
           </View>
 
-          {/* OPTIONS LIST */}
-          <ScrollView style={styles.optionsList}>
-            {options.map((option, index) => (
+          {/* OPTIONS - SIDE BY SIDE */}
+          <View style={styles.optionsRow}>
+            {topTwoOptions.map((option, index) => (
               <TouchableOpacity
                 key={index}
-                style={[
-                  styles.optionCard,
-                  selectedOption === option && styles.optionCardSelected,
-                ]}
+                style={styles.optionCard}
                 onPress={() => handleOptionPress(option)}
+                activeOpacity={0.7}
               >
                 <View style={styles.optionHeader}>
-                  <View style={styles.optionTitleRow}>
-                    <Text style={styles.optionName}>{option.food_name}</Text>
-                    {selectedOption === option && (
-                      <Ionicons name="checkmark-circle" size={24} color="#22c55e" />
-                    )}
-                  </View>
+                  <Text style={styles.optionName}>{option.food_name}</Text>
                   <Text style={styles.optionConfidence}>
-                    {(option.confidence * 100).toFixed(1)}% confidence
+                    {(option.confidence * 100).toFixed(1)}%
                   </Text>
                 </View>
 
                 {option.nutrients && (
-                  <View style={styles.nutrientRow}>
+                  <View style={styles.nutrientColumn}>
                     <View style={styles.nutrientItem}>
                       <Text style={styles.nutrientValue}>
                         {option.nutrients.calories}
@@ -131,20 +117,10 @@ export default function FoodSelectionModal({
                 )}
               </TouchableOpacity>
             ))}
-          </ScrollView>
+          </View>
 
           {/* ACTION BUTTONS */}
           <View style={styles.buttonContainer}>
-            {selectedOption ? (
-              <TouchableOpacity
-                style={styles.confirmBtn}
-                onPress={handleConfirm}
-              >
-                <Ionicons name="checkmark-outline" size={20} color="white" />
-                <Text style={styles.confirmText}>Confirm Selection</Text>
-              </TouchableOpacity>
-            ) : null}
-
             <View style={styles.secondaryBtnRow}>
               <TouchableOpacity
                 style={styles.retakeBtn}
@@ -165,11 +141,20 @@ export default function FoodSelectionModal({
           </View>
         </View>
       </View>
-    </Modal>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  fullscreen: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: 9999,
+    elevation: 9999,
+  },
   overlay: {
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.5)",
@@ -182,7 +167,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 16,
     paddingBottom: 32,
-    maxHeight: "90%",
   },
   closeBtn: {
     alignSelf: "flex-end",
@@ -212,79 +196,60 @@ const styles = StyleSheet.create({
     textAlign: "center",
     lineHeight: 20,
   },
-  optionsList: {
-    maxHeight: 300,
-    marginBottom: 20,
+  optionsRow: {
+    flexDirection: "row",
+    gap: 12,
+    marginBottom: 24,
   },
   optionCard: {
+    flex: 1,
     backgroundColor: "#f9fafb",
-    borderRadius: 12,
+    borderRadius: 16,
     padding: 16,
-    marginBottom: 12,
     borderWidth: 2,
-    borderColor: "transparent",
-  },
-  optionCardSelected: {
-    borderColor: "#22c55e",
-    backgroundColor: "#f0fdf4",
+    borderColor: "#e5e7eb",
+    alignItems: "center",
   },
   optionHeader: {
-    marginBottom: 12,
-  },
-  optionTitleRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
+    width: "100%",
+    marginBottom: 16,
     alignItems: "center",
-    marginBottom: 6,
   },
   optionName: {
-    fontSize: 18,
-    fontWeight: "600",
+    fontSize: 16,
+    fontWeight: "700",
     color: "#1f2937",
-    flex: 1,
+    textAlign: "center",
+    marginBottom: 6,
   },
   optionConfidence: {
     fontSize: 13,
-    color: "#6b7280",
-    fontWeight: "500",
+    color: "#22c55e",
+    fontWeight: "600",
   },
-  nutrientRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    paddingTop: 12,
-    borderTopWidth: 1,
-    borderTopColor: "#e5e7eb",
+  nutrientColumn: {
+    width: "100%",
+    gap: 10,
   },
   nutrientItem: {
+    flexDirection: "row",
+    justifyContent: "space-between",
     alignItems: "center",
+    paddingVertical: 4,
   },
   nutrientValue: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: "600",
     color: "#1f2937",
-    marginBottom: 2,
   },
   nutrientLabel: {
     fontSize: 11,
     color: "#6b7280",
     textTransform: "uppercase",
+    fontWeight: "500",
   },
   buttonContainer: {
     gap: 12,
-  },
-  confirmBtn: {
-    backgroundColor: "#22c55e",
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 16,
-    borderRadius: 12,
-    gap: 8,
-  },
-  confirmText: {
-    color: "white",
-    fontSize: 16,
-    fontWeight: "600",
   },
   secondaryBtnRow: {
     flexDirection: "row",

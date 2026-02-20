@@ -79,8 +79,9 @@ export default function CameraScreen({ navigation }: any) {
       setDetection(null);
       setNutrients(null);
       setError(null);
-
-      setModalVisible(true);
+      setFoodOptions([]); // Clear previous options
+      setSelectionModalVisible(false); // Ensure closed
+      setModalVisible(false); // Don't open yet, wait for results
 
       await detectFood(imageUri);
     }
@@ -161,6 +162,8 @@ export default function CameraScreen({ navigation }: any) {
 
   const detectFood = async (imageUri: string) => {
     setLoading(true);
+    setModalVisible(true); // Open loading modal
+    
     try {
       const formData = new FormData();
       const filename = imageUri.split('/').pop() || 'food.jpg';
@@ -173,37 +176,53 @@ export default function CameraScreen({ navigation }: any) {
         type,
       } as any);
 
-      const response = await apiClient.post("/api/food/detect", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      // Always call detailed endpoint to get top 3 predictions
+      const response = await apiClient.post(
+        "/api/food/detect/detailed?top_k=3",
+        formData,
+        { headers: { "Content-Type": "multipart/form-data" } }
+      );
 
-      // Check if we need to show multiple options
-      if (response.data.is_low_confidence) {
-        // Fetch detailed predictions (top 3)
-        const detailedResponse = await apiClient.post(
-          "/api/food/detect/detailed?top_k=3",
-          formData,
-          { headers: { "Content-Type": "multipart/form-data" } }
-        );
-
-        if (detailedResponse.data.predictions) {
-          setFoodOptions(detailedResponse.data.predictions);
+      if (response.data.predictions && response.data.predictions.length > 0) {
+        const firstPrediction = response.data.predictions[0];
+        
+        console.log('API Response - predictions:', response.data.predictions);
+        console.log('First prediction is_low_confidence:', firstPrediction.is_low_confidence);
+        
+        // Check if we need to show multiple options
+        if (firstPrediction.is_low_confidence) {
+          console.log('ASK_USER triggered, showing selection modal');
+          console.log('Options to set:', response.data.predictions);
+          
+          setLoading(false);
+          setError(null);
+          setDetection(null);
+          setModalVisible(false); // Close loading modal
+          
+          // Set options and open selection modal
+          setFoodOptions(response.data.predictions);
           setSelectionModalVisible(true);
+          
+          console.log('State updates complete');
           return;
         }
-      }
 
-      // Normal flow: show single result
-      setDetection(response.data);
-      setNutrients(response.data.nutrients || null);
+        // High confidence: show single result in AddMealModal
+        setError(null);
+        setDetection(firstPrediction);
+        setNutrients(firstPrediction.nutrients || null);
+        setLoading(false);
+        // modalVisible is already true, so AddMealModal will show content
+      } else {
+        throw new Error("No predictions returned");
+      }
 
     } catch (err: any) {
       const errorMsg =
         err.response?.data?.detail || err.message || "Failed to detect food.";
       setError(errorMsg);
-      Alert.alert("Error", errorMsg);
-    } finally {
       setLoading(false);
+      Alert.alert("Error", errorMsg);
     }
   };
 
@@ -266,6 +285,9 @@ export default function CameraScreen({ navigation }: any) {
           defaultMealType={urlMealType || "Dinner"}
         />
 
+      </ScrollView>
+
+      {selectionModalVisible && (
         <FoodSelectionModal
           visible={selectionModalVisible}
           onClose={handleModalClose}
@@ -275,8 +297,7 @@ export default function CameraScreen({ navigation }: any) {
           options={foodOptions}
           image={image}
         />
-
-      </ScrollView>
+      )}
     </SafeAreaView>
   );
 }

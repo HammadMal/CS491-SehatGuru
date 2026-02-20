@@ -64,7 +64,7 @@ async def detect_food(
         detector = get_detector()
 
         # Run prediction (detector may return new safety-dict or legacy list)
-        predictions = detector.predict_from_bytes(image_bytes, top_k=1)
+        predictions = detector.predict_from_bytes(image_bytes, top_k=3)
 
         if not predictions:
             raise HTTPException(
