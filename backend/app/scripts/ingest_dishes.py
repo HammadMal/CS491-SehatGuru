@@ -41,7 +41,9 @@ def get_data_paths() -> Dict[str, Path]:
 
     for base in base_paths:
         # Food dataset
-        food_path = base / "Dataset" / "Food_dataset.csv"
+        food_path = base / "backend" / "nutrients.csv"
+        if not food_path.exists():
+            food_path = base / "nutrients.csv"
         if food_path.exists() and 'food_dataset' not in paths:
             paths['food_dataset'] = food_path
 

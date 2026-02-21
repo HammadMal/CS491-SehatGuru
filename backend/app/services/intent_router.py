@@ -69,6 +69,7 @@ If no target is given, aim for a balanced 1800-2200 kcal day.
 
 Use Urdu food names alongside English where helpful (e.g., "Dal Chawal (Lentils & Rice)").
 Only use dishes listed in the retrieved context. If no suitable option exists for a slot, use a simple staple (e.g., plain roti with daal).
+Each dish must appear AT MOST ONCE across the entire meal plan — do not repeat the same dish in multiple meal slots.
 If the User Memory section lists any food dislikes, those foods are FORBIDDEN from the meal plan."""
 
 
@@ -345,6 +346,12 @@ async def retrieve_meal_plan_context(state: RouterState) -> dict:
         user_ctx = state.get("user_context")
         base_query = state["message"]
 
+        # Append user memory to main meal slot queries so ChromaDB retrieves
+        # dishes aligned with the user's stated preferences and favourites.
+        # Breakfast and snacks are left unaffected (karahi at breakfast makes no sense).
+        user_memory = state.get("user_memory", "")
+        preference_suffix = f" user preferences: {user_memory[:300]}" if user_memory else ""
+
         # Four concurrent queries — one per meal slot for appropriate dish variety
         breakfast_r, lunch_r, dinner_r, snacks_r = await asyncio.gather(
             rag_service.hybrid_search_async(
@@ -352,11 +359,11 @@ async def retrieve_meal_plan_context(state: RouterState) -> dict:
                 user_context=user_ctx, guidelines_top_k=0, dishes_top_k=3,
             ),
             rag_service.hybrid_search_async(
-                query=f"lunch dishes {base_query}",
+                query=f"lunch dishes {base_query}{preference_suffix}",
                 user_context=user_ctx, guidelines_top_k=0, dishes_top_k=3,
             ),
             rag_service.hybrid_search_async(
-                query=f"dinner main course dishes {base_query}",
+                query=f"dinner main course dishes {base_query}{preference_suffix}",
                 user_context=user_ctx, guidelines_top_k=0, dishes_top_k=3,
             ),
             rag_service.hybrid_search_async(
@@ -366,6 +373,8 @@ async def retrieve_meal_plan_context(state: RouterState) -> dict:
         )
 
         context_parts = []
+        seen_dishes = set()  # track names across slots to prevent duplicates
+
         for slot, results in [
             ("Breakfast Options", breakfast_r),
             ("Lunch Options", lunch_r),
@@ -373,9 +382,15 @@ async def retrieve_meal_plan_context(state: RouterState) -> dict:
             ("Snack Options", snacks_r),
         ]:
             dishes = results.get("dishes", [])
-            if dishes:
+            unique_dishes = [
+                d for d in dishes
+                if d["name"].lower().strip() not in seen_dishes
+            ]
+            seen_dishes.update(d["name"].lower().strip() for d in unique_dishes)
+
+            if unique_dishes:
                 context_parts.append(f"\n## {slot}:\n")
-                for d in dishes:
+                for d in unique_dishes:
                     context_parts.append(
                         f"- **{d['name']}**: {d['calories']:.0f} kcal | "
                         f"P: {d['protein_g']:.1f}g | "
