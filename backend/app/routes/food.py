@@ -187,6 +187,34 @@ async def detect_food_detailed(
             # Extract predictions list (available for both CONFIRMED and ASK_USER)
             preds = predictions.get("predictions", [])
             
+            if status == "UNKNOWN_OBJECT":
+                # Object not in our dataset - return with unknown flag
+                for pred in preds:
+                    dish = pred.get("dish", "")
+                    conf = float(pred.get("confidence", 0.0))
+                    if conf > 1.0:
+                        conf = conf / 100.0
+                    nutrients = get_macros(dish) if dish else None
+                    formatted_predictions.append({
+                        "food_name": dish,
+                        "confidence": conf,
+                        "is_low_confidence": True,
+                        "is_unknown": True,
+                        "nutrients": nutrients
+                    })
+                if not formatted_predictions:
+                    formatted_predictions.append({
+                        "food_name": "Unknown",
+                        "confidence": 0.0,
+                        "is_low_confidence": True,
+                        "is_unknown": True,
+                        "nutrients": None
+                    })
+                return FoodDetectionDetailedResponse(
+                    predictions=formatted_predictions,
+                    top_prediction=formatted_predictions[0]
+                )
+
             if preds:
                 # Use the predictions list with individual confidence scores
                 for pred in preds:
