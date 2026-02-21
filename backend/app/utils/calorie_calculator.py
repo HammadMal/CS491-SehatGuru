@@ -127,6 +127,36 @@ def adjust_for_goals(tdee: float, health_goals: List[str]) -> Tuple[int, int]:
     return adjusted_calories, adjustment
 
 
+def calculate_macro_goals(daily_calorie_goal: int, health_goals: List[str]) -> Dict[str, int]:
+    """
+    Calculate daily macronutrient goals in grams from the calorie goal.
+
+    Macro splits vary by health objective:
+    - Lose weight / maintain: 45% carbs · 30% protein · 25% fat
+    - Gain weight / build muscle: 50% carbs · 25% protein · 25% fat
+
+    Caloric density: carbs = 4 kcal/g, protein = 4 kcal/g, fat = 9 kcal/g
+
+    Args:
+        daily_calorie_goal: Final calorie target in kcal
+        health_goals: List of health goal strings
+
+    Returns:
+        Dictionary with daily_carbs_goal, daily_protein_goal, daily_fat_goal (all int, grams)
+    """
+    if "gain-weight" in health_goals or "build-muscle" in health_goals:
+        carb_pct, protein_pct, fat_pct = 0.50, 0.25, 0.25
+    else:
+        # lose-weight, maintain-weight, improve-health, manage-condition
+        carb_pct, protein_pct, fat_pct = 0.45, 0.30, 0.25
+
+    return {
+        "daily_carbs_goal":   int((daily_calorie_goal * carb_pct)   / 4),
+        "daily_protein_goal": int((daily_calorie_goal * protein_pct) / 4),
+        "daily_fat_goal":     int((daily_calorie_goal * fat_pct)     / 9),
+    }
+
+
 def calculate_daily_calories(
     age: int,
     gender: str,
@@ -181,7 +211,10 @@ def calculate_daily_calories(
     
     # Adjust for goals
     daily_calorie_goal, goal_adjustment = adjust_for_goals(tdee, health_goals)
-    
+
+    # Calculate macro goals from calorie goal
+    macro_goals = calculate_macro_goals(daily_calorie_goal, health_goals)
+
     # Return comprehensive result
     return {
         "daily_calorie_goal": daily_calorie_goal,
@@ -189,7 +222,8 @@ def calculate_daily_calories(
         "tdee": round(tdee, 1),
         "goal_adjustment": goal_adjustment,
         "calculation_method": "mifflin-st-jeor-1990",
-        "last_calculated_at": datetime.utcnow().isoformat()
+        "last_calculated_at": datetime.utcnow().isoformat(),
+        **macro_goals,
     }
 
 

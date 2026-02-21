@@ -40,7 +40,7 @@ function RootLayoutNav() {
     }
 
     // ===== 4. User finished onboarding =====
-    const allowedScreens = ['(tabs)', 'manual', 'analytics'];
+    const allowedScreens = ['(tabs)', 'manual', 'analytics', 'edit-profile'];
     if (!allowedScreens.includes(segment)) {
       router.replace('/(tabs)');
     }
