@@ -73,6 +73,11 @@ class UserProfileResponse(BaseModel):
     calculation_method: Optional[str] = Field(default=None, description="Algorithm used for calculation")
     calorie_last_calculated_at: Optional[datetime] = Field(default=None, description="When calories were last calculated")
 
+    # Macronutrient goal fields (in grams)
+    daily_carbs_goal: Optional[int] = Field(default=None, description="Daily carbohydrate goal in grams")
+    daily_protein_goal: Optional[int] = Field(default=None, description="Daily protein goal in grams")
+    daily_fat_goal: Optional[int] = Field(default=None, description="Daily fat goal in grams")
+
     class Config:
         json_encoders = {
             datetime: lambda v: v.isoformat() if v else None

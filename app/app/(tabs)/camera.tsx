@@ -9,20 +9,16 @@ import {
   Alert,
   ScrollView,
 } from 'react-native';
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView } from 'react-native-safe-area-context';
 import apiClient from '../../services/api';
-import AddMealModal from "../../components/AddMealModal";
-import FoodSelectionModal from "../../components/FoodSelectionModal";
-import { router, useLocalSearchParams } from "expo-router";
-import { useMealStore } from "../../store/useMealStore";
-import { Meal } from "../../types/meal.types";
-import * as Crypto from "expo-crypto";
-import { useAuth } from "../../hooks/useAuth";
-import { saveMealToFirestore } from "../../services/meals.firestore";
-
-
-
-
+import AddMealModal from '../../components/AddMealModal';
+import FoodSelectionModal from '../../components/FoodSelectionModal';
+import { router, useLocalSearchParams } from 'expo-router';
+import { useMealStore } from '../../store/useMealStore';
+import { Meal } from '../../types/meal.types';
+import * as Crypto from 'expo-crypto';
+import { useAuth } from '../../hooks/useAuth';
+import { saveMealToFirestore } from '../../services/meals.firestore';
 
 interface Nutrition {
   calories: number;
@@ -45,7 +41,14 @@ interface FoodOption {
   nutrients?: Nutrition;
 }
 
-export default function CameraScreen({ navigation }: any) {
+const MEAL_META: Record<string, { icon: any; color: string; bg: string }> = {
+  Breakfast: { icon: 'sunny-outline', color: '#f59e0b', bg: '#fffbeb' },
+  Lunch: { icon: 'restaurant-outline', color: '#22c55e', bg: '#f0fdf4' },
+  Dinner: { icon: 'moon-outline', color: '#6366f1', bg: '#eef2ff' },
+  Snack: { icon: 'cafe-outline', color: '#ec4899', bg: '#fdf2f8' },
+};
+
+export default function CameraScreen() {
   const { mealType: urlMealType } = useLocalSearchParams<{ mealType?: string }>();
   const [image, setImage] = useState<string | null>(null);
   const [detection, setDetection] = useState<FoodDetectionResult | null>(null);
@@ -58,36 +61,34 @@ export default function CameraScreen({ navigation }: any) {
   const { addMeal } = useMealStore();
   const { user } = useAuth();
 
-
+  const currentMealType = urlMealType || 'Dinner';
+  const meta = MEAL_META[currentMealType] || MEAL_META.Dinner;
 
   const openCamera = async () => {
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
-    if (status !== "granted") {
-      alert("Camera permission is required!");
+    if (status !== 'granted') {
+      alert('Camera permission is required!');
       return;
     }
-
     const result = await ImagePicker.launchCameraAsync({
       allowsEditing: true,
       aspect: [4, 4],
       quality: 0.8,
     });
-
     if (!result.canceled) {
       const imageUri = result.assets[0].uri;
       setImage(imageUri);
       setDetection(null);
       setNutrients(null);
       setError(null);
-      setFoodOptions([]); // Clear previous options
-      setSelectionModalVisible(false); // Ensure closed
-      setModalVisible(false); // Don't open yet, wait for results
-
+      setFoodOptions([]);
+      setSelectionModalVisible(false);
+      setModalVisible(false);
       await detectFood(imageUri);
     }
   };
 
-    const handleModalClose = () => {
+  const handleModalClose = () => {
     setModalVisible(false);
     setSelectionModalVisible(false);
     setImage(null);
@@ -98,7 +99,6 @@ export default function CameraScreen({ navigation }: any) {
   };
 
   const handleFoodSelection = (selectedFood: FoodOption) => {
-    // Close selection modal and open regular modal with selected food
     setSelectionModalVisible(false);
     setDetection({
       food_name: selectedFood.food_name,
@@ -111,23 +111,19 @@ export default function CameraScreen({ navigation }: any) {
   };
 
   const handleRetake = () => {
-      handleModalClose();
-      setTimeout(openCamera, 200);
-    };
+    handleModalClose();
+    setTimeout(openCamera, 200);
+  };
 
   const handleManual = () => {
-  setModalVisible(false);
-
-  // wait for modal to close before navigating
-  setTimeout(() => {
-    router.push(`/manual?mealType=${urlMealType || "Dinner"}`);
-  }, 150);
-};
-
+    setModalVisible(false);
+    setTimeout(() => {
+      router.push(`/manual?mealType=${currentMealType}`);
+    }, 150);
+  };
 
   const handleDone = async (mealData: any) => {
     if (!user) return;
-
     const meal: Meal = {
       id: Crypto.randomUUID(),
       userId: user.id,
@@ -138,154 +134,151 @@ export default function CameraScreen({ navigation }: any) {
       protein: Number(mealData.nutrients.protein),
       carbs: Number(mealData.nutrients.carbs),
       fat: Number(mealData.nutrients.fat),
-      source: "camera",
+      source: 'camera',
       createdAt: new Date().toISOString(),
     };
-
-
     await saveMealToFirestore(meal);
-
-
     addMeal(meal);
-
-
     handleModalClose();
-
-    // Navigate to dashboard to see the added meal
-    setTimeout(() => {
-      router.push("/(tabs)/");
-    }, 150);
-    };
-
-
-
+    setTimeout(() => router.push('/(tabs)/'), 150);
+  };
 
   const detectFood = async (imageUri: string) => {
     setLoading(true);
-    setModalVisible(true); // Open loading modal
-    
+    setModalVisible(true);
     try {
       const formData = new FormData();
       const filename = imageUri.split('/').pop() || 'food.jpg';
       const match = /\.(\w+)$/.exec(filename);
       const type = match ? `image/${match[1]}` : 'image/jpeg';
+      formData.append('file', { uri: imageUri, name: filename, type } as any);
 
-      formData.append("file", {
-        uri: imageUri,
-        name: filename,
-        type,
-      } as any);
-
-      // Always call detailed endpoint to get top 3 predictions
       const response = await apiClient.post(
-        "/api/food/detect/detailed?top_k=3",
+        '/api/food/detect/detailed?top_k=3',
         formData,
-        { headers: { "Content-Type": "multipart/form-data" } }
+        { headers: { 'Content-Type': 'multipart/form-data' } }
       );
 
-      if (response.data.predictions && response.data.predictions.length > 0) {
-        const firstPrediction = response.data.predictions[0];
-        
-        console.log('API Response - predictions:', response.data.predictions);
-        console.log('First prediction is_low_confidence:', firstPrediction.is_low_confidence);
-        
-        // Check if we need to show multiple options
-        if (firstPrediction.is_low_confidence) {
-          console.log('ASK_USER triggered, showing selection modal');
-          console.log('Options to set:', response.data.predictions);
-          
+      if (response.data.predictions?.length > 0) {
+        const first = response.data.predictions[0];
+        if (first.is_low_confidence) {
           setLoading(false);
           setError(null);
           setDetection(null);
-          setModalVisible(false); // Close loading modal
-          
-          // Set options and open selection modal
+          setModalVisible(false);
           setFoodOptions(response.data.predictions);
           setSelectionModalVisible(true);
-          
-          console.log('State updates complete');
           return;
         }
-
-        // High confidence: show single result in AddMealModal
         setError(null);
-        setDetection(firstPrediction);
-        setNutrients(firstPrediction.nutrients || null);
+        setDetection(first);
+        setNutrients(first.nutrients || null);
         setLoading(false);
-        // modalVisible is already true, so AddMealModal will show content
       } else {
-        throw new Error("No predictions returned");
+        throw new Error('No predictions returned');
       }
-
     } catch (err: any) {
-      const errorMsg =
-        err.response?.data?.detail || err.message || "Failed to detect food.";
+      const errorMsg = err.response?.data?.detail || err.message || 'Failed to detect food.';
       setError(errorMsg);
       setLoading(false);
-      Alert.alert("Error", errorMsg);
+      Alert.alert('Error', errorMsg);
     }
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
+    <SafeAreaView style={styles.safe}>
+      <ScrollView contentContainerStyle={styles.scroll}>
 
-        {/* HEADER */}
-        <Text style={styles.title}>Add a Meal</Text>
-
-        <Text style={styles.subtitle}>
-          Track your nutrition with camera or manual entry
-        </Text>
-
-        {/* {urlMealType && (
-  <View style={styles.mealTypePill}>
-    <Text style={styles.mealTypeText}>{urlMealType}</Text>
-  </View>
-)} */}
-
-
-
-        {/* MAIN MENU (no image yet) */}
-        <View style={styles.card}>
-
-          <TouchableOpacity style={styles.cameraMainBtn} onPress={openCamera}>
-            <Ionicons name="camera" size={22} color="white" />
-            <Text style={styles.cameraMainBtnText}>Add Meal with Camera</Text>
-          </TouchableOpacity>
-
-          <View style={styles.divider} />
-
-
-          <TouchableOpacity style={styles.manualBtn} onPress={() => router.push(`/manual?mealType=${urlMealType || "Dinner"}`)}>
-            <Ionicons name="create-outline" size={18} color="#374151" />
-            <Text style={styles.manualBtnText}>Log Meal Manually</Text>
-          </TouchableOpacity>
+        {/* ── Header ── */}
+        <View style={styles.header}>
+          <Text style={styles.heading}>Add a Meal</Text>
+          <Text style={styles.subheading}>Snap a photo or search manually</Text>
         </View>
 
-
-      
-        {/* ERROR */}
-        {error && (
-          <View style={styles.errorCard}>
-            <Text style={styles.errorText}>{error}</Text>
+        {/* ── Meal type context pill ── */}
+        {urlMealType && (
+          <View style={[styles.mealPill, { backgroundColor: meta.bg }]}>
+            <Ionicons name={meta.icon} size={14} color={meta.color} />
+            <Text style={[styles.mealPillText, { color: meta.color }]}>
+              Adding to {currentMealType}
+            </Text>
           </View>
         )}
 
-        <AddMealModal
-          visible={modalVisible}
-          loading={loading}
-          onClose={handleModalClose}
-          onRetake={handleRetake}
-          onManual={handleManual}
-          onDone={handleDone}
-          foodName={detection?.food_name}
-          nutrients={nutrients}
-          image={image}
-          isManual={false}
-          defaultMealType={urlMealType || "Dinner"}
-        />
+        {/* ── Camera action ── */}
+        <TouchableOpacity style={styles.cameraCard} onPress={openCamera} activeOpacity={0.85}>
+          <View style={styles.cameraIconRing}>
+            <Ionicons name="camera" size={32} color="#22c55e" />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.cameraCardTitle}>Scan with Camera</Text>
+            <Text style={styles.cameraCardSub}>AI identifies your food instantly</Text>
+          </View>
+          <View style={styles.cameraArrow}>
+            <Ionicons name="arrow-forward" size={18} color="#22c55e" />
+          </View>
+        </TouchableOpacity>
 
+        {/* ── Divider ── */}
+        <View style={styles.orRow}>
+          <View style={styles.orLine} />
+          <Text style={styles.orText}>or</Text>
+          <View style={styles.orLine} />
+        </View>
+
+        {/* ── Manual entry ── */}
+        <TouchableOpacity
+          style={styles.manualCard}
+          activeOpacity={0.85}
+          onPress={() => router.push(`/manual?mealType=${currentMealType}`)}
+        >
+          <View style={styles.manualIconRing}>
+            <Ionicons name="search" size={20} color="#6366f1" />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.manualCardTitle}>Search Food Database</Text>
+            <Text style={styles.manualCardSub}>Browse thousands of foods & calories</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={18} color="#bbb" />
+        </TouchableOpacity>
+
+        {/* ── Tips card ── */}
+        <View style={styles.tipsCard}>
+          <Text style={styles.tipsHeading}>📸 Camera tips</Text>
+          {[
+            'Place food on a flat surface',
+            'Good lighting gives better results',
+            'Get close so the food fills the frame',
+          ].map((tip) => (
+            <View key={tip} style={styles.tipRow}>
+              <View style={styles.tipDot} />
+              <Text style={styles.tipText}>{tip}</Text>
+            </View>
+          ))}
+        </View>
+
+        {/* ── Error ── */}
+        {error && (
+          <View style={styles.errorCard}>
+            <Ionicons name="alert-circle-outline" size={18} color="#ef4444" />
+            <Text style={styles.errorText}>{error}</Text>
+          </View>
+        )}
       </ScrollView>
+
+      <AddMealModal
+        visible={modalVisible}
+        loading={loading}
+        onClose={handleModalClose}
+        onRetake={handleRetake}
+        onManual={handleManual}
+        onDone={handleDone}
+        foodName={detection?.food_name}
+        nutrients={nutrients}
+        image={image}
+        isManual={false}
+        defaultMealType={currentMealType}
+      />
 
       {selectionModalVisible && (
         <FoodSelectionModal
@@ -303,189 +296,119 @@ export default function CameraScreen({ navigation }: any) {
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: "#f3f4f6",
+  safe: { flex: 1, backgroundColor: '#F3F6FA' },
+  scroll: { paddingHorizontal: 20, paddingTop: 16, paddingBottom: 60 },
+
+  /* Header */
+  header: { marginBottom: 20 },
+  heading: { fontSize: 26, fontWeight: '800', color: '#111' },
+  subheading: { fontSize: 14, color: '#888', marginTop: 4 },
+
+  /* Meal type pill */
+  mealPill: {
+    alignSelf: 'flex-start',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    marginBottom: 20,
   },
+  mealPillText: { fontSize: 13, fontWeight: '700' },
 
-  scrollContainer: {
-  paddingHorizontal: 20,
-  paddingTop: 20,   // ⬅ ADD
-  paddingBottom: 40,
-  alignItems: "center",
-},
-
-
-  title: {
-  fontSize: 24,
-  fontWeight: "700",
-  marginTop: 10,
-  marginBottom: 6,   // ⬅ reduce from 20
-  color: "#1f2937",
-  textAlign: "center",
-},
-
- 
-
-  cameraMainBtn: {
-  flexDirection: "row",
-  alignItems: "center",
-  backgroundColor: "#22c55e",
-  paddingVertical: 16,
-  paddingHorizontal: 22,
-  borderRadius: 14,
-  width: "100%",
-  justifyContent: "center",
-  shadowColor: "#22c55e",
-  shadowOpacity: 0.25,
-  shadowRadius: 8,
-  elevation: 3,
-},
-
-
-  cameraMainBtnText: {
-    color: "white",
-    marginLeft: 10,
-    fontSize: 17,
-    fontWeight: "600",
+  /* Camera card */
+  cameraCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    padding: 20,
+    borderWidth: 2,
+    borderColor: '#22c55e',
+    shadowColor: '#22c55e',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.12,
+    shadowRadius: 14,
+    elevation: 5,
+    marginBottom: 20,
   },
-
-  manualBtn: {
-  flexDirection: "row",
-  alignItems: "center",
-  backgroundColor: "#e5e7eb",
-  paddingVertical: 14,
-  borderRadius: 12,
-  width: "100%",          // ⬅ change from 75%
-  justifyContent: "center",
-},
-
-
-  manualBtnText: {
-    fontSize: 15,
-    color: "#374151",
-    marginLeft: 8,
-    fontWeight: "500",
-  },
-
-  preview: {
-    width: "95%",
-    height: 260,
+  cameraIconRing: {
+    width: 56,
+    height: 56,
     borderRadius: 16,
-    marginTop: 20,
+    backgroundColor: '#f0fdf4',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-
-  resultCard: {
-    width: "95%",
-    backgroundColor: "#ecfdf5",
-    padding: 16,
-    borderRadius: 12,
-    borderLeftWidth: 4,
-    borderLeftColor: "#22c55e",
-    marginTop: 20,
-  },
-
-  resultTitle: {
-    fontSize: 13,
-    color: "#059669",
-    fontWeight: "600",
-    marginBottom: 6,
-  },
-
-  foodName: {
-    fontSize: 22,
-    fontWeight: "700",
-    color: "#1f2937",
-    marginBottom: 12,
-  },
-
-  retakeBtn: {
-    backgroundColor: "#22c55e",
-    paddingVertical: 10,
+  cameraCardTitle: { fontSize: 16, fontWeight: '700', color: '#111' },
+  cameraCardSub: { fontSize: 12, color: '#888', marginTop: 3 },
+  cameraArrow: {
+    width: 32,
+    height: 32,
     borderRadius: 10,
-    alignItems: "center",
+    backgroundColor: '#f0fdf4',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 
-  retakeBtnText: {
-    color: "white",
-    fontSize: 16,
-    fontWeight: "600",
-  },
+  /* OR divider */
+  orRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 20 },
+  orLine: { flex: 1, height: 1, backgroundColor: '#E5E7EB' },
+  orText: { fontSize: 12, color: '#aaa', fontWeight: '600' },
 
-  nutritionCard: {
-    width: "95%",
-    marginTop: 20,
+  /* Manual card */
+  manualCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+    backgroundColor: '#fff',
+    borderRadius: 20,
     padding: 18,
-    backgroundColor: "white",
-    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#E8EDF2',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 3,
+    marginBottom: 24,
   },
-
-  nutritionTitle: {
-    fontSize: 18,
-    fontWeight: "700",
-    marginBottom: 10,
+  manualIconRing: {
+    width: 48,
+    height: 48,
+    borderRadius: 14,
+    backgroundColor: '#eef2ff',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
+  manualCardTitle: { fontSize: 15, fontWeight: '700', color: '#111' },
+  manualCardSub: { fontSize: 12, color: '#888', marginTop: 3 },
 
-  nutritionItem: {
-    fontSize: 15,
-    marginBottom: 4,
-    color: "#374151",
-  },
-
-  errorCard: {
-    width: "95%",
-    backgroundColor: "#fee2e2",
-    borderRadius: 12,
+  /* Tips card */
+  tipsCard: {
+    backgroundColor: '#fffbeb',
+    borderRadius: 16,
     padding: 16,
-    marginTop: 20,
+    borderWidth: 1,
+    borderColor: '#fde68a',
+    gap: 8,
+    marginBottom: 20,
   },
+  tipsHeading: { fontSize: 13, fontWeight: '700', color: '#92400e', marginBottom: 4 },
+  tipRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  tipDot: { width: 5, height: 5, borderRadius: 3, backgroundColor: '#f59e0b' },
+  tipText: { fontSize: 13, color: '#78350f' },
 
-  errorText: {
-    color: "#b91c1c",
-    fontSize: 15,
-    fontWeight: "600",
+  /* Error */
+  errorCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: '#fee2e2',
+    borderRadius: 12,
+    padding: 14,
   },
-
-  subtitle: {
-  fontSize: 14,
-  color: "#6b7280",
-  marginBottom: 30,
-  textAlign: "center",
-},
-
-card: {
-  width: "100%",
-  backgroundColor: "white",
-  borderRadius: 18,
-  padding: 20,
-  marginTop: 12,     // ⬅ ADD THIS
-  shadowColor: "#000",
-  shadowOpacity: 0.08,
-  shadowRadius: 10,
-  elevation: 4,
-},
-
-
-divider: {
-  height: 1,
-  backgroundColor: "#e5e7eb",
-  marginVertical: 16,
-},
-
-// mealTypePill: {
-//   alignSelf: "center",
-//   backgroundColor: "#ecfdf5",
-//   paddingHorizontal: 14,
-//   paddingVertical: 6,
-//   borderRadius: 999,
-//   marginBottom: 16,
-// },
-
-// mealTypeText: {
-//   color: "#059669",
-//   fontSize: 13,
-//   fontWeight: "600",
-// },
-
-
+  errorText: { flex: 1, color: '#b91c1c', fontSize: 14, fontWeight: '500' },
 });

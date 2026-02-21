@@ -69,6 +69,9 @@ class UserService:
                 profile_dict["goal_adjustment"] = calorie_result["goal_adjustment"]
                 profile_dict["calculation_method"] = calorie_result["calculation_method"]
                 profile_dict["calorie_last_calculated_at"] = datetime.fromisoformat(calorie_result["last_calculated_at"])
+                profile_dict["daily_carbs_goal"] = calorie_result["daily_carbs_goal"]
+                profile_dict["daily_protein_goal"] = calorie_result["daily_protein_goal"]
+                profile_dict["daily_fat_goal"] = calorie_result["daily_fat_goal"]
                 
                 print(f"Calculated daily calorie goal: {calorie_result['daily_calorie_goal']} for user {uid}")
             except Exception as calc_error:
@@ -110,7 +113,10 @@ class UserService:
                 tdee=updated_user.get("tdee"),
                 goal_adjustment=updated_user.get("goal_adjustment"),
                 calculation_method=updated_user.get("calculation_method"),
-                calorie_last_calculated_at=updated_user.get("calorie_last_calculated_at")
+                calorie_last_calculated_at=updated_user.get("calorie_last_calculated_at"),
+                daily_carbs_goal=updated_user.get("daily_carbs_goal"),
+                daily_protein_goal=updated_user.get("daily_protein_goal"),
+                daily_fat_goal=updated_user.get("daily_fat_goal"),
             )
 
         except HTTPException:
@@ -173,7 +179,10 @@ class UserService:
                 tdee=user_data.get("tdee"),
                 goal_adjustment=user_data.get("goal_adjustment"),
                 calculation_method=user_data.get("calculation_method"),
-                calorie_last_calculated_at=user_data.get("calorie_last_calculated_at")
+                calorie_last_calculated_at=user_data.get("calorie_last_calculated_at"),
+                daily_carbs_goal=user_data.get("daily_carbs_goal"),
+                daily_protein_goal=user_data.get("daily_protein_goal"),
+                daily_fat_goal=user_data.get("daily_fat_goal"),
             )
 
         except HTTPException:
@@ -270,6 +279,9 @@ class UserService:
                         update_dict["goal_adjustment"] = calorie_result["goal_adjustment"]
                         update_dict["calculation_method"] = calorie_result["calculation_method"]
                         update_dict["calorie_last_calculated_at"] = datetime.fromisoformat(calorie_result["last_calculated_at"])
+                        update_dict["daily_carbs_goal"] = calorie_result["daily_carbs_goal"]
+                        update_dict["daily_protein_goal"] = calorie_result["daily_protein_goal"]
+                        update_dict["daily_fat_goal"] = calorie_result["daily_fat_goal"]
                         
                         print(f"Recalculated daily calorie goal: {calorie_result['daily_calorie_goal']} for user {uid}")
                 except Exception as calc_error:

@@ -67,6 +67,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             const profileResponse = await apiClient.get('/api/user/profile');
             if (profileResponse.data?.daily_calorie_goal) {
               updatedUser.daily_calorie_goal = profileResponse.data.daily_calorie_goal;
+              updatedUser.daily_carbs_goal = profileResponse.data.daily_carbs_goal;
+              updatedUser.daily_protein_goal = profileResponse.data.daily_protein_goal;
+              updatedUser.daily_fat_goal = profileResponse.data.daily_fat_goal;
               console.log('Loaded daily calorie goal:', updatedUser.daily_calorie_goal);
             }
           } catch (profileError) {
@@ -114,6 +117,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         const profileResponse = await apiClient.get('/api/user/profile');
         if (profileResponse.data?.daily_calorie_goal) {
           user.daily_calorie_goal = profileResponse.data.daily_calorie_goal;
+          user.daily_carbs_goal = profileResponse.data.daily_carbs_goal;
+          user.daily_protein_goal = profileResponse.data.daily_protein_goal;
+          user.daily_fat_goal = profileResponse.data.daily_fat_goal;
           console.log('Login - Loaded daily calorie goal:', user.daily_calorie_goal);
         }
       } catch (profileError) {
@@ -189,6 +195,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         const profileResponse = await apiClient.get('/api/user/profile');
         if (profileResponse.data?.daily_calorie_goal) {
           user.daily_calorie_goal = profileResponse.data.daily_calorie_goal;
+          user.daily_carbs_goal = profileResponse.data.daily_carbs_goal;
+          user.daily_protein_goal = profileResponse.data.daily_protein_goal;
+          user.daily_fat_goal = profileResponse.data.daily_fat_goal;
           console.log('Google login - Loaded daily calorie goal:', user.daily_calorie_goal);
         }
       } catch (profileError) {
@@ -382,6 +391,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           const updatedUser: User = {
             ...user,
             daily_calorie_goal: profileResponse.data.daily_calorie_goal,
+            daily_carbs_goal: profileResponse.data.daily_carbs_goal,
+            daily_protein_goal: profileResponse.data.daily_protein_goal,
+            daily_fat_goal: profileResponse.data.daily_fat_goal,
           };
           setUser(updatedUser);
           await setObject(STORAGE_KEYS.USER_PROFILE, updatedUser);
@@ -390,6 +402,29 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       } catch (profileError) {
         console.log('Could not fetch calorie goal after onboarding');
       }
+    }
+  };
+
+  // Re-fetch user goals after profile update (called from edit-profile screen)
+  const refreshUserGoals = async (): Promise<void> => {
+    if (!user) return;
+    try {
+      const profileResponse = await apiClient.get('/api/user/profile');
+      if (profileResponse.data) {
+        const updatedUser: User = {
+          ...user,
+          daily_calorie_goal: profileResponse.data.daily_calorie_goal ?? user.daily_calorie_goal,
+          daily_carbs_goal: profileResponse.data.daily_carbs_goal ?? user.daily_carbs_goal,
+          daily_protein_goal: profileResponse.data.daily_protein_goal ?? user.daily_protein_goal,
+          daily_fat_goal: profileResponse.data.daily_fat_goal ?? user.daily_fat_goal,
+          fullName: profileResponse.data.basic_info?.full_name ?? user.fullName,
+        };
+        setUser(updatedUser);
+        await setObject(STORAGE_KEYS.USER_PROFILE, updatedUser);
+        console.log('Goals refreshed - calorie goal:', updatedUser.daily_calorie_goal);
+      }
+    } catch (err) {
+      console.log('Could not refresh user goals:', err);
     }
   };
 
@@ -414,6 +449,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     resetPassword,
     setNewPassword,
     refreshOnboardingStatus,
+    refreshUserGoals,
     setConsentAccepted,
     tempEmail,
     tempPassword,

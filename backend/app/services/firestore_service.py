@@ -4,8 +4,6 @@ from datetime import datetime, timezone
 from app.config.firebase import firebase_client
 from firebase_admin import firestore
 
-db = firebase_client.db
-
 logger = logging.getLogger(__name__)
 
 USER_MEMORY_COLLECTION = "user_memory"
@@ -36,7 +34,7 @@ def get_user_memory(user_id: str) -> dict:
 
 def save_user_memory(user_id: str, user_message: str, bot_response: str) -> int:
     """Append new turn to recent_messages, return updated message_count."""
-    ref = db.collection(USER_MEMORY_COLLECTION).document(user_id)
+    ref = _get_db().collection(USER_MEMORY_COLLECTION).document(user_id)
     doc = ref.get()
     data = doc.to_dict() if doc.exists else {}
 
@@ -61,7 +59,7 @@ def save_user_memory(user_id: str, user_message: str, bot_response: str) -> int:
 
 def update_preference_summary(user_id: str, summary: str) -> None:
     """Store a newly generated preference summary."""
-    ref = db.collection(USER_MEMORY_COLLECTION).document(user_id)
+    ref = _get_db().collection(USER_MEMORY_COLLECTION).document(user_id)
     ref.set({
         "preference_summary": summary,
         "updated_at": datetime.now(timezone.utc).isoformat(),
@@ -80,7 +78,7 @@ async def delete_meal_from_firestore(meal_id: str, user_id: str):
         ValueError: If meal not found or doesn't belong to user
     """
     try:
-        meal_ref = db.collection('meals').document(meal_id)
+        meal_ref = _get_db().collection('meals').document(meal_id)
         meal_doc = meal_ref.get()
 
         if not meal_doc.exists:
