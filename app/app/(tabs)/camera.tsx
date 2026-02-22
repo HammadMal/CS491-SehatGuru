@@ -145,7 +145,7 @@ export default function CameraScreen() {
 
   const detectFood = async (imageUri: string) => {
     setLoading(true);
-    setModalVisible(true);
+    // DO NOT open Modal here — loading overlay is shown separately
     try {
       const formData = new FormData();
       const filename = imageUri.split('/').pop() || 'food.jpg';
@@ -161,19 +161,30 @@ export default function CameraScreen() {
 
       if (response.data.predictions?.length > 0) {
         const first = response.data.predictions[0];
+        if (first.is_unknown) {
+          // UNKNOWN_OBJECT: not in our dataset, show error modal
+          setLoading(false);
+          setError('not_recognized');
+          setDetection(null);
+          setNutrients(null);
+          setModalVisible(true);
+          return;
+        }
         if (first.is_low_confidence) {
+          // ASK_USER: show FoodSelectionModal (no Modal was ever opened)
           setLoading(false);
           setError(null);
           setDetection(null);
-          setModalVisible(false);
           setFoodOptions(response.data.predictions);
           setSelectionModalVisible(true);
           return;
         }
+        // CONFIRMED: now open AddMealModal with result
         setError(null);
         setDetection(first);
         setNutrients(first.nutrients || null);
         setLoading(false);
+        setModalVisible(true);
       } else {
         throw new Error('No predictions returned');
       }
@@ -266,9 +277,21 @@ export default function CameraScreen() {
         )}
       </ScrollView>
 
+      {/* Loading overlay — NOT a Modal, so it won't capture touches after unmount */}
+      {loading && (
+        <View style={styles.loadingOverlay}>
+          <View style={styles.loadingCard}>
+            <Ionicons name="scan-outline" size={42} color="#22c55e" />
+            <Text style={styles.loadingTitle}>Analyzing food</Text>
+            <Text style={styles.loadingSub}>Identifying dish and nutrients…</Text>
+          </View>
+        </View>
+      )}
+
+      {/* Confirmed result — safe to use Modal since it's only opened for confirmed results */}
       <AddMealModal
         visible={modalVisible}
-        loading={loading}
+        loading={false}
         onClose={handleModalClose}
         onRetake={handleRetake}
         onManual={handleManual}
@@ -280,6 +303,7 @@ export default function CameraScreen() {
         defaultMealType={currentMealType}
       />
 
+      {/* ASK_USER — absolute positioned View, no Modal involved */}
       {selectionModalVisible && (
         <FoodSelectionModal
           visible={selectionModalVisible}
@@ -411,4 +435,39 @@ const styles = StyleSheet.create({
     padding: 14,
   },
   errorText: { flex: 1, color: '#b91c1c', fontSize: 14, fontWeight: '500' },
+
+  /* Loading overlay */
+  loadingOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0,0,0,0.45)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 5000,
+  },
+  loadingCard: {
+    backgroundColor: '#fff',
+    borderRadius: 24,
+    padding: 40,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+  loadingTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    marginTop: 14,
+    color: '#1f2937',
+  },
+  loadingSub: {
+    fontSize: 14,
+    color: '#6b7280',
+    marginTop: 6,
+  },
 });

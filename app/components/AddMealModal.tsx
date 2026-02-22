@@ -6,6 +6,10 @@ import {
   TouchableOpacity,
   StyleSheet,
   TextInput,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
 } from "react-native";
 import React, { useState, useEffect } from "react";
 import { Ionicons } from "@expo/vector-icons";
@@ -61,13 +65,21 @@ export default function AddMealModal({
 
   return (
   <Modal visible={visible} transparent animationType="slide">
-    <View style={styles.overlay}>
-      <View style={styles.sheet}>
+    <KeyboardAvoidingView 
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      style={{ flex: 1 }}
+    >
+      <View style={styles.overlay}>
+        <ScrollView 
+          contentContainerStyle={{ flexGrow: 1, justifyContent: "flex-end" }}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View style={styles.sheet}>
 
-        {/* CLOSE BUTTON */}
-        <TouchableOpacity style={styles.closeBtn} onPress={onClose}>
-          <Ionicons name="close" size={26} color="#444" />
-        </TouchableOpacity>
+            {/* CLOSE BUTTON */}
+            <TouchableOpacity style={styles.closeBtn} onPress={onClose}>
+              <Ionicons name="close" size={26} color="#444" />
+            </TouchableOpacity>
 
         {/* 🔄 LOADING STATE */}
         {loading ? (
@@ -80,13 +92,16 @@ export default function AddMealModal({
               </Text>
             </View>
 
-          ) : false ? (
-            /* ================= ERROR - DISABLED ================= */
+          ) : !foodName ? (
+            /* ================= UNKNOWN OBJECT / ERROR ================= */
             <View style={styles.errorState}>
+              {image && (
+                <Image source={{ uri: image }} style={styles.foodImage} />
+              )}
               <Ionicons name="alert-circle-outline" size={42} color="#dc2626" />
-              <Text style={styles.errorTitle}>Couldn’t identify food</Text>
+              <Text style={styles.errorTitle}>Couldn't identify food</Text>
               <Text style={styles.errorSubtitle}>
-                Try retaking the photo or log the meal manually.
+                This doesn't look like a supported Pakistani dish.{'\n'}Please try again with a clearer photo.
               </Text>
 
               <View style={styles.btnColumn}>
@@ -103,7 +118,7 @@ export default function AddMealModal({
             </View>
 
           ) : foodName ? (
-          <>
+          <Pressable onPress={() => setShowDropdown(false)}>
             {/* FOOD IMAGE */}
             {!isManual && image && (
               <Image source={{ uri: image }} style={styles.foodImage} />
@@ -150,6 +165,8 @@ export default function AddMealModal({
                 style={styles.gramsInput}
                 value={String(grams)}
                 keyboardType="numeric"
+                autoFocus={false}
+                selectTextOnFocus={true}
                 onChangeText={(text) => setGrams(Number(text) || 0)}
               />
             </View>
@@ -215,10 +232,12 @@ export default function AddMealModal({
                 <Text style={styles.doneText}>Done</Text>
               </TouchableOpacity>
             </View>
-          </>
+          </Pressable>
         ) : null}
+          </View>
+        </ScrollView>
       </View>
-    </View>
+    </KeyboardAvoidingView>
   </Modal>
 );
 
@@ -227,7 +246,6 @@ export default function AddMealModal({
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    justifyContent: "flex-end",
     backgroundColor: "rgba(0,0,0,0.45)",
   },
   sheet: {
@@ -236,13 +254,20 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 28,
     padding: 20,
     paddingBottom: 30,
+    maxHeight: '90%',
   },
 
   closeBtn: {
     position: "absolute",
     top: 15,
     right: 20,
-    zIndex: 20,
+    zIndex: 9999,
+    backgroundColor: '#f1f5f9',
+    borderRadius: 20,
+    width: 36,
+    height: 36,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 
   foodImage: {
@@ -252,7 +277,11 @@ const styles = StyleSheet.create({
     marginBottom: 18,
   },
 
-  mealTypeContainer: { marginBottom: 10 },
+  mealTypeContainer: { 
+    marginBottom: 10,
+    position: 'relative',
+    zIndex: 100,
+  },
 
   mealTypeButton: {
     flexDirection: "row",
@@ -267,11 +296,19 @@ const styles = StyleSheet.create({
   mealTypeText: { fontSize: 14, color: "#444", marginRight: 6 },
 
   dropdown: {
+    position: 'absolute',
+    top: 32,
+    left: 0,
     backgroundColor: "#fff",
     borderRadius: 10,
     elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
     marginTop: 4,
     width: 150,
+    zIndex: 1000,
   },
 
   dropdownItem: { paddingVertical: 10, paddingHorizontal: 12 },
