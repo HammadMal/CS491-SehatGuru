@@ -17,6 +17,7 @@ import apiClient from '../services/api';
 import AddMealModal from '../components/AddMealModal';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { getCustomDishes, type CustomDish } from '../services/custom-dish.api';
 
 const MEAL_META: Record<string, { icon: any; color: string; bg: string }> = {
   Breakfast: { icon: 'sunny-outline', color: '#f59e0b', bg: '#fffbeb' },
@@ -32,6 +33,7 @@ export default function ManualMealScreen() {
   const [filtered, setFiltered] = useState<any[]>([]);
   const [selectedFood, setSelectedFood] = useState<any>(null);
   const [loadingData, setLoadingData] = useState(true);
+  const [customDishes, setCustomDishes] = useState<CustomDish[]>([]);
   const { addMeal } = useMealStore();
   const { user } = useAuth();
 
@@ -60,7 +62,18 @@ export default function ManualMealScreen() {
         setLoadingData(false);
       }
     }
+
+    async function fetchCustomDishes() {
+      try {
+        const dishes = await getCustomDishes();
+        setCustomDishes(dishes);
+      } catch {
+        // silent – not critical
+      }
+    }
+
     fetchNutrients();
+    fetchCustomDishes();
   }, []);
 
   useEffect(() => {
@@ -87,7 +100,7 @@ export default function ManualMealScreen() {
     await saveMealToFirestore(meal);
     addMeal(meal);
     setSelectedFood(null);
-    setTimeout(() => router.push('/(tabs)/'), 150);
+    setTimeout(() => router.push('/(tabs)/' as any), 150);
   };
 
   return (
@@ -150,7 +163,53 @@ export default function ManualMealScreen() {
         <View style={styles.centerState}>
           <Ionicons name="search-outline" size={44} color="#E5E7EB" />
           <Text style={styles.centerStateTitle}>No results</Text>
-          <Text style={styles.centerStateText}>Try a different food name</Text>
+          <Text style={styles.centerStateText}>Try a different name, or build your own dish</Text>
+          <TouchableOpacity
+            style={styles.customDishBtn}
+            onPress={() =>
+              router.push({ pathname: '/custom-dish' as any, params: { mealType: currentMealType } })
+            }
+            activeOpacity={0.85}
+          >
+            <Ionicons name="add-circle-outline" size={16} color="#fff" />
+            <Text style={styles.customDishBtnText}>Build Custom Dish</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
+      {/* ── My Custom Dishes ── */}
+      {!search && customDishes.length > 0 && (
+        <View style={{ paddingHorizontal: 16, marginBottom: 8 }}>
+          <Text style={[styles.centerStateTitle, { fontSize: 14, marginBottom: 10, color: '#374151' }]}>
+            My Custom Dishes
+          </Text>
+          {customDishes.map((dish) => (
+            <TouchableOpacity
+              key={dish.id}
+              style={styles.foodItem}
+              onPress={() => setSelectedFood({
+                food_name: dish.food_name,
+                calories: dish.energy_kcal,
+                carbs: dish.carb_g,
+                protein: dish.protein_g,
+                fat: dish.fat_g,
+              })}
+              activeOpacity={0.8}
+            >
+              <View style={styles.foodLeft}>
+                <Text style={styles.foodName} numberOfLines={1}>{dish.food_name}</Text>
+                <View style={styles.macroRow}>
+                  <MacroBadge label="C" value={dish.carb_g ?? 0} color="#f59e0b" />
+                  <MacroBadge label="P" value={dish.protein_g ?? 0} color="#3b82f6" />
+                  <MacroBadge label="F" value={dish.fat_g ?? 0} color="#8b5cf6" />
+                </View>
+              </View>
+              <View style={styles.calBadge}>
+                <Text style={styles.calValue}>{Math.round(dish.energy_kcal ?? 0)}</Text>
+                <Text style={styles.calUnit}>kcal</Text>
+              </View>
+            </TouchableOpacity>
+          ))}
         </View>
       )}
 
@@ -303,4 +362,17 @@ const styles = StyleSheet.create({
   calBadge: { alignItems: 'center', minWidth: 48 },
   calValue: { fontSize: 18, fontWeight: '900', color: '#111' },
   calUnit: { fontSize: 10, color: '#999', fontWeight: '500' },
+
+  /* Custom dish button */
+  customDishBtn: {
+    flexDirection: 'row' as const,
+    alignItems: 'center' as const,
+    gap: 6,
+    marginTop: 8,
+    backgroundColor: '#22c55e',
+    paddingHorizontal: 18,
+    paddingVertical: 12,
+    borderRadius: 14,
+  },
+  customDishBtnText: { color: '#fff', fontSize: 14, fontWeight: '700' as const },
 });
