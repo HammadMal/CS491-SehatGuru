@@ -61,4 +61,5 @@ export interface OnboardingContextType {
   goToNextStep: () => void;
   goToPreviousStep: () => void;
   resetOnboarding: () => void;
+  refreshOnboardingData: () => Promise<void>;
 }

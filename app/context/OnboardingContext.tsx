@@ -180,6 +180,18 @@ export const OnboardingProvider: React.FC<OnboardingProviderProps> = ({ children
     setCurrentStep(0);
   };
 
+  const refreshOnboardingData = async () => {
+    try {
+      const profile = await userAPI.getProfile();
+      if (profile) {
+        setOnboardingData(profile);
+        await setObject(STORAGE_KEYS.ONBOARDING_DATA, profile);
+      }
+    } catch (error) {
+      console.log('Could not refresh onboarding data:', error);
+    }
+  };
+
   const value: OnboardingContextType = {
     onboardingData,
     currentStep,
@@ -192,6 +204,7 @@ export const OnboardingProvider: React.FC<OnboardingProviderProps> = ({ children
     goToNextStep,
     goToPreviousStep,
     resetOnboarding,
+    refreshOnboardingData,
   };
 
   return <OnboardingContext.Provider value={value}>{children}</OnboardingContext.Provider>;

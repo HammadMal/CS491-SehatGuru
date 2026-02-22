@@ -9,6 +9,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { CustomInput } from '../components/auth/CustomInput';
 import { useAuth } from '../hooks/useAuth';
 import { userAPI } from '../services/user.api';
+import { OnboardingContext } from '../context/OnboardingContext';
 import { validateName, validateHeight, validateWeight, validateAge } from '../utils/validation';
 import type { ActivityLevel, HealthGoal } from '../types/onboarding.types';
 
@@ -32,6 +33,7 @@ const HEALTH_GOALS: { value: HealthGoal; label: string; icon: any }[] = [
 
 export default function EditProfileScreen() {
     const { refreshUserGoals } = useAuth();
+    const onboardingContext = React.useContext(OnboardingContext);
 
     /* form state */
     const [fullName, setFullName] = useState('');
@@ -98,8 +100,11 @@ export default function EditProfileScreen() {
                 healthGoals,
             });
 
-            /* refresh goals in context so dashboard updates instantly */
+            /* refresh calorie/macro goals in auth context */
             await refreshUserGoals();
+
+            /* refresh onboarding data in context + AsyncStorage so chatbot picks up new preferences immediately */
+            await onboardingContext?.refreshOnboardingData();
 
             Alert.alert('Profile Updated! 🎉', 'Your calorie and macro goals have been recalculated.', [
                 { text: 'OK', onPress: () => router.back() },
