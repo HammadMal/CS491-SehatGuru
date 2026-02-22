@@ -140,7 +140,26 @@ openssl rand -hex 32
 ```
 Copy output to `.env` as `JWT_SECRET_KEY`
 
-### 7. Run the Server
+### 7. RAG Setup (Required for Chatbot)
+
+The chatbot uses ChromaDB as a local vector store. It is not included in the repo and must be built on every new machine by running the two ingestion scripts below.
+
+```bash
+# Make sure you are inside the backend/ directory
+cd backend
+
+# Ingest Pakistani Dietary Guidelines PDFs into ChromaDB
+python -m app.scripts.ingest_knowledge_base
+
+# Ingest the dishes dataset into ChromaDB
+python -m app.scripts.ingest_dishes
+```
+
+Both scripts will print progress as they run. You only need to do this once per machine (or when the dataset changes).
+
+**Note:** The `GEMINI_API_KEY` must be set in your `.env` before running these — embeddings are generated via the Gemini API.
+
+### 8. Run the Server
 
 ```bash
 # Quick start
@@ -163,6 +182,7 @@ Open your browser:
 - [ ] Dependencies installed (`pip list` shows fastapi, firebase-admin, etc.)
 - [ ] `.env` file created with all required values
 - [ ] `firebase-credentials.json` exists in backend folder
+- [ ] RAG ingestion scripts run successfully (both `ingest_knowledge_base` and `ingest_dishes`)
 - [ ] Server starts without errors
 - [ ] http://localhost:8000/docs loads successfully
 - [ ] Firebase connection successful (check server logs)

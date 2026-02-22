@@ -61,7 +61,7 @@ class AuthService:
             user_doc_data = {
                 "email": user_data.email,
                 "full_name": user_data.full_name if user_data.full_name else "",
-                "email_verified": False,
+                "email_verified": True,
                 "created_at": now,
                 "updated_at": now,
                 "auth_provider": "email",
@@ -166,14 +166,6 @@ class AuthService:
             except Exception as e:
                 print(f"Error syncing email verification status: {str(e)}")
                 # Continue with login even if sync fails
-
-            # Check if email is verified
-            email_verified = user_data.get("email_verified", False)
-            if not email_verified:
-                raise HTTPException(
-                    status_code=status.HTTP_403_FORBIDDEN,
-                    detail="Please verify your email before logging in. Check your inbox for the verification link."
-                )
 
             # Update last login timestamp
             users_ref.document(uid).update({
