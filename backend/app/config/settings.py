@@ -76,6 +76,10 @@ class Settings(BaseSettings):
     RAG_TOP_K: int = 5
     EMBEDDING_MODEL: str = "models/gemini-embedding-001"
 
+    # Memory (Mem0 OSS)
+    MEM0_COLLECTION_NAME: str = "sehatguru_user_memories"
+    MEM0_CHROMA_DIR: str = "./chroma_db_mem0"
+
     # Self-Validation Settings
     ENABLE_RESPONSE_VALIDATION: bool = True
     VALIDATION_MAX_RETRIES: int = 1
