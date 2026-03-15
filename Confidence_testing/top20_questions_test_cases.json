@@ -1,0 +1,159 @@
+{
+  "test_profile": {
+    "note": "This profile is injected into every test request. Edit it to test different user personas.",
+    "user_context": {
+      "age": 22,
+      "gender": "male",
+      "weight_kg": 64,
+      "height_cm": 175,
+      "activity_level": "moderately_active",
+      "health_goals": ["muscle_gain", "weight_gain"],
+      "dietary_restrictions": ["Halal Food", "no pork", "Meat Lover (Chicken and Beef)"],
+      "daily_calorie_target": 2800
+    },
+    "preference_summary": "The user is a 22-year-old male university student weighing 64kg who wants to gain weight and build muscle. They sometimes skip breakfast due to their schedule. They like Pakistani cuisine and prefer home-cooked meals. They dislike overly spicy food and have mentioned they love karahi but don't like Biryani"
+  },
+
+  "top20_questions": [
+    {
+      "id": "Q-01",
+      "prompt": "Can I use intermittent fasting to lose weight more quickly?",
+      "tags": ["intermittent_fasting", "weight_loss"],
+      "expected_intent": "nutritional_advice",
+      "category_label": "Weight & Body-Goal"
+    },
+    {
+      "id": "Q-02",
+      "prompt": "How can I eat tastily whilst using less salt?",
+      "tags": ["sodium", "low_salt", "flavor"],
+      "expected_intent": "nutritional_advice",
+      "category_label": "Nutritional Facts"
+    },
+    {
+      "id": "Q-03",
+      "prompt": "Are the sugars in fruit bad to consume?",
+      "tags": ["sugar", "fruit", "fructose"],
+      "expected_intent": "nutritional_advice",
+      "category_label": "Nutritional Facts"
+    },
+    {
+      "id": "Q-04",
+      "prompt": "Are carbohydrates bad?",
+      "tags": ["carbs", "macros", "general"],
+      "expected_intent": "nutritional_advice",
+      "category_label": "Nutritional Facts"
+    },
+    {
+      "id": "Q-05",
+      "prompt": "Is it better to swap sugar for honey? Or Gudh?",
+      "tags": ["sugar", "honey", "jaggery", "comparison"],
+      "expected_intent": "nutritional_advice",
+      "category_label": "Nutritional Facts"
+    },
+    {
+      "id": "Q-06",
+      "prompt": "What is a healthy snack?",
+      "tags": ["snacks", "healthy_eating"],
+      "expected_intent": "nutritional_advice",
+      "category_label": "Meal Planning"
+    },
+    {
+      "id": "Q-07",
+      "prompt": "I've tried many diets in the past. I lose weight but it comes back.",
+      "tags": ["yo_yo_dieting", "weight_loss", "sustainability"],
+      "expected_intent": "nutritional_advice",
+      "category_label": "Weight & Body-Goal"
+    },
+    {
+      "id": "Q-08",
+      "prompt": "Is vitamin/mineral supplementation necessary?",
+      "tags": ["supplements", "vitamins", "minerals"],
+      "expected_intent": "nutritional_advice",
+      "category_label": "Supplementation"
+    },
+    {
+      "id": "Q-09",
+      "prompt": "How can I reduce calories in Pakistani home cooking (like Salan) without losing flavor?",
+      "tags": ["weight_loss", "cooking_tips", "pakistani_food", "low_calorie"],
+      "expected_intent": "nutritional_advice",
+      "category_label": "Meal Planning"
+    },
+    {
+      "id": "Q-10",
+      "prompt": "What is the best diet for PCOS to help with weight loss and facial hair?",
+      "tags": ["pcos", "hormonal", "women", "weight_loss", "health_condition"],
+      "expected_intent": "nutritional_advice",
+      "category_label": "Health Condition"
+    },
+    {
+      "id": "Q-11",
+      "prompt": "I have Type 2 Diabetes; can I still eat white rice or Roti daily?",
+      "tags": ["diabetes", "carbs", "glycemic_index", "pakistani_staple"],
+      "expected_intent": "nutritional_advice",
+      "category_label": "Health Condition"
+    },
+    {
+      "id": "Q-12",
+      "prompt": "Is 'Desi Ghee' actually healthier than vegetable oil for the heart?",
+      "tags": ["ghee", "vegetable_oil", "heart_health", "fats", "comparison"],
+      "expected_intent": "nutritional_advice",
+      "category_label": "Nutritional Facts"
+    },
+    {
+      "id": "Q-13",
+      "prompt": "How can I increase my Iron levels if I am vegetarian or eat less meat?",
+      "tags": ["iron", "vegetarian", "anemia", "micronutrients"],
+      "expected_intent": "nutritional_advice",
+      "category_label": "Health Condition"
+    },
+    {
+      "id": "Q-14",
+      "prompt": "What are some protein-rich breakfast options other than just eggs?",
+      "tags": ["protein", "breakfast", "pakistani_food"],
+      "expected_intent": "nutritional_advice",
+      "category_label": "Meal Planning"
+    },
+    {
+      "id": "Q-15",
+      "prompt": "Can I drink Chai (tea) right after a meal, or does it affect digestion?",
+      "tags": ["chai", "digestion", "iron_absorption", "pakistani_habit"],
+      "expected_intent": "nutritional_advice",
+      "category_label": "Educational"
+    },
+    {
+      "id": "Q-16",
+      "prompt": "What should I eat to manage high Uric Acid/Gout while living in Pakistan?",
+      "tags": ["uric_acid", "gout", "dietary_restrictions", "health_condition"],
+      "expected_intent": "nutritional_advice",
+      "category_label": "Health Condition"
+    },
+    {
+      "id": "Q-17",
+      "prompt": "Is 'Pink Salt' (Himalayan) better for weight loss than regular salt?",
+      "tags": ["pink_salt", "himalayan_salt", "weight_loss", "myths"],
+      "expected_intent": "nutritional_advice",
+      "category_label": "Educational"
+    },
+    {
+      "id": "Q-18",
+      "prompt": "I feel tired all the time; could it be a Vitamin D deficiency?",
+      "tags": ["vitamin_d", "fatigue", "supplementation", "deficiency"],
+      "expected_intent": "nutritional_advice",
+      "category_label": "Supplementation"
+    },
+    {
+      "id": "Q-19",
+      "prompt": "What are 'hidden' calories in common Pakistani street foods (e.g., Samosa, Gol Gappay)?",
+      "tags": ["calories", "street_food", "pakistani_food", "awareness"],
+      "expected_intent": "nutritional_advice",
+      "category_label": "Nutritional Facts"
+    },
+    {
+      "id": "Q-20",
+      "prompt": "How much water should I drink during a heatwave?",
+      "tags": ["hydration", "water", "heatwave", "dehydration"],
+      "expected_intent": "nutritional_advice",
+      "category_label": "Educational"
+    }
+  ]
+}
