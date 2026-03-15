@@ -1,6 +1,7 @@
 import asyncio
+import base64
 import logging
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, status
 from app.models.chat import (
     ChatMessageRequest,
     ChatMessageResponse,
@@ -8,28 +9,12 @@ from app.models.chat import (
 )
 from app.services.gemini_service import gemini_service
 from app.services.rag_service import rag_service
-from app.services.intent_router import route_and_respond, generate_preference_summary
-from app.services.firestore_service import (
-    get_user_memory,
-    save_user_memory,
-    update_preference_summary,
-    MEMORY_SUMMARIZE_EVERY_N,
-)
+from app.services.intent_router import route_and_respond
+from app.services.mem0_service import mem0_service
 from app.middleware.auth import get_current_active_user
 
 router = APIRouter(prefix="/chat", tags=["Chat"])
 logger = logging.getLogger(__name__)
-
-
-async def _regenerate_summary(user_id: str, recent_messages: list, existing_summary: str | None = None) -> None:
-    """Background task to regenerate preference summary, preserving existing facts."""
-    try:
-        summary = await generate_preference_summary(recent_messages, existing_summary)
-        if summary:
-            update_preference_summary(user_id, summary)
-            logger.info(f"Summary regenerated for user {user_id}")
-    except Exception as e:
-        logger.warning(f"Summary regeneration failed for {user_id}: {e}")
 
 
 @router.post("/message", response_model=ChatMessageResponse)
@@ -130,19 +115,15 @@ async def send_chat_message_with_history(
                 for msg in request.chat_history
             ]
 
-        # Load user memory — use override if provided (test mode), otherwise load from Firestore
+        # Load user memory — use override if provided (test mode), otherwise search Mem0
         is_test_mode = bool(request.user_memory_override is not None)
         if is_test_mode:
             preference_summary = request.user_memory_override
             logger.info(f"[MEMORY] Using user_memory_override (test mode) for uid={current_user['uid']}")
         else:
-            try:
-                memory = get_user_memory(current_user["uid"])
-                preference_summary = memory.get("preference_summary")
-                logger.info(f"[MEMORY] Loaded for uid={current_user['uid']}: has_summary={bool(preference_summary)}, msg_count={memory.get('message_count', 0)}")
-            except Exception as e:
-                logger.warning(f"[MEMORY] Failed to load user memory: {e}")
-                preference_summary = None
+            memories = await mem0_service.search(current_user["uid"], request.message)
+            preference_summary = mem0_service.format_for_prompt(memories) or None
+            logger.info(f"[MEMORY] Mem0 search for uid={current_user['uid']}: {len(memories)} facts found")
 
         if request.use_rag:
             # Use intent router for RAG-enabled requests
@@ -157,23 +138,10 @@ async def send_chat_message_with_history(
 
             # Skip memory save in test mode or when blocked by guard rails
             if not is_test_mode and result.get("guard_result", "ok") == "ok":
-                try:
-                    new_count = save_user_memory(
-                        current_user["uid"], request.message, result["response"]
-                    )
-                    logger.info(f"[MEMORY] Turn saved for uid={current_user['uid']}, new message_count={new_count}")
-                    if new_count % MEMORY_SUMMARIZE_EVERY_N == 0:
-                        logger.info(f"[MEMORY] Threshold hit at count={new_count} — firing background summary task")
-                        updated_memory = get_user_memory(current_user["uid"])
-                        asyncio.create_task(
-                            _regenerate_summary(
-                                current_user["uid"],
-                                updated_memory["recent_messages"],
-                                updated_memory.get("preference_summary"),
-                            )
-                        )
-                except Exception as e:
-                    logger.warning(f"[MEMORY] Failed to save user memory: {e}")
+                asyncio.create_task(
+                    mem0_service.add_turn(current_user["uid"], request.message, result["response"])
+                )
+                logger.info(f"[MEMORY] Mem0 add_turn queued for uid={current_user['uid']}")
             else:
                 logger.info(f"[GUARD] Skipping memory save for blocked message (guard_result={result.get('guard_result')})")
 
@@ -195,11 +163,10 @@ async def send_chat_message_with_history(
             use_rag=False,
         )
 
-        # Save turn even when RAG is disabled
-        try:
-            save_user_memory(current_user["uid"], request.message, response_text)
-        except Exception as e:
-            logger.warning(f"Failed to save user memory: {e}")
+        # Save turn to Mem0 even when RAG is disabled
+        asyncio.create_task(
+            mem0_service.add_turn(current_user["uid"], request.message, response_text)
+        )
 
         return ChatMessageResponse(
             response=response_text,
@@ -207,10 +174,38 @@ async def send_chat_message_with_history(
         )
 
     except Exception as e:
+        import traceback
+        logger.error(f"[CHAT] 500 error: {type(e).__name__}: {e}\n{traceback.format_exc()}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to generate chatbot response: {str(e)}"
         )
+
+
+@router.post("/transcribe")
+async def transcribe_audio(
+    audio: UploadFile = File(...),
+    current_user: dict = Depends(get_current_active_user)
+):
+    """Transcribe audio file to text using Gemini."""
+    try:
+        audio_bytes = await audio.read()
+        logger.info(f"[TRANSCRIBE] Received audio: {audio.filename}, size={len(audio_bytes)} bytes, content_type={audio.content_type}")
+
+        audio_b64 = base64.b64encode(audio_bytes).decode("utf-8")
+
+        import google.generativeai as genai
+        model = genai.GenerativeModel("gemini-2.0-flash")
+        response = model.generate_content([
+            {"inline_data": {"mime_type": "audio/mp4", "data": audio_b64}},
+            "Transcribe the speech in this audio exactly as spoken. Return only the transcribed text, nothing else.",
+        ])
+        transcript = response.text.strip()
+        logger.info(f"[TRANSCRIBE] Result: {transcript}")
+        return {"transcript": transcript}
+    except Exception as e:
+        logger.error(f"[TRANSCRIBE] Error: {type(e).__name__}: {e}")
+        raise HTTPException(status_code=500, detail=f"Transcription failed: {str(e)}")
 
 
 @router.get("/rag/status")

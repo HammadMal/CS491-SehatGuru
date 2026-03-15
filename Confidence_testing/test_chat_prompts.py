@@ -51,6 +51,9 @@ DEFAULT_API_URL = "http://localhost:8000"
 TEST_CASES_FILE = Path(__file__).parent / "chat_test_cases.json"
 RESULTS_FILE = Path(__file__).parent / "chat_test_results.csv"
 
+# Will be overridden by --file argument if provided
+_active_test_file: Path = TEST_CASES_FILE
+
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -58,26 +61,29 @@ RESULTS_FILE = Path(__file__).parent / "chat_test_results.csv"
 
 def load_test_data(category: Optional[str] = None) -> tuple:
     """Returns (test_cases, test_profile)."""
-    with open(TEST_CASES_FILE, "r", encoding="utf-8") as f:
+    with open(_active_test_file, "r", encoding="utf-8") as f:
         data = json.load(f)
 
     test_profile = data.get("test_profile", {})
 
-    if category == "nutritional_advice":
-        cases = data["nutritional_advice"]
+    # Collect all array-valued keys that are not test_profile
+    all_categories = {k: v for k, v in data.items() if k != "test_profile" and isinstance(v, list)}
+
+    if category and category in all_categories:
+        cases = all_categories[category]
+    elif category == "nutritional_advice":
+        cases = data.get("nutritional_advice", [])
     elif category == "meal_plan_generation":
-        cases = data["meal_plan_generation"]
+        cases = data.get("meal_plan_generation", [])
     elif category == "guard_rails":
         cases = data.get("guard_rails", [])
     elif category == "ambiguous_intent":
         cases = data.get("ambiguous_intent", [])
     else:
-        cases = (
-            data["nutritional_advice"]
-            + data["meal_plan_generation"]
-            + data.get("guard_rails", [])
-            + data.get("ambiguous_intent", [])
-        )
+        # Concatenate all categories
+        cases = []
+        for v in all_categories.values():
+            cases += v
 
     return cases, test_profile
 
@@ -311,16 +317,27 @@ def save_results(results: list):
 # ---------------------------------------------------------------------------
 
 def main():
+    global _active_test_file, RESULTS_FILE
+
     parser = argparse.ArgumentParser(description="SehatGuru Chat Prompt Tester")
     parser.add_argument("--url", default=DEFAULT_API_URL, help="API base URL")
     parser.add_argument("--token", default=None, help="JWT Bearer token")
     parser.add_argument(
         "--category",
-        choices=["nutritional_advice", "meal_plan_generation", "guard_rails", "ambiguous_intent"],
         default=None,
-        help="Run only one category (default: all)",
+        help="Run only one category key from the JSON (default: all). E.g. nutritional_advice, meal_plan_generation, top20_questions",
+    )
+    parser.add_argument(
+        "--file",
+        default=None,
+        help="Path to a test cases JSON file (default: chat_test_cases.json)",
     )
     args = parser.parse_args()
+
+    # Override active test file and auto-derive results file name
+    if args.file:
+        _active_test_file = Path(args.file)
+        RESULTS_FILE = _active_test_file.parent / (_active_test_file.stem + "_results.csv")
 
     api_url = args.url.rstrip("/")
     token = args.token or os.environ.get("SEHATGURU_TOKEN", "")
@@ -334,7 +351,7 @@ def main():
     print("SehatGuru Chat Prompt Tester")
     print("=" * 80)
     print(f"API URL  : {api_url}")
-    print(f"Category : {args.category or 'both (nutritional_advice + meal_plan_generation)'}")
+    print(f"Category : {args.category or 'all'}")
     cases, _ = load_test_data(args.category)
     print(f"Cases    : {len(cases)}")
 
