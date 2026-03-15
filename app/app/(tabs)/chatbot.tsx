@@ -16,6 +16,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import * as Crypto from 'expo-crypto';
+import { Audio } from 'expo-av';
 
 import { useChatStore } from '../../store/useChatStore';
 import { chatAPI } from '../../services/chat.api';
@@ -23,11 +24,16 @@ import { ChatMessage } from '../../components/ChatMessage';
 import { Colors } from '../../constants/colors';
 import { OnboardingContext } from '../../context/OnboardingContext';
 import { AuthContext } from '../../context/AuthContext';
+import { getItem } from '../../utils/storage';
+import { API_BASE_URL } from '../../config';
 import type { Message, UserContext } from '../../types/chat.types';
 
 export default function ChatbotScreen() {
   const [inputText, setInputText] = useState('');
   const [keyboardHeight, setKeyboardHeight] = useState(0);
+  const [isRecording, setIsRecording] = useState(false);
+  const [isTranscribing, setIsTranscribing] = useState(false);
+  const recordingRef = useRef<Audio.Recording | null>(null);
   const scrollViewRef = useRef<ScrollView>(null);
   const inputRef = useRef<TextInput>(null);
 
@@ -76,6 +82,64 @@ export default function ChatbotScreen() {
       }, 150);
     }
   }, [messages]);
+
+  const handleMicPress = async () => {
+    if (isRecording) {
+      // Stop recording and transcribe
+      try {
+        await recordingRef.current?.stopAndUnloadAsync();
+        const uri = recordingRef.current?.getURI();
+        recordingRef.current = null;
+        setIsRecording(false);
+
+        if (!uri) return;
+        setIsTranscribing(true);
+
+        const token = await getItem('access_token');
+
+        const formData = new FormData();
+        formData.append('audio', {
+          uri,
+          type: 'audio/mp4',
+          name: 'voice.m4a',
+        } as any);
+
+        const res = await fetch(`${API_BASE_URL}/api/chat/transcribe`, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${token}` },
+          body: formData,
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          if (data.transcript) setInputText(data.transcript);
+        } else {
+          const err = await res.json().catch(() => ({}));
+          Alert.alert('Error', err.detail || `Server error ${res.status}`);
+        }
+      } catch (e: any) {
+        Alert.alert('Error', e?.message || 'Could not transcribe audio.');
+      } finally {
+        setIsTranscribing(false);
+        await Audio.setAudioModeAsync({ allowsRecordingIOS: false });
+      }
+      return;
+    }
+
+    // Start recording
+    const { granted } = await Audio.requestPermissionsAsync();
+    if (!granted) {
+      Alert.alert('Permission required', 'Microphone permission is needed for voice input.');
+      return;
+    }
+
+    await Audio.setAudioModeAsync({ allowsRecordingIOS: true, playsInSilentModeIOS: true });
+    const { recording } = await Audio.Recording.createAsync(
+      Audio.RecordingOptionsPresets.HIGH_QUALITY
+    );
+    recordingRef.current = recording;
+    setIsRecording(true);
+  };
 
   const handleSend = async () => {
     if (!inputText.trim() || isLoading) return;
@@ -236,6 +300,20 @@ export default function ChatbotScreen() {
                 }, 200);
               }}
             />
+            <TouchableOpacity
+              style={[styles.micButton, isRecording && styles.micButtonActive]}
+              onPress={handleMicPress}
+              disabled={isLoading || isTranscribing}
+            >
+              {isTranscribing
+                ? <ActivityIndicator size="small" color={Colors.primary} />
+                : <Ionicons
+                    name={isRecording ? 'stop' : 'mic'}
+                    size={18}
+                    color={isRecording ? '#FFFFFF' : Colors.primary}
+                  />
+              }
+            </TouchableOpacity>
             <TouchableOpacity
               style={[
                 styles.sendButton,
@@ -452,5 +530,16 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.borderLight,
     shadowOpacity: 0,
     elevation: 0,
+  },
+  micButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 4,
+  },
+  micButtonActive: {
+    backgroundColor: '#ef4444',
   },
 });

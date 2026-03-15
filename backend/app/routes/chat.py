@@ -1,6 +1,7 @@
 import asyncio
+import base64
 import logging
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, status
 from app.models.chat import (
     ChatMessageRequest,
     ChatMessageResponse,
@@ -179,6 +180,32 @@ async def send_chat_message_with_history(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to generate chatbot response: {str(e)}"
         )
+
+
+@router.post("/transcribe")
+async def transcribe_audio(
+    audio: UploadFile = File(...),
+    current_user: dict = Depends(get_current_active_user)
+):
+    """Transcribe audio file to text using Gemini."""
+    try:
+        audio_bytes = await audio.read()
+        logger.info(f"[TRANSCRIBE] Received audio: {audio.filename}, size={len(audio_bytes)} bytes, content_type={audio.content_type}")
+
+        audio_b64 = base64.b64encode(audio_bytes).decode("utf-8")
+
+        import google.generativeai as genai
+        model = genai.GenerativeModel("gemini-2.0-flash")
+        response = model.generate_content([
+            {"inline_data": {"mime_type": "audio/mp4", "data": audio_b64}},
+            "Transcribe the speech in this audio exactly as spoken. Return only the transcribed text, nothing else.",
+        ])
+        transcript = response.text.strip()
+        logger.info(f"[TRANSCRIBE] Result: {transcript}")
+        return {"transcript": transcript}
+    except Exception as e:
+        logger.error(f"[TRANSCRIBE] Error: {type(e).__name__}: {e}")
+        raise HTTPException(status_code=500, detail=f"Transcription failed: {str(e)}")
 
 
 @router.get("/rag/status")
