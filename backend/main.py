@@ -123,16 +123,26 @@ from pydantic import BaseModel
 from typing import List
 from datetime import datetime, timezone
 
-# ── Load nutrients CSVs once at startup ──────────────────────────────────────
-_nutrients_path = os.path.join(os.path.dirname(__file__), "nutrients.csv")
-_ingredients_path = os.path.join(os.path.dirname(__file__), "ingredientsfinal.csv")
+# ── Lazy-load nutrients CSVs (deferred to first request to save startup RAM) ──
+_nutrients_df = None
+_ingredients_df = None
 
-_nutrients_df = pd.read_csv(_nutrients_path)
-_nutrients_df.columns = _nutrients_df.columns.str.lower().str.strip()
+def _get_nutrients_df():
+    global _nutrients_df
+    if _nutrients_df is None:
+        path = os.path.join(os.path.dirname(__file__), "nutrients.csv")
+        _nutrients_df = pd.read_csv(path)
+        _nutrients_df.columns = _nutrients_df.columns.str.lower().str.strip()
+    return _nutrients_df
 
-_ingredients_df = pd.read_csv(_ingredients_path)
-_ingredients_df.columns = _ingredients_df.columns.str.lower().str.strip()
-_ingredients_df["food_name"] = _ingredients_df["food_name"].astype(str).str.lower().str.strip()
+def _get_ingredients_df():
+    global _ingredients_df
+    if _ingredients_df is None:
+        path = os.path.join(os.path.dirname(__file__), "ingredientsfinal.csv")
+        _ingredients_df = pd.read_csv(path)
+        _ingredients_df.columns = _ingredients_df.columns.str.lower().str.strip()
+        _ingredients_df["food_name"] = _ingredients_df["food_name"].astype(str).str.lower().str.strip()
+    return _ingredients_df
 
 # All nutrient columns (mirrors nutrients.csv schema)
 _NUTRIENT_COLS = [
@@ -189,8 +199,9 @@ def search_ingredients(q: str = "", limit: int = 20):
     query = q.lower().strip()
 
     # Get all rows that contain the query anywhere
-    mask = _ingredients_df["food_name"].str.contains(query, na=False)
-    matches = _ingredients_df[mask].copy()
+    df = _get_ingredients_df()
+    mask = df["food_name"].str.contains(query, na=False)
+    matches = df[mask].copy()
 
     if matches.empty:
         return []
@@ -236,12 +247,13 @@ async def save_custom_dish(
     totals = {col: 0.0 for col in _NUTRIENT_COLS}
 
     used_ingredients = []
+    df = _get_ingredients_df()
     for ing in dish.ingredients:
         name = ing.food_name.lower().strip()
-        row = _ingredients_df[_ingredients_df["food_name"] == name]
+        row = df[df["food_name"] == name]
         if row.empty:
             # Try partial match fallback
-            row = _ingredients_df[_ingredients_df["food_name"].str.contains(name, na=False)].head(1)
+            row = df[df["food_name"].str.contains(name, na=False)].head(1)
         if row.empty:
             continue  # skip unknown ingredient
 
