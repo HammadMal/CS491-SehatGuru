@@ -6,7 +6,7 @@
 // API Configuration
 // export const API_BASE_URL = 'http://192.168.18.130:8000';
 
-export const API_BASE_URL = 'http://localhost:8000';
+export const API_BASE_URL = 'https://cs491-sehatguru-production.up.railway.app';
 
 
 // Google OAuth Configuration
