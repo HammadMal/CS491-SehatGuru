@@ -1,8 +1,8 @@
 # FastAPI Core
 fastapi==0.109.0
 uvicorn[standard]==0.27.0
-pydantic==2.5.3
-pydantic-settings==2.1.0
+pydantic>=2.7.3,<3.0.0
+pydantic-settings>=2.1.0,<3.0.0
 email-validator==2.1.0
 
 # Firebase
