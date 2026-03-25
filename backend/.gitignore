@@ -57,5 +57,7 @@ logs/
 *.db
 *.sqlite3
 
-# Vector Database (ChromaDB)
-chroma_db/
+# Vector Database (ChromaDB) - committed for deployment (pre-ingested data)
+# chroma_db/ is tracked intentionally
+!chroma_db/
+!chroma_db/**
