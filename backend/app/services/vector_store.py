@@ -1,7 +1,6 @@
 import os
 from typing import List, Dict, Any, Optional
 import chromadb
-from chromadb.config import Settings as ChromaSettings
 from app.config.settings import settings
 from app.models.rag import DocumentChunk
 from app.services.embedding_service import embedding_service
@@ -17,13 +16,7 @@ class VectorStoreService:
         os.makedirs(persist_dir, exist_ok=True)
 
         # Initialize persistent client
-        self.client = chromadb.PersistentClient(
-            path=persist_dir,
-            settings=ChromaSettings(
-                anonymized_telemetry=False,
-                allow_reset=True
-            )
-        )
+        self.client = chromadb.PersistentClient(path=persist_dir)
 
         # Collection names from settings
         self.knowledge_base_collection = settings.RAG_COLLECTION_KNOWLEDGE_BASE

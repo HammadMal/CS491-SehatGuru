@@ -43,7 +43,7 @@ langgraph==0.0.32
 
 # RAG (Retrieval Augmented Generation)
 onnxruntime==1.17.3
-chromadb==0.4.24
+chromadb==1.4.1
 mem0ai>=0.1.60,<0.2.0
 pypdf==3.17.4
 sentence-transformers==2.6.1
