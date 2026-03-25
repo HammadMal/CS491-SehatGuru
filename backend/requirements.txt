@@ -41,6 +41,7 @@ langchain-community==0.0.38
 langgraph==0.0.32
 
 # RAG (Retrieval Augmented Generation)
+onnxruntime>=1.14.1,<1.20.0
 chromadb==0.4.24
 mem0ai>=0.1.60,<0.2.0
 pypdf==3.17.4
