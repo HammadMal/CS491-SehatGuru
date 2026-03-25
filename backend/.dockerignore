@@ -52,9 +52,8 @@ test_*.py
 .DS_Store
 Thumbs.db
 
-# SQLite
+# SQLite (but NOT chroma_db — it needs its sqlite3 files)
 *.db
-*.sqlite3
 
 # Logs
 *.log

@@ -1,0 +1,42 @@
+# Git
+.git
+.gitattributes
+
+# App (React Native frontend — not needed in backend image)
+app/
+
+# Docs and extras
+Docs/
+Confidence_testing/
+"popular dish generation"/
+Dataset/
+UNI_SETUP.md
+README.md
+
+# Python
+backend/__pycache__
+backend/**/__pycache__
+backend/**/*.pyc
+backend/.pytest_cache
+backend/.coverage
+
+# Virtual environments
+backend/venv/
+backend/.venv/
+
+# Environment files
+backend/.env
+backend/.env.*
+
+# IDEs
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Keep: backend/, model/SehatGuru_ConvNeXt_Final.pth

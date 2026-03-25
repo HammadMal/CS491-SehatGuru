@@ -3,16 +3,16 @@ version: '3.8'
 services:
   backend:
     build:
-      context: ./backend
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: backend/Dockerfile
     container_name: sehatguru-backend
     ports:
       - "8000:8000"
     volumes:
       # Mount source code for hot reload during development
       - ./backend:/app
-      # Mount model directory
-      - ./model:/model
+      # Mount model directory at /app/model for local dev
+      - ./model:/app/model
       # Prevent cache from being overwritten
       - /app/__pycache__
       # Persist pip cache to avoid re-downloading packages

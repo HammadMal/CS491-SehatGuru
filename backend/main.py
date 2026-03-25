@@ -38,11 +38,7 @@ async def lifespan(app: FastAPI):
 
     # Initialize Food Detection Model
     try:
-        model_path = os.path.join(
-            os.path.dirname(os.path.dirname(__file__)),
-            "model",
-            "SehatGuru_ConvNeXt_Final.pth"
-        )
+        model_path = settings.MODEL_PATH
         print(f"Loading food detection model from: {model_path}")
         initialize_detector(model_path)
         print("Food detection model initialized successfully")

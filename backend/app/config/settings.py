@@ -50,7 +50,7 @@ class Settings(BaseSettings):
     FRONTEND_URL: str = "http://localhost:3000"
 
     # CORS
-    ALLOWED_ORIGINS: str = "http://localhost:3000,http://localhost:8000"
+    ALLOWED_ORIGINS: str = "*"
 
     @property
     def allowed_origins_list(self) -> List[str]:
@@ -79,6 +79,9 @@ class Settings(BaseSettings):
     # Memory (Mem0 OSS)
     MEM0_COLLECTION_NAME: str = "sehatguru_user_memories"
     MEM0_CHROMA_DIR: str = "./chroma_db_mem0"
+
+    # ML Model
+    MODEL_PATH: str = "/app/model/SehatGuru_ConvNeXt_Final.pth"
 
     # Self-Validation Settings
     ENABLE_RESPONSE_VALIDATION: bool = True
