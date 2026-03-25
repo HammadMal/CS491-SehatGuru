@@ -25,16 +25,7 @@ COPY backend/ .
 # Download model from HuggingFace Hub
 ARG HF_TOKEN
 RUN pip install --no-cache-dir huggingface_hub && \
-    HF_TOKEN="$HF_TOKEN" python -c "
-import os
-from huggingface_hub import hf_hub_download
-hf_hub_download(
-    repo_id='Sameer121/ConvNext_Food_Classifier',
-    filename='SehatGuru_ConvNeXt_Final.pth',
-    local_dir='/app/model',
-    token=os.environ.get('HF_TOKEN')
-)
-"
+    HF_TOKEN="$HF_TOKEN" python -c "import os; from huggingface_hub import hf_hub_download; hf_hub_download(repo_id='Sameer121/ConvNext_Food_Classifier', filename='SehatGuru_ConvNeXt_Final.pth', local_dir='/app/model', token=os.environ.get('HF_TOKEN'))"
 
 # Expose port
 EXPOSE 8000
