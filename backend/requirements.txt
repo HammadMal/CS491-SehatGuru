@@ -48,9 +48,7 @@ sentence-transformers==2.6.1
 tiktoken==0.6.0
 transformers>=4.36.0,<4.46.0
 
-# Machine Learning
-torch==2.1.2
-torchvision==0.16.2
+# Machine Learning (torch/torchvision installed via Dockerfile with CPU-only index)
 Pillow==10.2.0
 numpy<2.0.0
 timm==0.9.12
