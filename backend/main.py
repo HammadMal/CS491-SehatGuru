@@ -10,7 +10,7 @@ import logging
 
 from app.config.settings import settings
 from app.config.firebase import firebase_client
-from app.routes import auth, food, user, chat
+from app.routes import auth, food, user, chat, feedback
 from app.ml.food_detector import initialize_detector
 from app.middleware.auth import get_current_active_user
 
@@ -118,6 +118,7 @@ async def general_exception_handler(request: Request, exc: Exception):
 app.include_router(auth.router, prefix="/api")
 app.include_router(user.router, prefix="/api")
 app.include_router(chat.router, prefix="/api")
+app.include_router(feedback.router, prefix="/api")
 app.include_router(food.router)
 
 # Nutrients endpoint (correct location)
