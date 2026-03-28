@@ -71,14 +71,12 @@ class AuthService:
 
             users_ref.document(firebase_user.uid).set(user_doc_data)
 
-            # Generate email verification link
-            try:
-                verification_link = firebase_client.generate_email_verification_link(user_data.email)
-                # Send verification email
-                await send_verification_email(user_data.email, verification_link)
-            except Exception as e:
-                print(f"Error sending verification email: {str(e)}")
-                # Don't fail registration if email fails
+            # Email verification disabled
+            # try:
+            #     verification_link = firebase_client.generate_email_verification_link(user_data.email)
+            #     await send_verification_email(user_data.email, verification_link)
+            # except Exception as e:
+            #     print(f"Error sending verification email: {str(e)}")
 
             return {
                 "uid": firebase_user.uid,
