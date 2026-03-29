@@ -11,10 +11,15 @@ from textblob import TextBlob
 import io
 import base64
 
+# Constants for branding
+APP_GREEN = "#22c55e"
+GREEN_PALETTE = ["#22c55e", "#86efac", "#16a34a", "#059669", "#10b981"]
+LOGO_PATH = Path(__file__).parent.parent / "app" / "assets" / "images" / "logobgrm.png"
+
 # Page config
 st.set_page_config(
-    page_title="SehatGuru Analytics Dashboard",
-    page_icon="📊",
+    page_title="SehatGuru Analytics",
+    page_icon=str(LOGO_PATH) if LOGO_PATH.exists() else "🏥",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -98,11 +103,14 @@ with st.spinner("Loading data from Firestore..."):
         st.stop()
 
 # Sidebar
-st.sidebar.title("📊 SehatGuru Analytics")
+if LOGO_PATH.exists():
+    st.sidebar.image(str(LOGO_PATH), width=200)
+else:
+    st.sidebar.title("SehatGuru Analytics")
 st.sidebar.markdown("---")
 
 # Date filter
-st.sidebar.subheader("📅 Date Range Filter")
+st.sidebar.subheader("Date Range Filter")
 use_date_filter = st.sidebar.checkbox("Enable Date Filter", value=False)
 if use_date_filter:
     date_range = st.sidebar.date_input(
@@ -115,7 +123,7 @@ else:
     date_range = (datetime(2000, 1, 1).date(), datetime.now().date())
 
 # User segment filters
-st.sidebar.subheader("👥 User Segment Filters")
+st.sidebar.subheader("User Segment Filters")
 show_completed_onboarding = st.sidebar.checkbox("Completed Onboarding Only", value=False)
 selected_health_goals = st.sidebar.multiselect(
     "Filter by Health Goals",
@@ -165,7 +173,7 @@ filtered_users_df = apply_user_filters(users_df)
 # Debug information (can be removed later)
 if st.sidebar.checkbox("Show Debug Info", value=False):
     st.sidebar.markdown("---")
-    st.sidebar.subheader("🔍 Debug Info")
+    st.sidebar.subheader("Debug Info")
     st.sidebar.write(f"Raw users in DB: {len(users_df)}")
     st.sidebar.write(f"Filtered users: {len(filtered_users_df)}")
     st.sidebar.write(f"Meals in DB: {len(meals_df)}")
@@ -184,7 +192,7 @@ def create_csv_download_link(df, filename):
     return href
 
 # Main content
-st.title("🏥 SehatGuru User Analytics Dashboard")
+st.title("SehatGuru Analytics Dashboard")
 st.markdown("Comprehensive analytics for user behavior, meal logging, and feedback.")
 
 # Overview metrics
@@ -208,7 +216,7 @@ with col4:
     st.metric("Feedback Submissions", len(feedback_df))
 
 # Export buttons
-st.subheader("📥 Export Data")
+st.subheader("Export Data")
 col1, col2, col3 = st.columns(3)
 with col1:
     if not filtered_users_df.empty:
@@ -223,7 +231,7 @@ with col3:
 st.markdown("---")
 
 # Tabs for different analytics sections
-tab1, tab2, tab3 = st.tabs(["👥 User Profiles", "🍽️ Meal Analytics", "💬 Feedback Analytics"])
+tab1, tab2, tab3 = st.tabs(["User Profiles", "Meal Analytics", "Feedback Analytics"])
 
 # Tab 1: User Profiles
 with tab1:
@@ -246,8 +254,9 @@ with tab1:
                             pass
                 
                 if ages:
-                    fig = px.histogram(ages, nbins=20, title="User Age Distribution")
-                    st.plotly_chart(fig, width='stretch')
+                    fig = px.histogram(ages, nbins=20, title="User Age Distribution", 
+                                     color_discrete_sequence=[APP_GREEN])
+                    st.plotly_chart(fig, use_container_width=True)
                 else:
                     st.info("No age data available")
         
@@ -262,8 +271,9 @@ with tab1:
                 
                 if genders:
                     gender_counts = pd.Series(genders).value_counts()
-                    fig = px.pie(gender_counts, names=gender_counts.index, values=gender_counts.values, title="Gender Distribution")
-                    st.plotly_chart(fig, width='stretch')
+                    fig = px.pie(gender_counts, names=gender_counts.index, values=gender_counts.values, 
+                               title="Gender Distribution", color_discrete_sequence=GREEN_PALETTE)
+                    st.plotly_chart(fig, use_container_width=True)
                 else:
                     st.info("No gender data available")
         
@@ -278,9 +288,10 @@ with tab1:
             
             if all_goals:
                 goals_counts = pd.Series(all_goals).value_counts()
-                fig = px.bar(goals_counts, x=goals_counts.index, y=goals_counts.values, title="Health Goals")
+                fig = px.bar(goals_counts, x=goals_counts.index, y=goals_counts.values, 
+                           title="Health Goals", color_discrete_sequence=[APP_GREEN])
                 fig.update_xaxes(tickangle=45)
-                st.plotly_chart(fig, width='stretch')
+                st.plotly_chart(fig, use_container_width=True)
             else:
                 st.info("No health goals data available")
         
@@ -288,8 +299,9 @@ with tab1:
         st.subheader("Activity Level Distribution")
         if 'activity_level' in filtered_users_df.columns:
             activity_counts = filtered_users_df['activity_level'].value_counts()
-            fig = px.bar(activity_counts, x=activity_counts.index, y=activity_counts.values, title="Activity Levels")
-            st.plotly_chart(fig, width='stretch')
+            fig = px.bar(activity_counts, x=activity_counts.index, y=activity_counts.values, 
+                       title="Activity Levels", color_discrete_sequence=[APP_GREEN])
+            st.plotly_chart(fig, use_container_width=True)
         
         # Dietary Preferences
         st.subheader("Dietary Preferences")
@@ -303,13 +315,14 @@ with tab1:
                             dietary_data[pref] = dietary_data.get(pref, 0) + 1
             
             if dietary_data:
-                fig = px.bar(x=list(dietary_data.keys()), y=list(dietary_data.values()), title="Dietary Preferences")
-                st.plotly_chart(fig, width='stretch')
+                fig = px.bar(x=list(dietary_data.keys()), y=list(dietary_data.values()), 
+                           title="Dietary Preferences", color_discrete_sequence=[APP_GREEN])
+                st.plotly_chart(fig, use_container_width=True)
             else:
                 st.info("No dietary preferences data available")
         
         # User Cohorting - Weekly Retention Analysis
-        st.subheader("📈 User Retention Analysis")
+        st.subheader("User Retention Analysis")
         if 'created_at' in filtered_users_df.columns and 'onboarding_completed' in filtered_users_df.columns:
             # Convert created_at to datetime
             cohort_df = filtered_users_df.copy()
@@ -343,13 +356,15 @@ with tab1:
                     fig = px.line(retention_df, x='week', y='retention_rate', 
                                 title='Weekly Onboarding Completion Rate',
                                 labels={'week': 'Week', 'retention_rate': 'Completion Rate (%)'})
-                    st.plotly_chart(fig, width='stretch')
+                    fig.update_traces(line_color=APP_GREEN)
+                    st.plotly_chart(fig, use_container_width=True)
                     
                     # User acquisition trend
                     fig2 = px.bar(retention_df, x='week', y='total_users', 
                                 title='Weekly User Acquisition',
-                                labels={'week': 'Week', 'total_users': 'New Users'})
-                    st.plotly_chart(fig2, width='stretch')
+                                labels={'week': 'Week', 'total_users': 'New Users'},
+                                color_discrete_sequence=[APP_GREEN])
+                    st.plotly_chart(fig2, use_container_width=True)
                 else:
                     st.info("No cohort data available")
             else:
@@ -367,26 +382,32 @@ with tab2:
         st.subheader("Meal Type Distribution")
         if 'mealType' in meals_df.columns:
             meal_counts = meals_df['mealType'].value_counts()
-            fig = px.pie(meal_counts, names=meal_counts.index, values=meal_counts.values, title="Meals by Type")
-            st.plotly_chart(fig, width='stretch')
+            fig = px.pie(meal_counts, names=meal_counts.index, values=meal_counts.values, 
+                       title="Meals by Type", color_discrete_sequence=GREEN_PALETTE)
+            st.plotly_chart(fig, use_container_width=True)
         
         # Top Foods
         st.subheader("Top 10 Most Logged Foods")
         if 'foodName' in meals_df.columns:
-            top_foods = meals_df['foodName'].value_counts().head(10)
-            fig = px.bar(top_foods, x=top_foods.index, y=top_foods.values, title="Top Foods")
+            # Normalize food names to handle case/whitespace duplicates
+            normalized_foods = meals_df['foodName'].str.strip().str.title()
+            top_foods = normalized_foods.value_counts().head(10)
+            fig = px.bar(top_foods, x=top_foods.index, y=top_foods.values, 
+                       title="Top Foods", color_discrete_sequence=[APP_GREEN])
             fig.update_xaxes(tickangle=45)
-            st.plotly_chart(fig, width='stretch')
+            st.plotly_chart(fig, use_container_width=True)
         
         # Source Distribution
         st.subheader("Meal Logging Source")
         if 'source' in meals_df.columns:
-            source_counts = meals_df['source'].value_counts()
-            fig = px.bar(source_counts, x=source_counts.index, y=source_counts.values, title="Camera vs Manual Entry")
-            st.plotly_chart(fig, width='stretch')
+            # Filter out chatbot as it's not a valid logging source
+            source_counts = meals_df[~meals_df['source'].str.lower().isin(['chatbot', 'chat'])]['source'].value_counts()
+            fig = px.bar(source_counts, x=source_counts.index, y=source_counts.values, 
+                       title="Camera vs Manual Entry", color_discrete_sequence=[APP_GREEN])
+            st.plotly_chart(fig, use_container_width=True)
         
         # Meal Timing Heatmap
-        st.subheader("⏰ Meal Logging Activity Heatmap")
+        st.subheader("Meal Logging Activity Heatmap")
         if 'createdAt' in meals_df.columns:
             timing_df = meals_df.copy()
             timing_df['createdAt'] = pd.to_datetime(timing_df['createdAt'], errors='coerce')
@@ -409,7 +430,7 @@ with tab2:
                     z=heatmap_data.values,
                     x=heatmap_data.columns,
                     y=heatmap_data.index,
-                    colorscale='Blues',
+                    colorscale=[[0, '#f0fdf4'], [0.5, '#4ade80'], [1, '#166534']],
                     hoverongaps=False
                 ))
                 
@@ -425,8 +446,9 @@ with tab2:
                 hourly_activity = timing_df.groupby('hour').size()
                 fig2 = px.bar(hourly_activity, x=hourly_activity.index, y=hourly_activity.values,
                             title='Meals Logged by Hour of Day',
-                            labels={'x': 'Hour (0-23)', 'y': 'Number of Meals'})
-                st.plotly_chart(fig2, width='stretch')
+                            labels={'x': 'Hour (0-23)', 'y': 'Number of Meals'},
+                            color_discrete_sequence=[APP_GREEN])
+                st.plotly_chart(fig2, use_container_width=True)
             else:
                 st.info("No valid timestamp data for timing analysis")
     
@@ -438,14 +460,6 @@ with tab3:
     st.header("Feedback Analytics")
     
     if not feedback_df.empty:
-        # Feedback over time
-        st.subheader("Feedback Submissions Over Time")
-        if 'submitted_at' in feedback_df.columns:
-            feedback_df['submitted_at'] = pd.to_datetime(feedback_df['submitted_at'], errors='coerce')
-            feedback_df = feedback_df.dropna(subset=['submitted_at'])
-            daily_feedback = feedback_df.groupby(feedback_df['submitted_at'].dt.date).size()
-            fig = px.line(daily_feedback, x=daily_feedback.index, y=daily_feedback.values, title="Daily Feedback Submissions")
-            st.plotly_chart(fig, width='stretch')
         
         # Feedback sections analysis
         st.subheader("Feedback Sections")
@@ -460,9 +474,10 @@ with tab3:
             
             if section_titles:
                 section_counts = pd.Series(section_titles).value_counts()
-                fig = px.bar(section_counts, x=section_counts.index, y=section_counts.values, title="Feedback by Section")
+                fig = px.bar(section_counts, x=section_counts.index, y=section_counts.values, 
+                           title="Feedback by Section", color_discrete_sequence=[APP_GREEN])
                 fig.update_xaxes(tickangle=45)
-                st.plotly_chart(fig, width='stretch')
+                st.plotly_chart(fig, use_container_width=True)
         
         # Comments word cloud (simple text analysis)
         st.subheader("Feedback Comments")
@@ -477,14 +492,15 @@ with tab3:
                         all_words.extend(words)
                 
                 word_counts = pd.Series(all_words).value_counts().head(20)
-                fig = px.bar(word_counts, x=word_counts.index, y=word_counts.values, title="Top Words in Comments")
+                fig = px.bar(word_counts, x=word_counts.index, y=word_counts.values, 
+                           title="Top Words in Comments", color_discrete_sequence=[APP_GREEN])
                 fig.update_xaxes(tickangle=45)
-                st.plotly_chart(fig, width='stretch')
+                st.plotly_chart(fig, use_container_width=True)
             else:
                 st.info("No comments available")
         
         # Sentiment Analysis
-        st.subheader("😊 Sentiment Analysis")
+        st.subheader("Sentiment Analysis")
         if 'comment' in feedback_df.columns:
             comments = feedback_df['comment'].dropna()
             if not comments.empty:
@@ -507,45 +523,10 @@ with tab3:
                     
                     sentiment_counts = sentiment_df['category'].value_counts()
                     fig = px.pie(sentiment_counts, names=sentiment_counts.index, values=sentiment_counts.values,
-                               title='Feedback Sentiment Distribution')
-                    st.plotly_chart(fig, width='stretch')
+                               title='Feedback Sentiment Distribution', color_discrete_sequence=GREEN_PALETTE)
+                    st.plotly_chart(fig, use_container_width=True)
                     
-                    # Sentiment over time
-                    if 'submitted_at' in feedback_df.columns:
-                        feedback_df['submitted_at'] = pd.to_datetime(feedback_df['submitted_at'], errors='coerce')
-                        feedback_df = feedback_df.dropna(subset=['submitted_at'])
-                        
-                        # Add sentiment scores to feedback_df
-                        feedback_df['sentiment_score'] = None
-                        for idx, row in feedback_df.iterrows():
-                            if isinstance(row['comment'], str) and row['comment'].strip():
-                                try:
-                                    blob = TextBlob(row['comment'])
-                                    feedback_df.at[idx, 'sentiment_score'] = blob.sentiment.polarity
-                                except:
-                                    pass
-                        
-                        # Group by week and calculate average sentiment
-                        feedback_df['week'] = feedback_df['submitted_at'].dt.tz_localize(None).dt.to_period('W').dt.start_time
-                        weekly_sentiment = feedback_df.dropna(subset=['sentiment_score']).groupby('week')['sentiment_score'].mean()
-                        
-                        if not weekly_sentiment.empty:
-                            fig2 = px.line(weekly_sentiment, x=weekly_sentiment.index, y=weekly_sentiment.values,
-                                         title='Average Sentiment Score Over Time',
-                                         labels={'x': 'Week', 'y': 'Average Sentiment (-1 to 1)'})
-                            fig2.add_hline(y=0, line_dash="dash", line_color="red", annotation_text="Neutral")
-                            st.plotly_chart(fig2, width='stretch')
                     
-                    # Sentiment statistics
-                    col1, col2, col3 = st.columns(3)
-                    with col1:
-                        st.metric("Average Sentiment", f"{sum(sentiments)/len(sentiments):.2f}")
-                    with col2:
-                        positive_count = sum(1 for s in sentiments if s > 0.1)
-                        st.metric("Positive Feedback", f"{positive_count} ({positive_count/len(sentiments)*100:.1f}%)")
-                    with col3:
-                        negative_count = sum(1 for s in sentiments if s < -0.1)
-                        st.metric("Negative Feedback", f"{negative_count} ({negative_count/len(sentiments)*100:.1f}%)")
                 else:
                     st.info("Could not analyze sentiment from comments")
             else:
