@@ -1,0 +1,6 @@
+streamlit>=1.28.0
+firebase-admin>=6.0.0
+pandas>=2.0.0
+plotly>=5.15.0
+python-dotenv>=1.0.0
+textblob>=0.17.1
