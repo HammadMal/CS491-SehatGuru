@@ -4,6 +4,10 @@ export interface User {
   fullName?: string;
   photoUrl?: string;
   emailVerified?: boolean;
+  daily_calorie_goal?: number;  // Personalized daily calorie target
+  daily_carbs_goal?: number;    // Personalized daily carbs target (g)
+  daily_protein_goal?: number;  // Personalized daily protein target (g)
+  daily_fat_goal?: number;      // Personalized daily fat target (g)
 }
 
 export interface AuthContextType {
@@ -22,6 +26,7 @@ export interface AuthContextType {
   resetPassword: (email: string) => Promise<void>;
   setNewPassword: (password: string) => Promise<void>;
   refreshOnboardingStatus: () => Promise<void>;
+  refreshUserGoals: () => Promise<void>;
   verifyOTP: (email: string, otp: string) => Promise<boolean>;
   resetPasswordWithOTP: (email: string, otp: string, newPassword: string) => Promise<void>;
   setConsentAccepted: () => Promise<void>;

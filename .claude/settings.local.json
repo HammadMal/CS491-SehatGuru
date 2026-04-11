@@ -6,7 +6,12 @@
       "Bash(cat:*)",
       "Bash(tree:*)",
       "Bash(find:*)",
-      "Bash(npx expo install:*)"
+      "Bash(npx expo install:*)",
+      "Bash(python3:*)",
+      "Bash(pip3 install:*)",
+      "Bash(ls backend/venv/bin/python*)",
+      "Bash(ls backend/.venv/bin/python*)",
+      "Read(//mnt/c/Users/Hammad/**)"
     ],
     "deny": [],
     "ask": []

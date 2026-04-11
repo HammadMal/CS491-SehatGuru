@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useContext, useMemo } from 'react';
 import {
   View,
   Text,
@@ -16,20 +16,39 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import * as Crypto from 'expo-crypto';
+import { Audio } from 'expo-av';
 
 import { useChatStore } from '../../store/useChatStore';
 import { chatAPI } from '../../services/chat.api';
 import { ChatMessage } from '../../components/ChatMessage';
 import { Colors } from '../../constants/colors';
-import type { Message } from '../../types/chat.types';
+import { OnboardingContext } from '../../context/OnboardingContext';
+import { AuthContext } from '../../context/AuthContext';
+import { getItem } from '../../utils/storage';
+import { API_BASE_URL } from '../../config';
+import type { Message, UserContext } from '../../types/chat.types';
 
 export default function ChatbotScreen() {
   const [inputText, setInputText] = useState('');
   const [keyboardHeight, setKeyboardHeight] = useState(0);
+  const [isRecording, setIsRecording] = useState(false);
+  const [isTranscribing, setIsTranscribing] = useState(false);
+  const recordingRef = useRef<Audio.Recording | null>(null);
   const scrollViewRef = useRef<ScrollView>(null);
   const inputRef = useRef<TextInput>(null);
 
   const { messages, isLoading, addMessage, setLoading } = useChatStore();
+  const onboardingContext = useContext(OnboardingContext);
+  const authContext = useContext(AuthContext);
+
+  // Build user context from onboarding data for personalized RAG responses
+  const userContext: UserContext | undefined = useMemo(() => {
+    if (!onboardingContext?.onboardingData) return undefined;
+    return chatAPI.buildUserContext(
+      onboardingContext.onboardingData,
+      authContext?.user?.daily_calorie_goal ?? undefined,
+    );
+  }, [onboardingContext?.onboardingData, authContext?.user?.daily_calorie_goal]);
 
   // Keyboard listeners for better scroll handling
   useEffect(() => {
@@ -64,6 +83,64 @@ export default function ChatbotScreen() {
     }
   }, [messages]);
 
+  const handleMicPress = async () => {
+    if (isRecording) {
+      // Stop recording and transcribe
+      try {
+        await recordingRef.current?.stopAndUnloadAsync();
+        const uri = recordingRef.current?.getURI();
+        recordingRef.current = null;
+        setIsRecording(false);
+
+        if (!uri) return;
+        setIsTranscribing(true);
+
+        const token = await getItem('access_token');
+
+        const formData = new FormData();
+        formData.append('audio', {
+          uri,
+          type: 'audio/mp4',
+          name: 'voice.m4a',
+        } as any);
+
+        const res = await fetch(`${API_BASE_URL}/api/chat/transcribe`, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${token}` },
+          body: formData,
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          if (data.transcript) setInputText(data.transcript);
+        } else {
+          const err = await res.json().catch(() => ({}));
+          Alert.alert('Error', err.detail || `Server error ${res.status}`);
+        }
+      } catch (e: any) {
+        Alert.alert('Error', e?.message || 'Could not transcribe audio.');
+      } finally {
+        setIsTranscribing(false);
+        await Audio.setAudioModeAsync({ allowsRecordingIOS: false });
+      }
+      return;
+    }
+
+    // Start recording
+    const { granted } = await Audio.requestPermissionsAsync();
+    if (!granted) {
+      Alert.alert('Permission required', 'Microphone permission is needed for voice input.');
+      return;
+    }
+
+    await Audio.setAudioModeAsync({ allowsRecordingIOS: true, playsInSilentModeIOS: true });
+    const { recording } = await Audio.Recording.createAsync(
+      Audio.RecordingOptionsPresets.HIGH_QUALITY
+    );
+    recordingRef.current = recording;
+    setIsRecording(true);
+  };
+
   const handleSend = async () => {
     if (!inputText.trim() || isLoading) return;
 
@@ -86,8 +163,14 @@ export default function ChatbotScreen() {
     setLoading(true);
 
     try {
-      // Call API to get bot response
-      const response = await chatAPI.sendMessage(currentMessage);
+      // Build session history from current messages (excluding the just-added user message)
+      const chatHistory = messages.slice(0, -1).map((m) => ({
+        role: m.sender === 'user' ? 'user' : 'assistant',
+        content: m.content,
+      }));
+
+      // Call API with user context and session history
+      const response = await chatAPI.sendMessage(currentMessage, userContext, true, chatHistory);
 
       // Add bot response to store
       const botMessage: Message = {
@@ -128,11 +211,11 @@ export default function ChatbotScreen() {
         {/* Header */}
         <View style={styles.header}>
           <View style={styles.headerIcon}>
-            <Ionicons name="fitness" size={20} color={Colors.primary} />
+            <Ionicons name="nutrition" size={20} color={Colors.primary} />
           </View>
           <View style={styles.headerTextContainer}>
-            <Text style={styles.headerTitle}>Wellness Coach</Text>
-            <Text style={styles.headerSubtitle}>Powered by AI • Always here to help</Text>
+            <Text style={styles.headerTitle}>SehatGuru</Text>
+            <Text style={styles.headerSubtitle}>Your Pakistani Nutrition Expert • AI Powered</Text>
           </View>
         </View>
 
@@ -150,18 +233,18 @@ export default function ChatbotScreen() {
           {messages.length === 0 ? (
             <View style={styles.emptyState}>
               <View style={styles.emptyIconContainer}>
-                <Ionicons name="sparkles" size={48} color={Colors.primary} />
+                <Ionicons name="leaf" size={48} color={Colors.primary} />
               </View>
-              <Text style={styles.emptyStateTitle}>Your AI Wellness Coach</Text>
+              <Text style={styles.emptyStateTitle}>SehatGuru</Text>
               <Text style={styles.emptyStateText}>
-                Get personalized advice on fitness, nutrition, and healthy living
+                Get personalized Pakistani nutrition advice based on dietary guidelines
               </Text>
               <View style={styles.suggestionContainer}>
                 <Text style={styles.suggestionLabel}>Try asking:</Text>
                 {[
-                  '💪 What exercises burn the most calories?',
-                  '🥗 How much protein should I eat daily?',
-                  '🏃 Tips for starting a running routine',
+                  '🍚 How many calories are in biryani?',
+                  '🥗 What should a diabetic person eat?',
+                  '💪 High protein Pakistani dishes for fitness',
                 ].map((suggestion, index) => (
                   <TouchableOpacity
                     key={index}
@@ -217,6 +300,20 @@ export default function ChatbotScreen() {
                 }, 200);
               }}
             />
+            <TouchableOpacity
+              style={[styles.micButton, isRecording && styles.micButtonActive]}
+              onPress={handleMicPress}
+              disabled={isLoading || isTranscribing}
+            >
+              {isTranscribing
+                ? <ActivityIndicator size="small" color={Colors.primary} />
+                : <Ionicons
+                    name={isRecording ? 'stop' : 'mic'}
+                    size={18}
+                    color={isRecording ? '#FFFFFF' : Colors.primary}
+                  />
+              }
+            </TouchableOpacity>
             <TouchableOpacity
               style={[
                 styles.sendButton,
@@ -433,5 +530,16 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.borderLight,
     shadowOpacity: 0,
     elevation: 0,
+  },
+  micButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 4,
+  },
+  micButtonActive: {
+    backgroundColor: '#ef4444',
   },
 });

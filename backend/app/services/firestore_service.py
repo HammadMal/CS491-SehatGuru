@@ -1,9 +1,11 @@
 """Firestore service for meal operations"""
 import logging
-from app.config.firebase import db
-from firebase_admin import firestore
+from app.config.firebase import firebase_client
+
+db = firebase_client.db
 
 logger = logging.getLogger(__name__)
+
 
 async def delete_meal_from_firestore(meal_id: str, user_id: str):
     """

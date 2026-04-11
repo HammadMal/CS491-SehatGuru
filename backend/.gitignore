@@ -56,3 +56,6 @@ logs/
 # Database
 *.db
 *.sqlite3
+
+# Vector Database (ChromaDB)
+chroma_db/

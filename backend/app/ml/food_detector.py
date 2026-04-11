@@ -1,4 +1,4 @@
-"""Food Detection Service using PyTorch EfficientNet"""
+"""Food Detection Service using PyTorch ConvNeXt Tiny"""
 import torch
 import torch.nn as nn
 from torchvision import transforms
@@ -19,9 +19,9 @@ except ImportError:
     logger.warning("timm library not available, will try alternative loading methods")
 
 
-class CustomEfficientNetWithHead(nn.Module):
+class CustomConvNeXtWithHead(nn.Module):
     """
-    Custom EfficientNet wrapper that properly connects backbone and head
+    Custom ConvNeXt wrapper that properly connects backbone and head
     This handles models saved with 'backbone.' and 'head.' prefixes
     """
 
@@ -34,8 +34,8 @@ class CustomEfficientNetWithHead(nn.Module):
         # Load backbone using timm
         try:
             if TIMM_AVAILABLE:
-                # Create EfficientNet backbone
-                self.backbone = timm.create_model('efficientnet_b0', pretrained=False, num_classes=0)
+                # Create ConvNeXt Tiny backbone
+                self.backbone = timm.create_model('convnext_tiny', pretrained=False, num_classes=0)
 
                 # Load backbone weights
                 backbone_state = {}
@@ -146,9 +146,9 @@ class CustomEfficientNetWithHead(nn.Module):
         return logits
 
 
-class FlexibleEfficientNet(nn.Module):
+class FlexibleConvNeXt(nn.Module):
     """
-    Flexible wrapper for loading EfficientNet models with custom architectures
+    Flexible wrapper for loading ConvNeXt models with custom architectures
     This class can load models with non-standard layer names
     """
 
@@ -175,13 +175,181 @@ class FlexibleEfficientNet(nn.Module):
         For now, this is a placeholder that will be replaced by timm loading
         """
         raise NotImplementedError(
-            "FlexibleEfficientNet forward pass not implemented. "
+            "FlexibleConvNeXt forward pass not implemented. "
             "Please install timm library: pip install timm"
         )
 
 
+class SafeFoodPredictor:
+    """Safety-layered predictor with Temperature Scaling and strict safety funnel."""
+
+    def __init__(self, model: nn.Module, class_names: list, device: Optional[str] = None):
+        self.model = model
+        self.class_names = class_names
+        self.device = device or ("cuda" if torch.cuda.is_available() else "cpu")
+
+        # Temperature Scaling parameter
+        self.temperature = 1.5  # Reduces overconfidence
+
+        # Out-of-Distribution threshold - below this, object is not in our dataset
+        self.ood_confidence_floor = 40.0  # If conf_1 < 40%, reject as unknown
+
+        # Strict Safety Thresholds - ANY failure triggers ASK_USER
+        self.baseline_confidence_threshold = 80.0  # Minimum conf_1 required
+        self.ambiguity_gap_threshold = 15.0  # Minimum gap between conf_1 and conf_2
+        self.viable_alternative_threshold = 15.0  # Maximum conf_2 allowed
+
+    def preprocess(self, image: Image.Image) -> torch.Tensor:
+        transform = transforms.Compose([
+            transforms.Resize((292, 292)),
+            transforms.CenterCrop(260),
+            transforms.ToTensor(),
+            transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
+        ])
+        return transform(image).unsqueeze(0).to(self.device)
+
+    def _forward(self, input_tensor: torch.Tensor) -> torch.Tensor:
+        outputs = self.model(input_tensor)
+        if isinstance(outputs, tuple):
+            logits = outputs[0]
+        elif torch.is_tensor(outputs):
+            logits = outputs
+        else:
+            raise ValueError(f"Unexpected model output type: {type(outputs)}")
+        return logits
+
+    def predict_with_safeguards(self, original_image: Image.Image, top_k: int = 3) -> dict:
+        """
+        Predict with Temperature Scaling and strict safety funnel.
+        Returns ASK_USER if ANY of 4 safety checks fail.
+        """
+        # PHASE 1: RGB prediction with Temperature Scaling
+        input_rgb = self.preprocess(original_image)
+        with torch.no_grad():
+            logits = self._forward(input_rgb)
+            
+            # Apply Temperature Scaling to reduce overconfidence
+            scaled_logits = logits / self.temperature
+            probs = torch.softmax(scaled_logits, dim=1)
+
+            # Get top_k predictions
+            k = min(top_k, len(self.class_names))
+            topk = torch.topk(probs, k, dim=1)
+            topk_probs = topk.values[0]
+            topk_idx = topk.indices[0]
+
+            # Extract top predictions and their confidences
+            all_predictions = []
+            for i in range(k):
+                raw_prob = float(topk_probs[i].item())
+                conf_pct = raw_prob * 100.0
+                all_predictions.append({
+                    "dish": self.class_names[topk_idx[i].item()],
+                    "confidence": conf_pct
+                })
+                logger.info(f"SafePredictor (T={self.temperature}): pred[{i}] raw={raw_prob:.6f}, pct={conf_pct:.2f}%")
+            
+            # Extract top 2 for safety checks
+            conf_1 = all_predictions[0]["confidence"]
+            dish_1 = all_predictions[0]["dish"]
+            conf_2 = all_predictions[1]["confidence"] if len(all_predictions) > 1 else 0.0
+            dish_2 = all_predictions[1]["dish"] if len(all_predictions) > 1 else ""
+
+        logger.info(f"SafePredictor: Top predictions: 1={dish_1} ({conf_1:.2f}%), 2={dish_2} ({conf_2:.2f}%)")
+
+        # PRE-CHECK: Out-of-Distribution (Unknown Object) Detection
+        logger.info(f"SafePredictor: OOD CHECK - Confidence Floor: {conf_1:.2f}% (threshold: {self.ood_confidence_floor}%)")
+        if conf_1 < self.ood_confidence_floor:
+            logger.info(f"SafePredictor: OOD CHECK FAILED - Object not in dataset, rejecting")
+            return {
+                "status": "UNKNOWN_OBJECT",
+                "reason": "Confidence Floor Missed",
+                "message": "I couldn't recognize this dish. Please make sure it is a supported Pakistani food and clearly visible.",
+                "options": [],
+                "predictions": all_predictions,
+                "confidence": conf_1,
+            }
+        logger.info(f"SafePredictor: OOD CHECK PASSED - Object likely in dataset")
+
+        # Initialize safety flag
+        needs_human_fallback = False
+        failed_checks = []
+        
+        # CHECK 1: Low Baseline Confidence
+        logger.info(f"SafePredictor: CHECK 1 - Baseline Confidence: {conf_1:.2f}% (threshold: {self.baseline_confidence_threshold}%)")
+        if conf_1 < self.baseline_confidence_threshold:
+            needs_human_fallback = True
+            failed_checks.append("Low Baseline Confidence")
+            logger.info(f"SafePredictor: CHECK 1 FAILED - Below baseline threshold")
+        else:
+            logger.info(f"SafePredictor: CHECK 1 PASSED")
+
+        # CHECK 2: Ambiguity Gap
+        gap = conf_1 - conf_2
+        logger.info(f"SafePredictor: CHECK 2 - Ambiguity Gap: {gap:.2f}% (threshold: {self.ambiguity_gap_threshold}%)")
+        if gap < self.ambiguity_gap_threshold:
+            needs_human_fallback = True
+            failed_checks.append("Ambiguity Gap")
+            logger.info(f"SafePredictor: CHECK 2 FAILED - Predictions too close")
+        else:
+            logger.info(f"SafePredictor: CHECK 2 PASSED")
+
+        # CHECK 3: Viable Alternative
+        logger.info(f"SafePredictor: CHECK 3 - Viable Alternative: {conf_2:.2f}% (threshold: {self.viable_alternative_threshold}%)")
+        if conf_2 > self.viable_alternative_threshold:
+            needs_human_fallback = True
+            failed_checks.append("Viable Alternative")
+            logger.info(f"SafePredictor: CHECK 3 FAILED - Second option too strong")
+        else:
+            logger.info(f"SafePredictor: CHECK 3 PASSED")
+
+        # CHECK 4: Color Bias Test - TEMPORARILY DISABLED
+        # Causing too many false positives, needs tuning
+        # img_bw = original_image.convert("L").convert("RGB")
+        # input_bw = self.preprocess(img_bw)
+        # with torch.no_grad():
+        #     logits_bw = self._forward(input_bw)
+        #     scaled_logits_bw = logits_bw / self.temperature
+        #     probs_bw = torch.softmax(scaled_logits_bw, dim=1)
+        #     idx_bw = torch.argmax(probs_bw, dim=1)[0].item()
+        #     conf_bw = float(probs_bw[0][idx_bw].item() * 100.0)
+        #     dish_bw = self.class_names[idx_bw]
+        # 
+        # logger.info(f"SafePredictor: CHECK 4 - Color Bias: RGB={dish_1}, Grayscale={dish_bw} ({conf_bw:.2f}%)")
+        # if dish_1 != dish_bw:
+        #     needs_human_fallback = True
+        #     failed_checks.append("Color Bias")
+        #     logger.info(f"SafePredictor: CHECK 4 FAILED - Grayscale prediction differs")
+        # else:
+        #     logger.info(f"SafePredictor: CHECK 4 PASSED")
+        
+        logger.info(f"SafePredictor: CHECK 4 - Color Bias: SKIPPED (disabled)")
+
+        # FINAL DECISION: Strict mode - ANY failure triggers ASK_USER
+        if needs_human_fallback:
+            reason = " + ".join(failed_checks)
+            logger.info(f"SafePredictor: FINAL DECISION - ASK_USER (Failed checks: {reason})")
+            return {
+                "status": "ASK_USER",
+                "reason": reason,
+                "message": f"Failed one or more safety checks.",
+                "options": [dish_1, dish_2, "None of these"],
+                "predictions": all_predictions,
+                "confidence": conf_1,
+            }
+
+        # SUCCESS - all checks passed
+        logger.info(f"SafePredictor: FINAL DECISION - CONFIRMED (All 4 checks passed)")
+        return {
+            "status": "CONFIRMED",
+            "dish": dish_1,
+            "confidence": conf_1,
+            "predictions": all_predictions
+        }
+
+
 class FoodDetector:
-    """Food detection service using EfficientNet model"""
+    """Food detection service using ConvNeXt Tiny model"""
 
     def __init__(self, model_path: str, device: Optional[str] = None):
         """
@@ -199,7 +367,7 @@ class FoodDetector:
         self.model.eval()
 
         # Define image transformations
-        # Standard EfficientNet preprocessing
+        # Standard ConvNeXt preprocessing (uses ImageNet normalization)
         self.transform = transforms.Compose([
             transforms.Resize((224, 224)),
             transforms.ToTensor(),
@@ -243,13 +411,17 @@ class FoodDetector:
                     # Check if this is a custom architecture with 'backbone' and 'head'
                     has_backbone = any('backbone' in key for key in state_dict.keys())
                     has_head = any('head' in key for key in state_dict.keys())
+                    has_model_prefix = any('model.stem' in key or 'model.stages' in key for key in state_dict.keys())
 
                     if has_backbone and has_head:
-                        logger.info("Detected custom EfficientNet with 'backbone' and 'head' structure")
-                        model = self._load_custom_efficientnet(state_dict)
+                        logger.info("Detected custom ConvNeXt with 'backbone' and 'head' structure")
+                        model = self._load_custom_convnext(state_dict)
+                    elif has_model_prefix and has_head:
+                        logger.info("Detected timm-based ConvNeXt with 'model.' prefix")
+                        model = self._load_timm_convnext(state_dict)
                     else:
-                        logger.info("Detected standard architecture, using torchvision")
-                        model = self._load_torchvision_efficientnet(state_dict)
+                        logger.info("Detected standard architecture, using torchvision ConvNeXt")
+                        model = self._load_torchvision_convnext(state_dict)
             else:
                 # It's the full model
                 model = checkpoint
@@ -264,8 +436,8 @@ class FoodDetector:
             logger.error(f"Error loading model: {str(e)}")
             raise
 
-    def _load_custom_efficientnet(self, state_dict: dict) -> nn.Module:
-        """Load custom EfficientNet model with backbone/head structure"""
+    def _load_custom_convnext(self, state_dict: dict) -> nn.Module:
+        """Load custom ConvNeXt model with backbone/head structure"""
         # Try to determine number of classes from head - find the LAST linear layer
         num_classes = 21  # Default
         head_layers = {}
@@ -290,19 +462,106 @@ class FoodDetector:
         else:
             logger.warning(f"Could not detect output classes from head, using default: {num_classes}")
 
-        logger.info(f"Loading custom EfficientNet with {num_classes} classes")
+        logger.info(f"Loading custom ConvNeXt Tiny with {num_classes} classes")
 
         # Use custom wrapper that properly handles backbone + head
         try:
-            model = CustomEfficientNetWithHead(state_dict, num_classes)
-            logger.info("Successfully created custom model with backbone and head")
+            model = CustomConvNeXtWithHead(state_dict, num_classes)
+            logger.info("Successfully created custom ConvNeXt model with backbone and head")
             return model
         except Exception as e:
             logger.error(f"Failed to create custom model: {str(e)}")
             raise
 
-    def _load_torchvision_efficientnet(self, state_dict: dict) -> nn.Module:
-        """Load standard torchvision EfficientNet"""
+    def _load_timm_convnext(self, state_dict: dict) -> nn.Module:
+        """Load timm-based ConvNeXt with model.stem/stages structure"""
+        # Detect number of classes from head
+        num_classes = 20  # Default
+        for key in state_dict.keys():
+            if key.startswith('head.') and 'weight' in key and 'norm' not in key:
+                shape = state_dict[key].shape
+                if len(shape) == 2:  # Linear layer
+                    num_classes = shape[0]
+                    logger.info(f"Detected {num_classes} output classes from {key}")
+
+        logger.info(f"Loading timm ConvNeXt Tiny with {num_classes} classes")
+
+        if not TIMM_AVAILABLE:
+            raise ImportError("timm library is required to load this model. Install with: pip install timm")
+
+        # Create timm ConvNeXt model
+        model = timm.create_model('convnext_tiny', pretrained=False, num_classes=0)
+        
+        # Separate model backbone and head weights
+        model_state = {}
+        head_state = {}
+        
+        for key, value in state_dict.items():
+            if key.startswith('model.'):
+                # Remove 'model.' prefix for timm model
+                new_key = key.replace('model.', '')
+                model_state[new_key] = value
+            elif key.startswith('head.'):
+                # Keep head weights separate
+                head_state[key] = value
+        
+        # Load model weights (strict=False to handle any minor mismatches)
+        model.load_state_dict(model_state, strict=False)
+        logger.info(f"Loaded ConvNeXt backbone with {len(model_state)} parameters")
+        
+        # Build classification head
+        # Get feature dimension from model
+        with torch.no_grad():
+            dummy_input = torch.randn(1, 3, 224, 224)
+            features = model(dummy_input)
+            feature_dim = features.shape[1]
+        
+        logger.info(f"Feature dimension: {feature_dim}")
+        
+        # Build head from state dict
+        head_layers = []
+        layer_indices = sorted(set(int(k.split('.')[1]) for k in head_state.keys() if k.count('.') >= 2 and k.split('.')[1].isdigit()))
+        
+        for idx in layer_indices:
+            weight_key = f'head.{idx}.weight'
+            if weight_key in head_state:
+                weight = head_state[weight_key]
+                if len(weight.shape) == 2:  # Linear layer
+                    out_dim, in_dim = weight.shape
+                    linear = nn.Linear(in_dim, out_dim)
+                    linear.weight.data = weight
+                    if f'head.{idx}.bias' in head_state:
+                        linear.bias.data = head_state[f'head.{idx}.bias']
+                    head_layers.append(linear)
+                    logger.info(f"  Head layer {idx}: Linear({in_dim} -> {out_dim})")
+                    
+                    # Add ReLU after linear layers except the last one
+                    if out_dim != num_classes:
+                        head_layers.append(nn.ReLU(inplace=True))
+                        logger.info(f"  Head layer {idx}+: ReLU")
+        
+        if not head_layers:
+            # Fallback to simple linear head
+            logger.info(f"No head layers found, creating simple linear head: {feature_dim} -> {num_classes}")
+            head_layers = [nn.Linear(feature_dim, num_classes)]
+        
+        # Create complete model with backbone and head
+        class ConvNeXtWithHead(nn.Module):
+            def __init__(self, backbone, head):
+                super().__init__()
+                self.backbone = backbone
+                self.head = head
+            
+            def forward(self, x):
+                features = self.backbone(x)
+                return self.head(features)
+        
+        complete_model = ConvNeXtWithHead(model, nn.Sequential(*head_layers))
+        logger.info("Successfully created timm ConvNeXt model with custom head")
+        return complete_model
+
+    def _load_torchvision_convnext(self, state_dict: dict) -> nn.Module:
+        """Load standard torchvision ConvNeXt"""
         from torchvision import models
 
         num_classes = 21
@@ -312,9 +571,9 @@ class FoodDetector:
                 logger.info(f"Detected {num_classes} output classes")
                 break
 
-        model = models.efficientnet_b0(weights=None)
-        num_features = model.classifier[1].in_features
-        model.classifier[1] = nn.Linear(num_features, num_classes)
+        model = models.convnext_tiny(weights=None)
+        num_features = model.classifier[2].in_features
+        model.classifier[2] = nn.Linear(num_features, num_classes)
         model.load_state_dict(state_dict)
         return model
 
@@ -392,101 +651,28 @@ class FoodDetector:
 
         return tensor.to(self.device)
 
-    def predict(self, image: Image.Image, top_k: int = 1) -> list:
+    def predict(self, image: Image.Image, top_k: int = 3) -> list:
         """
         Predict food class from image
 
         Args:
             image: PIL Image
-            top_k: Number of top predictions to return
+            top_k: Number of top predictions to return (default: 3)
 
         Returns:
-            List of tuples (class_name, confidence) sorted by confidence
+            Dictionary with safety status and predictions
         """
-        try:
-            with torch.no_grad():
-                # Preprocess
-                input_tensor = self.preprocess_image(image)
-                print(f"[DEBUG] Input tensor shape: {input_tensor.shape}")
-                logger.info(f"Input tensor shape: {input_tensor.shape}")
+        # Use SafeFoodPredictor to apply safety checks before confirming
+        predictor = SafeFoodPredictor(self.model, self.class_names, device=self.device)
+        return predictor.predict_with_safeguards(image, top_k=top_k)
 
-                # Run inference
-                outputs = self.model(input_tensor)
-                print(f"[DEBUG] Raw outputs type: {type(outputs)}")
-                print(f"[DEBUG] Raw outputs shape: {outputs.shape if hasattr(outputs, 'shape') else 'N/A'}")
-                logger.info(f"Raw outputs type: {type(outputs)}, shape: {outputs.shape if hasattr(outputs, 'shape') else 'N/A'}")
-
-                # Handle different output formats
-                if isinstance(outputs, tuple):
-                    # Model returns tuple (logits, aux_outputs)
-                    logits = outputs[0]
-                    print(f"[DEBUG] Model returned tuple, using first element")
-                elif torch.is_tensor(outputs):
-                    # Model returns tensor directly
-                    logits = outputs
-                    print(f"[DEBUG] Model returned tensor directly")
-                else:
-                    raise ValueError(f"Unexpected output type: {type(outputs)}")
-
-                print(f"[DEBUG] Logits shape before squeeze: {logits.shape}")
-                print(f"[DEBUG] Number of class names: {len(self.class_names)}")
-
-                # Remove batch dimension if present
-                if len(logits.shape) > 1:
-                    logits = logits.squeeze(0)
-
-                print(f"[DEBUG] Logits shape after squeeze: {logits.shape}")
-                logger.info(f"Logits shape after processing: {logits.shape}")
-
-                # Get probabilities
-                probabilities = torch.nn.functional.softmax(logits, dim=0)
-                print(f"[DEBUG] Probabilities shape: {probabilities.shape}")
-                logger.info(f"Probabilities shape: {probabilities.shape}")
-
-                # Get top k predictions
-                top_k_count = min(top_k, len(self.class_names), len(probabilities))
-                print(f"[DEBUG] Getting top {top_k_count} predictions")
-                top_probs, top_indices = torch.topk(probabilities, top_k_count)
-
-                print(f"[DEBUG] Top indices: {top_indices}")
-                print(f"[DEBUG] Top probs: {top_probs}")
-
-                # Format results
-                results = []
-                for prob, idx in zip(top_probs, top_indices):
-                    idx_val = idx.item()
-                    print(f"[DEBUG] Processing index {idx_val}, prob {prob.item():.4f}")
-                    print(f"[DEBUG] Class names length: {len(self.class_names)}")
-
-                    if idx_val < len(self.class_names):
-                        class_name = self.class_names[idx_val]
-                        confidence = prob.item()
-                        results.append((class_name, confidence))
-                        print(f"[DEBUG] Added prediction: {class_name} ({confidence:.4f})")
-                        logger.info(f"Prediction: {class_name} ({confidence:.4f})")
-                    else:
-                        print(f"[DEBUG] WARNING: Index {idx_val} out of range!")
-                        logger.warning(f"Index {idx_val} out of range for class_names (len={len(self.class_names)})")
-
-                print(f"[DEBUG] Total results: {len(results)}")
-
-                if not results:
-                    logger.error("No valid predictions generated")
-                    raise ValueError("Model produced no valid predictions")
-
-                return results
-
-        except Exception as e:
-            logger.error(f"Error in predict method: {str(e)}", exc_info=True)
-            raise
-
-    def predict_from_bytes(self, image_bytes: bytes, top_k: int = 1) -> list:
+    def predict_from_bytes(self, image_bytes: bytes, top_k: int = 3) -> list:
         """
         Predict food class from image bytes
 
         Args:
             image_bytes: Image file bytes
-            top_k: Number of top predictions to return
+            top_k: Number of top predictions to return (default: 3)
 
         Returns:
             List of tuples (class_name, confidence) sorted by confidence

@@ -40,7 +40,7 @@ function RootLayoutNav() {
     }
 
     // ===== 4. User finished onboarding =====
-    const allowedScreens = ['(tabs)', 'manual', 'analytics'];
+    const allowedScreens = ['(tabs)', 'manual', 'analytics', 'edit-profile', 'custom-dish'];
     if (!allowedScreens.includes(segment)) {
       router.replace('/(tabs)');
     }
@@ -60,6 +60,7 @@ function RootLayoutNav() {
       <Stack.Screen name="(tabs)" />
       <Stack.Screen name="manual" />
       <Stack.Screen name="analytics" />
+      <Stack.Screen name="custom-dish" />
     </Stack>
   );
 }

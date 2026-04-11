@@ -3,6 +3,8 @@ import { User, AuthContextType } from '../types/auth.types';
 import { getItem, setItem, removeItem, getObject, setObject, STORAGE_KEYS } from '../utils/storage';
 import { authAPI } from '../services/auth.api';
 import { userAPI } from '../services/user.api';
+import apiClient from '../services/api';
+import { useChatStore } from '../store/useChatStore';
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -59,6 +61,21 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             emailVerified: currentUser.email_verified,
             photoUrl: currentUser.photo_url,
           };
+
+          // Fetch user profile to get daily_calorie_goal from Firestore
+          try {
+            const profileResponse = await apiClient.get('/api/user/profile');
+            if (profileResponse.data?.daily_calorie_goal) {
+              updatedUser.daily_calorie_goal = profileResponse.data.daily_calorie_goal;
+              updatedUser.daily_carbs_goal = profileResponse.data.daily_carbs_goal;
+              updatedUser.daily_protein_goal = profileResponse.data.daily_protein_goal;
+              updatedUser.daily_fat_goal = profileResponse.data.daily_fat_goal;
+              console.log('Loaded daily calorie goal:', updatedUser.daily_calorie_goal);
+            }
+          } catch (profileError) {
+            console.log('Could not fetch calorie goal from profile (may not have completed onboarding)');
+          }
+
           setUser(updatedUser);
           await setObject(STORAGE_KEYS.USER_PROFILE, updatedUser);
         } catch (error) {
@@ -94,6 +111,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         emailVerified: userData.email_verified,
         photoUrl: userData.photo_url,
       };
+
+      // Fetch user profile to get daily_calorie_goal from Firestore
+      try {
+        const profileResponse = await apiClient.get('/api/user/profile');
+        if (profileResponse.data?.daily_calorie_goal) {
+          user.daily_calorie_goal = profileResponse.data.daily_calorie_goal;
+          user.daily_carbs_goal = profileResponse.data.daily_carbs_goal;
+          user.daily_protein_goal = profileResponse.data.daily_protein_goal;
+          user.daily_fat_goal = profileResponse.data.daily_fat_goal;
+          console.log('Login - Loaded daily calorie goal:', user.daily_calorie_goal);
+        }
+      } catch (profileError) {
+        console.log('Could not fetch calorie goal (user may not have completed onboarding yet)');
+      }
 
       setUser(user);
       await setObject(STORAGE_KEYS.USER_PROFILE, user);
@@ -158,6 +189,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         emailVerified: userData.email_verified, // Always true for Google users
         photoUrl: userData.photo_url,
       };
+
+      // Fetch user profile to get daily_calorie_goal from Firestore
+      try {
+        const profileResponse = await apiClient.get('/api/user/profile');
+        if (profileResponse.data?.daily_calorie_goal) {
+          user.daily_calorie_goal = profileResponse.data.daily_calorie_goal;
+          user.daily_carbs_goal = profileResponse.data.daily_carbs_goal;
+          user.daily_protein_goal = profileResponse.data.daily_protein_goal;
+          user.daily_fat_goal = profileResponse.data.daily_fat_goal;
+          console.log('Google login - Loaded daily calorie goal:', user.daily_calorie_goal);
+        }
+      } catch (profileError) {
+        console.log('Could not fetch calorie goal (user may not have completed onboarding yet)');
+      }
 
       setUser(user);
       await setObject(STORAGE_KEYS.USER_PROFILE, user);
@@ -321,6 +366,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setUser(null);
       setHasCompletedOnboarding(false);
       setHasAcceptedConsent(false);
+      useChatStore.getState().clearMessages();
       await removeItem(STORAGE_KEYS.AUTH_TOKEN);
       await removeItem(STORAGE_KEYS.REFRESH_TOKEN);
       await removeItem(STORAGE_KEYS.USER_PROFILE);
@@ -336,6 +382,50 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const consentAccepted = await getItem(STORAGE_KEYS.CONSENT_ACCEPTED);
     setHasCompletedOnboarding(onboardingComplete === 'true');
     setHasAcceptedConsent(consentAccepted === 'true');
+
+    // After onboarding completes, fetch user profile to get calculated calorie goal
+    if (onboardingComplete === 'true') {
+      try {
+        const profileResponse = await apiClient.get('/api/user/profile');
+        if (profileResponse.data?.daily_calorie_goal && user) {
+          const updatedUser: User = {
+            ...user,
+            daily_calorie_goal: profileResponse.data.daily_calorie_goal,
+            daily_carbs_goal: profileResponse.data.daily_carbs_goal,
+            daily_protein_goal: profileResponse.data.daily_protein_goal,
+            daily_fat_goal: profileResponse.data.daily_fat_goal,
+          };
+          setUser(updatedUser);
+          await setObject(STORAGE_KEYS.USER_PROFILE, updatedUser);
+          console.log('Onboarding complete - Loaded daily calorie goal:', updatedUser.daily_calorie_goal);
+        }
+      } catch (profileError) {
+        console.log('Could not fetch calorie goal after onboarding');
+      }
+    }
+  };
+
+  // Re-fetch user goals after profile update (called from edit-profile screen)
+  const refreshUserGoals = async (): Promise<void> => {
+    if (!user) return;
+    try {
+      const profileResponse = await apiClient.get('/api/user/profile');
+      if (profileResponse.data) {
+        const updatedUser: User = {
+          ...user,
+          daily_calorie_goal: profileResponse.data.daily_calorie_goal ?? user.daily_calorie_goal,
+          daily_carbs_goal: profileResponse.data.daily_carbs_goal ?? user.daily_carbs_goal,
+          daily_protein_goal: profileResponse.data.daily_protein_goal ?? user.daily_protein_goal,
+          daily_fat_goal: profileResponse.data.daily_fat_goal ?? user.daily_fat_goal,
+          fullName: profileResponse.data.basic_info?.full_name ?? user.fullName,
+        };
+        setUser(updatedUser);
+        await setObject(STORAGE_KEYS.USER_PROFILE, updatedUser);
+        console.log('Goals refreshed - calorie goal:', updatedUser.daily_calorie_goal);
+      }
+    } catch (err) {
+      console.log('Could not refresh user goals:', err);
+    }
   };
 
   // Set consent as accepted (called from important-info screen)
@@ -359,6 +449,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     resetPassword,
     setNewPassword,
     refreshOnboardingStatus,
+    refreshUserGoals,
     setConsentAccepted,
     tempEmail,
     tempPassword,

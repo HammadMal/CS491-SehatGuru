@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Request, status
+from fastapi import FastAPI, Request, status, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, FileResponse
 from fastapi.exceptions import RequestValidationError
@@ -10,8 +10,9 @@ import logging
 
 from app.config.settings import settings
 from app.config.firebase import firebase_client
-from app.routes import auth, food, user, chat
+from app.routes import auth, food, user, chat, feedback
 from app.ml.food_detector import initialize_detector
+from app.middleware.auth import get_current_active_user
 
 # Configure logging for ML module
 logging.basicConfig(level=logging.INFO)
@@ -40,7 +41,7 @@ async def lifespan(app: FastAPI):
         model_path = os.path.join(
             os.path.dirname(os.path.dirname(__file__)),
             "model",
-            "final_effnet_enhanced.pth"
+            "SehatGuru_ConvNeXt_Final.pth"
         )
         print(f"Loading food detection model from: {model_path}")
         initialize_detector(model_path)
@@ -117,10 +118,48 @@ async def general_exception_handler(request: Request, exc: Exception):
 app.include_router(auth.router, prefix="/api")
 app.include_router(user.router, prefix="/api")
 app.include_router(chat.router, prefix="/api")
+app.include_router(feedback.router, prefix="/api")
 app.include_router(food.router)
 
 # Nutrients endpoint (correct location)
 import csv
+import pandas as pd
+from pydantic import BaseModel
+from typing import List
+from datetime import datetime, timezone
+
+# ── Load nutrients CSVs once at startup ──────────────────────────────────────
+_nutrients_path = os.path.join(os.path.dirname(__file__), "nutrients.csv")
+_ingredients_path = os.path.join(os.path.dirname(__file__), "ingredientsfinal.csv")
+
+_nutrients_df = pd.read_csv(_nutrients_path)
+_nutrients_df.columns = _nutrients_df.columns.str.lower().str.strip()
+
+_ingredients_df = pd.read_csv(_ingredients_path)
+_ingredients_df.columns = _ingredients_df.columns.str.lower().str.strip()
+_ingredients_df["food_name"] = _ingredients_df["food_name"].astype(str).str.lower().str.strip()
+
+# All nutrient columns (mirrors nutrients.csv schema)
+_NUTRIENT_COLS = [
+    "energy_kcal", "carb_g", "protein_g", "fat_g", "freesugar_g", "fibre_g",
+    "calcium_mg", "iron_mg", "energy_kj", "sfa_mg", "mufa_mg", "pufa_mg",
+    "cholesterol_mg", "phosphorus_mg", "magnesium_mg", "sodium_mg", "potassium_mg",
+    "copper_mg", "selenium_ug", "chromium_mg", "manganese_mg", "molybdenum_mg",
+    "zinc_mg", "vita_ug", "vite_mg", "vitd2_ug", "vitd3_ug", "vitk1_ug", "vitk2_ug",
+    "folate_ug", "vitb1_mg", "vitb2_mg", "vitb3_mg", "vitb5_mg", "vitb6_mg",
+    "vitb7_ug", "vitb9_ug", "vitc_mg", "carotenoids_ug",
+]
+
+# ── Models ───────────────────────────────────────────────────────────────────
+class CustomDishIngredient(BaseModel):
+    food_name: str
+    grams: float
+
+class CustomDishRequest(BaseModel):
+    dish_name: str
+    ingredients: List[CustomDishIngredient]
+
+# ── Endpoints ────────────────────────────────────────────────────────────────
 
 @app.get("/api/nutrients")
 def get_nutrients():
@@ -136,6 +175,121 @@ def get_nutrients():
             rows.append(row)
 
     return rows
+
+
+@app.get("/api/ingredients/search")
+def search_ingredients(q: str = "", limit: int = 20):
+    """
+    Search ingredientsfinal.csv by food_name substring with relevance ranking.
+    Ranking tiers (best first):
+      0 - exact match
+      1 - name starts with query
+      2 - a word in the name starts with query
+      3 - query appears anywhere in name
+    Within each tier, shorter names rank higher.
+    """
+    if not q.strip():
+        return []
+
+    query = q.lower().strip()
+
+    # Get all rows that contain the query anywhere
+    mask = _ingredients_df["food_name"].str.contains(query, na=False)
+    matches = _ingredients_df[mask].copy()
+
+    if matches.empty:
+        return []
+
+    # Assign relevance score
+    def relevance(name: str) -> int:
+        if name == query:
+            return 0
+        if name.startswith(query):
+            return 1
+        if any(word.startswith(query) for word in name.split()):
+            return 2
+        return 3
+
+    matches["_score"] = matches["food_name"].apply(relevance)
+    matches["_len"] = matches["food_name"].str.len()
+    matches = matches.sort_values(["_score", "_len"]).head(limit)
+
+    output = []
+    for _, row in matches.iterrows():
+        item = {"food_name": row["food_name"]}
+        for col in _NUTRIENT_COLS:
+            if col in row:
+                val = row[col]
+                item[col] = float(val) if pd.notna(val) else 0.0
+        output.append(item)
+
+    return output
+
+
+@app.post("/api/custom-dishes")
+async def save_custom_dish(
+    dish: CustomDishRequest,
+    current_user: dict = Depends(get_current_active_user)
+):
+    """
+    Build a custom dish from ingredients, compute full nutrient profile, save to Firestore.
+    Each ingredient's nutrients are scaled: value * grams / 100.
+    """
+    uid = current_user["uid"]
+
+    # Initialise totals for all nutrient columns
+    totals = {col: 0.0 for col in _NUTRIENT_COLS}
+
+    used_ingredients = []
+    for ing in dish.ingredients:
+        name = ing.food_name.lower().strip()
+        row = _ingredients_df[_ingredients_df["food_name"] == name]
+        if row.empty:
+            # Try partial match fallback
+            row = _ingredients_df[_ingredients_df["food_name"].str.contains(name, na=False)].head(1)
+        if row.empty:
+            continue  # skip unknown ingredient
+
+        factor = ing.grams / 100.0
+        for col in _NUTRIENT_COLS:
+            if col in row.columns:
+                val = row[col].values[0]
+                totals[col] += float(val) * factor if pd.notna(val) else 0.0
+
+        used_ingredients.append({"food_name": ing.food_name, "grams": ing.grams})
+
+    # Build Firestore document (mirrors nutrients.csv columns)
+    doc = {
+        "userId": uid,
+        "food_name": dish.dish_name,
+        **{col: round(totals[col], 4) for col in _NUTRIENT_COLS},
+        "ingredients": used_ingredients,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    }
+
+    db = firebase_client.db
+    ref = db.collection("custom_dishes").document()
+    ref.set(doc)
+
+    return {"id": ref.id, **doc}
+
+
+@app.get("/api/custom-dishes")
+async def get_custom_dishes(
+    current_user: dict = Depends(get_current_active_user)
+):
+    """Return all custom dishes saved by the current user."""
+    uid = current_user["uid"]
+    db = firebase_client.db
+    docs = (
+        db.collection("custom_dishes")
+        .where("userId", "==", uid)
+        .stream()
+    )
+    results = [{"id": d.id, **d.to_dict()} for d in docs]
+    # Sort newest-first in Python (avoids needing a composite Firestore index)
+    results.sort(key=lambda x: x.get("created_at", ""), reverse=True)
+    return results
 
 
 

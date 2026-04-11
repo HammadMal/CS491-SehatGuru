@@ -65,10 +65,31 @@ class Settings(BaseSettings):
 
     # Gemini AI
     GEMINI_API_KEY: str = ""
-    GEMINI_MODEL: str = "gemini-2.0-flash-exp"
+    GEMINI_MODEL: str = "gemini-2.0-flash"
+
+    # RAG Configuration
+    RAG_COLLECTION_KNOWLEDGE_BASE: str = "pakistani_dietary_guidelines"
+    RAG_COLLECTION_DISHES: str = "pakistani_dishes"
+    CHROMA_PERSIST_DIR: str = "./chroma_db"
+    RAG_CHUNK_SIZE: int = 1000
+    RAG_CHUNK_OVERLAP: int = 200
+    RAG_TOP_K: int = 5
+    EMBEDDING_MODEL: str = "models/gemini-embedding-001"
+
+    # Memory (Mem0 OSS)
+    MEM0_COLLECTION_NAME: str = "sehatguru_user_memories"
+    MEM0_CHROMA_DIR: str = "./chroma_db_mem0"
+
+    # Self-Validation Settings
+    ENABLE_RESPONSE_VALIDATION: bool = True
+    VALIDATION_MAX_RETRIES: int = 1
+    VALIDATION_THRESHOLD_SAFETY: float = 0.7
+    VALIDATION_THRESHOLD_ACCURACY: float = 0.7
+    VALIDATION_THRESHOLD_PERSONALIZATION: float = 0.5
+    VALIDATION_THRESHOLD_CULTURAL: float = 0.7
 
     class Config:
-        env_file = ".env"
+        env_file = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), ".env")
         case_sensitive = True
 
 

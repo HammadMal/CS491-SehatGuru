@@ -8,7 +8,7 @@ import {
   MealPreferences,
   DietaryPreferences,
 } from '../types/onboarding.types';
-import { setObject, setItem, STORAGE_KEYS } from '../utils/storage';
+import { setObject, setItem, getObject, STORAGE_KEYS } from '../utils/storage';
 import { AuthContext } from './AuthContext';
 import { userAPI } from '../services/user.api';
 
@@ -50,7 +50,7 @@ export const OnboardingProvider: React.FC<OnboardingProviderProps> = ({ children
   const authContext = useContext(AuthContext);
   const previousUserIdRef = useRef<string | null>(null);
 
-  // Reset onboarding data when user logs out or changes
+  // Load or reset onboarding data when user changes
   useEffect(() => {
     const currentUserId = authContext?.user?.id || null;
 
@@ -65,6 +65,28 @@ export const OnboardingProvider: React.FC<OnboardingProviderProps> = ({ children
       console.log('User changed, resetting onboarding data');
       setOnboardingData(initialOnboardingData);
       setCurrentStep(0);
+    }
+    // If user just logged in (went from null to having an ID), load their saved onboarding data
+    else if (previousUserIdRef.current === null && currentUserId !== null) {
+      getObject<OnboardingData>(STORAGE_KEYS.ONBOARDING_DATA).then(async (saved) => {
+        if (saved && saved.basicInfo?.age) {
+          console.log('Loaded onboarding data from AsyncStorage for user:', currentUserId);
+          setOnboardingData(saved);
+        } else {
+          // AsyncStorage is empty or stale — fetch from backend
+          try {
+            const profile = await userAPI.getProfile();
+            if (profile) {
+              console.log('Loaded onboarding data from backend for user:', currentUserId);
+              setOnboardingData(profile);
+              // Cache it locally for next time
+              await setObject(STORAGE_KEYS.ONBOARDING_DATA, profile);
+            }
+          } catch (error) {
+            console.log('Could not load onboarding data from backend:', error);
+          }
+        }
+      });
     }
 
     // Update the ref to track the current user
@@ -158,6 +180,18 @@ export const OnboardingProvider: React.FC<OnboardingProviderProps> = ({ children
     setCurrentStep(0);
   };
 
+  const refreshOnboardingData = async () => {
+    try {
+      const profile = await userAPI.getProfile();
+      if (profile) {
+        setOnboardingData(profile);
+        await setObject(STORAGE_KEYS.ONBOARDING_DATA, profile);
+      }
+    } catch (error) {
+      console.log('Could not refresh onboarding data:', error);
+    }
+  };
+
   const value: OnboardingContextType = {
     onboardingData,
     currentStep,
@@ -170,6 +204,7 @@ export const OnboardingProvider: React.FC<OnboardingProviderProps> = ({ children
     goToNextStep,
     goToPreviousStep,
     resetOnboarding,
+    refreshOnboardingData,
   };
 
   return <OnboardingContext.Provider value={value}>{children}</OnboardingContext.Provider>;

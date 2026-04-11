@@ -4,6 +4,7 @@ from fastapi import HTTPException, status
 from app.config.firebase import firebase_client
 from app.config.settings import settings
 from app.models.user import UserProfileRequest, UserProfileResponse, UserProfileUpdateRequest
+from app.utils.calorie_calculator import calculate_daily_calories
 
 
 class UserService:
@@ -47,6 +48,35 @@ class UserService:
                 "onboarding_completed": True,
                 "updated_at": now
             }
+            
+            # Calculate personalized daily calorie goal
+            try:
+                calorie_result = calculate_daily_calories(
+                    age=int(profile_data.basic_info.age),
+                    gender=profile_data.basic_info.gender,
+                    height=float(profile_data.basic_info.height),
+                    height_unit=profile_data.basic_info.height_unit,
+                    weight=float(profile_data.basic_info.weight),
+                    weight_unit=profile_data.basic_info.weight_unit,
+                    activity_level=profile_data.activity_level,
+                    health_goals=profile_data.health_goals
+                )
+                
+                # Add calorie calculation results to profile
+                profile_dict["daily_calorie_goal"] = calorie_result["daily_calorie_goal"]
+                profile_dict["bmr"] = calorie_result["bmr"]
+                profile_dict["tdee"] = calorie_result["tdee"]
+                profile_dict["goal_adjustment"] = calorie_result["goal_adjustment"]
+                profile_dict["calculation_method"] = calorie_result["calculation_method"]
+                profile_dict["calorie_last_calculated_at"] = datetime.fromisoformat(calorie_result["last_calculated_at"])
+                profile_dict["daily_carbs_goal"] = calorie_result["daily_carbs_goal"]
+                profile_dict["daily_protein_goal"] = calorie_result["daily_protein_goal"]
+                profile_dict["daily_fat_goal"] = calorie_result["daily_fat_goal"]
+                
+                print(f"Calculated daily calorie goal: {calorie_result['daily_calorie_goal']} for user {uid}")
+            except Exception as calc_error:
+                print(f"Warning: Could not calculate calories: {str(calc_error)}")
+                # Continue without calorie calculation - not critical for profile save
 
             # Update full_name at the top level if provided and currently empty
             existing_data = user_snapshot.to_dict()
@@ -77,7 +107,16 @@ class UserService:
                 dietary_preferences=profile_data.dietary_preferences,
                 onboarding_completed=True,
                 created_at=updated_user.get("profile_created_at"),
-                updated_at=now
+                updated_at=now,
+                daily_calorie_goal=updated_user.get("daily_calorie_goal"),
+                bmr=updated_user.get("bmr"),
+                tdee=updated_user.get("tdee"),
+                goal_adjustment=updated_user.get("goal_adjustment"),
+                calculation_method=updated_user.get("calculation_method"),
+                calorie_last_calculated_at=updated_user.get("calorie_last_calculated_at"),
+                daily_carbs_goal=updated_user.get("daily_carbs_goal"),
+                daily_protein_goal=updated_user.get("daily_protein_goal"),
+                daily_fat_goal=updated_user.get("daily_fat_goal"),
             )
 
         except HTTPException:
@@ -134,7 +173,16 @@ class UserService:
                 dietary_preferences=DietaryPreferences(**dietary_prefs_data),
                 onboarding_completed=user_data.get("onboarding_completed", False),
                 created_at=user_data.get("profile_created_at"),
-                updated_at=user_data.get("updated_at")
+                updated_at=user_data.get("updated_at"),
+                daily_calorie_goal=user_data.get("daily_calorie_goal"),
+                bmr=user_data.get("bmr"),
+                tdee=user_data.get("tdee"),
+                goal_adjustment=user_data.get("goal_adjustment"),
+                calculation_method=user_data.get("calculation_method"),
+                calorie_last_calculated_at=user_data.get("calorie_last_calculated_at"),
+                daily_carbs_goal=user_data.get("daily_carbs_goal"),
+                daily_protein_goal=user_data.get("daily_protein_goal"),
+                daily_fat_goal=user_data.get("daily_fat_goal"),
             )
 
         except HTTPException:
@@ -174,21 +222,71 @@ class UserService:
 
             # Prepare update data (only include fields that are provided)
             update_dict = {"updated_at": datetime.utcnow()}
+            
+            # Track if we need to recalculate calories
+            needs_calorie_recalc = False
 
             if update_data.basic_info is not None:
                 update_dict["basic_info"] = update_data.basic_info.model_dump()
+                needs_calorie_recalc = True  # Age, weight, height, or gender changed
 
             if update_data.activity_level is not None:
                 update_dict["activity_level"] = update_data.activity_level
+                needs_calorie_recalc = True  # Activity level changed
 
             if update_data.health_goals is not None:
                 update_dict["health_goals"] = update_data.health_goals
+                needs_calorie_recalc = True  # Health goals changed
 
             if update_data.meal_preferences is not None:
                 update_dict["meal_preferences"] = update_data.meal_preferences.model_dump()
 
             if update_data.dietary_preferences is not None:
                 update_dict["dietary_preferences"] = update_data.dietary_preferences.model_dump()
+            
+            # Recalculate calories if relevant fields changed
+            if needs_calorie_recalc:
+                try:
+                    # Get current user data to fill in missing fields
+                    existing_data = user_snapshot.to_dict()
+                    basic_info = update_data.basic_info or existing_data.get("basic_info", {})
+                    activity_level = update_data.activity_level or existing_data.get("activity_level", "")
+                    health_goals = update_data.health_goals or existing_data.get("health_goals", [])
+                    
+                    # Only recalculate if we have all required data
+                    if basic_info and activity_level:
+                        from app.models.user import BasicInfo as BasicInfoModel
+                        if isinstance(basic_info, dict):
+                            basic_info_obj = BasicInfoModel(**basic_info)
+                        else:
+                            basic_info_obj = basic_info
+                        
+                        calorie_result = calculate_daily_calories(
+                            age=int(basic_info_obj.age),
+                            gender=basic_info_obj.gender,
+                            height=float(basic_info_obj.height),
+                            height_unit=basic_info_obj.height_unit,
+                            weight=float(basic_info_obj.weight),
+                            weight_unit=basic_info_obj.weight_unit,
+                            activity_level=activity_level,
+                            health_goals=health_goals
+                        )
+                        
+                        # Update calorie fields
+                        update_dict["daily_calorie_goal"] = calorie_result["daily_calorie_goal"]
+                        update_dict["bmr"] = calorie_result["bmr"]
+                        update_dict["tdee"] = calorie_result["tdee"]
+                        update_dict["goal_adjustment"] = calorie_result["goal_adjustment"]
+                        update_dict["calculation_method"] = calorie_result["calculation_method"]
+                        update_dict["calorie_last_calculated_at"] = datetime.fromisoformat(calorie_result["last_calculated_at"])
+                        update_dict["daily_carbs_goal"] = calorie_result["daily_carbs_goal"]
+                        update_dict["daily_protein_goal"] = calorie_result["daily_protein_goal"]
+                        update_dict["daily_fat_goal"] = calorie_result["daily_fat_goal"]
+                        
+                        print(f"Recalculated daily calorie goal: {calorie_result['daily_calorie_goal']} for user {uid}")
+                except Exception as calc_error:
+                    print(f"Warning: Could not recalculate calories: {str(calc_error)}")
+                    # Continue with update even if calorie calculation fails
 
             # Update user document
             user_doc.update(update_dict)

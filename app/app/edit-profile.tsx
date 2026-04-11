@@ -160,15 +160,12 @@ export default function EditProfileScreen() {
                             <View style={{ flex: 1 }}>
                                 <CustomInput
                                     label="Height"
-                                    placeholder={heightUnit === 'cm' ? 'e.g. 170' : "e.g. 5'7\""}
+                                    placeholder="0"
                                     value={height}
                                     onChangeText={(t) => { setHeight(t); setErrors({ ...errors, height: null }); }}
                                     error={errors.height}
-                                    keyboardType={heightUnit === 'cm' ? 'decimal-pad' : 'numbers-and-punctuation'}
+                                    keyboardType="decimal-pad"
                                 />
-                                {heightUnit === 'ft' && (
-                                    <Text style={styles.helperText}>Format: 5'7" or 5 7</Text>
-                                )}
                             </View>
                             <View style={styles.unitToggle}>
                                 <Text style={styles.unitToggleLabel}>Unit</Text>

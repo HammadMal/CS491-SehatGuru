@@ -1,0 +1,377 @@
+ID,Category,Tags,Prompt,Expected Intent,Actual Intent,Intent Correct,Expected Guard,Guard Result,Guard Check Correct,Response Length,Has Response,Validation Passed,Response,Error
+Q-01,nutritional_advice,"intermittent_fasting, weight_loss",Can I use intermittent fasting to lose weight more quickly?,nutritional_advice,nutritional_advice,True,N/A,ok,,1700,True,True,"As SehatGuru, I advise focusing on a balanced approach for your weight and muscle gain goals, rather than intermittent fasting, especially given your tendency to skip breakfast. Consistent, nutrient-rich meals are key.
+
+Since your goal is weight gain and muscle building, reducing caloric intake through intermittent fasting isn't the right approach for you. Instead, let's focus on strategies to help you meet your 2800 kcal target.
+
+Here's a better strategy, based on Pakistani Dietary Guidelines:
+
+1.  **Never skip breakfast:** Start your day with a substantial meal. Since you sometimes skip it, try to wake up earlier.
+2.  **Increase protein intake:** Aim for 2-3 servings of meat, chicken, fish, or eggs per day to fulfill protein requirements. Don't forget pulses (dalain) like dal (lentils) are a great source of protein, fiber, and essential amino acids, and can be used as a substitute for meat if you're short on it.
+3.  **Choose lean meats:** Select lean cuts of meat to avoid excessive saturated fat and cholesterol intake, which are linked to heart diseases. Avoid non-lean meat, this can increase cardiovascular diseases, breast and prostate cancers.
+4.  **Regular meals and snacks:** Since you are moderately active, focus on increasing your food intake frequency and portion size.
+5.  **Nutrient-dense options:** Prioritize home-cooked Pakistani meals rich in protein and complex carbohydrates.
+6.  **Evening Snack:** Since you mentioned you are a university student, a good evening snack would be tea with biscuits
+
+Remember, slow and steady wins the race. Focus on making sustainable dietary changes that align with Pakistani dietary guidelines and your love for Pakistani cuisine.",
+Q-02,nutritional_advice,"sodium, low_salt, flavor",How can I eat tastily whilst using less salt?,nutritional_advice,nutritional_advice,True,N/A,ok,,3307,True,True,"Okay, here's some advice on reducing salt intake while still enjoying tasty Pakistani food, keeping your muscle and weight gain goals in mind:
+
+Since you want to gain weight and build muscle, it's important to focus on nutrient-dense foods. While reducing salt, you don't want to sacrifice flavor or your ability to enjoy your meals.
+
+**Understanding the Risks of High Salt Intake:** The Pakistani Dietary Guidelines for Better Nutrition (PDGFBN) emphasize that high salt intake is linked to hypertension (high blood pressure), strokes, and heart attacks. Since salt is frequently used in Pakistani cuisine, it's wise to be mindful of your intake.
+
+**Practical Tips for Reducing Salt in Your Diet:**
+
+*   **Limit Salt in Cooking:**
+    *   Gradually reduce the amount of salt you add while cooking your favorite dishes like Chicken Karahi. Taste as you go!
+    *   Avoid adding extra salt to your food at the table. Remove the salt shaker from the table.
+*   **Choose Low-Sodium Options:**
+    *   When buying ingredients, opt for products with lower sodium content.
+*   **Enhance Flavor with Alternatives:**
+    *   Instead of relying on salt, use herbs, spices, and lemon juice to enhance the taste of your meals. For example, add more *zeera* (cumin), coriander, garlic, ginger, or *garam masala* to your Karahi for a flavor boost.
+*   **Avoid Salty Snacks:** Limit your consumption of salty snacks like chips and processed foods.
+*   **Be Mindful of Hidden Salt:** Be aware that some foods, like processed foods and pickles (*achaar*), are high in sodium.
+
+**Pakistani Food Choices and Salt:**
+
+*   **Lassi:** If you enjoy Lassi (salted), try making it at home and gradually reducing the amount of salt you add.
+*   **Nihari:** While Nihari can be a good source of protein, be mindful of the sodium content, as traditionally prepared Nihari can be quite salty. Prepare at home for optimal sodium control.
+*   **Jeera Baghar (Tadka):** While *jeera baghar* adds flavor, remember that oils can contribute to overall calorie intake, which is good for your weight gain goals, but should still be used in moderation.
+
+**General Dietary Advice (aligned with your goals and PDGFBN):**
+
+*   **Prioritize Home-Cooked Meals:** Since you prefer home-cooked meals, this is a great way to control the amount of salt, sugar, and oil used in your food.
+*   **Focus on Whole Foods:** Build your meals around whole, unprocessed foods like lean meats (chicken, beef), *dal* (lentils), vegetables, and *roti* (flatbread).
+*   **Limit Processed Foods:** The PDGFBN recommends limiting highly processed foods, which are often high in salt, sugar, and unhealthy fats.
+
+**Sample Meal Ideas for Weight Gain (with Reduced Salt):**
+
+*   **Breakfast:** Eggs with vegetables and whole wheat roti.
+*   **Lunch:** Chicken Karahi (prepared with less salt and more spices), brown rice, and a side salad.
+*   **Dinner:** *Daal* (Lentils) with beef/chicken, roti, and yogurt.
+*   **Snacks:** Nuts, seeds, or a homemade protein shake.
+
+Remember to stay hydrated by drinking plenty of water throughout the day.
+
+By following these tips, you can reduce your salt intake while still enjoying delicious Pakistani cuisine and achieving your muscle and weight gain goals. Focus on preparing your own meals so you can control your sodium intake.",
+Q-03,nutritional_advice,"sugar, fruit, fructose",Are the sugars in fruit bad to consume?,nutritional_advice,nutritional_advice,True,N/A,ok,,1721,True,True,"As SehatGuru, let's address your question about the sugars in fruit.
+
+The Pakistani Dietary Guidelines (PDGFBN) emphasize limiting intake of ""soft drinks, confectionaries, bakery products and commercial fruit drinks"" due to their high sugar content and empty calories, which can increase the risk of overweight, obesity, and related diseases. These are often loaded with added sugars.
+
+However, the sugars found naturally in fruits are different. Fruits also provide essential vitamins, minerals, fiber, and antioxidants. According to the PDGFBN, ""Eat five servings of fresh vegetables and fruits a day"" as they are beneficial for preventing chronic diseases and cancers.
+
+Here's the key:
+
+*   **Natural Sugars vs. Added Sugars:** The sugar in whole fruits comes packaged with fiber, which slows down absorption and prevents blood sugar spikes.
+*   **Serving Size:** Stick to recommended serving sizes. For example, 1 serving of fruit is ""1 small size banana or 1 apple or 1 peach or 2-3 plums or 3-4 apricots."" Each serving provides approximately 15g of carbohydrates and 60 calories.
+
+Since you're trying to gain weight and build muscle, incorporating fruits into your diet is a good strategy. Some ideas:
+
+*   **Fruit Salad (Phalon ka salaad):** A katori of fruit salad (78 kcal, 0.9g protein, 16.0g carbs, 1.2g fat) can be a healthy snack.
+*   **Fruits with Yogurt:** Pair fruits with yogurt for added protein and calcium, aligning with the PDGFBN recommendation of 2-3 servings of milk or yogurt daily.
+
+Limit your intake of fruit juices, as they often lack fiber and can contribute to excessive sugar intake. Instead, focus on whole fruits as part of a balanced diet to reach your calorie and muscle-building goals.",
+Q-04,nutritional_advice,"carbs, macros, general",Are carbohydrates bad?,nutritional_advice,nutritional_advice,True,N/A,ok,,2391,True,True,"As SehatGuru, let's address your question about carbohydrates. Carbohydrates are **not inherently bad**, but the *type* and *amount* you consume are crucial, especially for your goal of weight and muscle gain.
+
+According to the Pakistani Dietary Guidelines, carbohydrates should make up 45-65% of your total daily calories. For your 2800 kcal target, this translates to roughly 1260-1820 calories from carbs per day.
+
+Here's why:
+
+*   **Energy Source:** Carbs are your body's primary fuel source, especially important for an active university student. They provide the energy you need for workouts and daily activities.
+*   **Muscle Growth:** While protein is crucial for muscle building, carbs help replenish glycogen stores in your muscles after exercise, aiding recovery and growth.
+
+**However, the *type* of carbohydrate matters:**
+
+*   **Prioritize complex carbohydrates:** Choose whole grains like whole wheat roti (flatbread), brown rice, and dal (lentils). These have a lower glycemic index, providing sustained energy release and preventing blood sugar spikes. The PDGFBN recommends half of your daily intake of cereals include wholegrains.
+*   **Limit refined carbohydrates:** Reduce your intake of white bread, white rice, and processed foods as they have a high glycemic index, potentially leading to health issues if consumed in excess.
+
+**Practical Advice for You:**
+
+*   **Breakfast is Key:** Since you sometimes skip breakfast, make it a priority. Include complex carbs like oats or whole-wheat paratha with eggs for protein and sustained energy.
+*   **Balanced Meals:** Ensure each meal has a good balance of protein (chicken, beef, or dal), complex carbohydrates (roti or rice), and healthy fats (ghee or olive oil).
+*   **Snack Smart:** Opt for healthy snacks like fruits, nuts, or yogurt between meals to maintain energy levels and meet your calorie goals.
+*   **Control Portion Sizes:** Be mindful of serving sizes, especially with rice and roti. 1-2 roti or a katori of rice per meal is a good starting point.
+*   **Incorporate Vegetables and Fruits:** Eat five servings of fresh vegetables and fruits a day, they’re full of nutrients, dietary fibre, and antioxidants!
+
+Remember, it's about making informed choices and balancing your diet. Including carbs in moderation from healthy food options like roti, daal and brown rice will actually help you achieve your goals.",
+Q-05,nutritional_advice,"sugar, honey, jaggery, comparison",Is it better to swap sugar for honey? Or Gudh?,nutritional_advice,nutritional_advice,True,N/A,ok,,1743,True,True,"SehatGuru here! Let's talk about sugar, honey (shehad), and jaggery (gudh) for your muscle and weight gain goals.
+
+While honey and jaggery might seem healthier than refined sugar, it's important to understand their impact on your diet:
+
+*   **Sugar:** Refined sugar provides empty calories and should be limited. The Pakistani Dietary Guidelines (PDGFBN) recommends reducing sugar intake from soft drinks, confectionaries, and bakery products.
+
+*   **Honey (Shehad):** Honey does offer some trace nutrients and antioxidants compared to refined sugar. However, it's still primarily sugar. Consider it for a small nutritional boost, not as a calorie free sweetener
+
+*   **Jaggery (Gudh):** Jaggery, like honey, might contain some trace minerals. However, it is also a concentrated source of sugar.
+
+**Recommendation:**
+
+For your weight and muscle gain goals, focus on complex carbohydrates (roti, dal) from whole grains and protein-rich foods (chicken, beef, pulses) rather than relying on simple sugars, even in the form of honey or jaggery. PDGFBN recommends prioritizing complex carbohydrates over simple sugars.
+
+*   **Limit added sugars:** Whether it's sugar, honey, or jaggery, use them sparingly. The PDGFBN recommends less than 10% of calories from free sugars.
+*   **Focus on Whole Foods:** Prioritize nutrient-dense foods like meat, lentils, and wholegrain carbs.
+*   **Timing matters:** If you're going to have something sweet, consider it post-workout to replenish glycogen stores.
+
+For example, instead of adding a lot of honey to your milk, consider a banana and a scoop of protein powder. This will give you more protein and nutrients.
+
+Remember, I'm here to help you make informed choices! Let me know if you have more questions.",
+Q-06,nutritional_advice,"snacks, healthy_eating",What is a healthy snack?,nutritional_advice,nutritional_advice,True,N/A,ok,,2145,True,True,"As SehatGuru, I can help you choose healthy snacks for your muscle and weight gain goals, keeping in mind your preference for Pakistani cuisine.
+
+According to the Pakistani Dietary Guidelines for Better Nutrition (PDGFBN), healthy snack options include:
+
+*   **Fruits:** All seasonal fruits like bananas, apples, guava (amrood), grapes (angoor), mangoes (aam), dates (khajoor), and melons. These provide vitamins and natural sugars for energy.
+*   **Milk and Milk Products:** Lassi, yogurt (dahi), cheese, and milkshakes (with fruits like banana or mango, but minimize added sugar). These are good sources of protein and calcium.
+*   **Vegetables:** Fresh salads and green, yellow, and red vegetables offer essential vitamins and minerals.
+*   **Roasted Pulses and Beans:** A good source of protein and fiber.
+*   **Potato Cutlets & Shami Kabab:** *Shami kebab* (137 kcal, 10.2g protein, 16.3g carbs, 3.0g fat) can be a good option for protein.
+*   **Sandwiches:** Chicken, *Shami*, potato cutlet, cheese, or egg sandwiches with fresh salad.
+*   **Chaat:** *Fruit chaat* or *Chana chaat*.
+*   *Dahi baray*
+*   **Nuts and Dried Fruits:** Provide healthy fats and energy.
+
+Since you are trying to gain weight and build muscle, focus on snacks that are calorie and protein-dense.
+
+**Practical Tips:**
+
+*   **Timing:** Since you sometimes skip breakfast, a mid-morning snack is crucial. Aim for a snack 2-3 hours after your lunch.
+*   **Portion Size:** A ""katori"" (small bowl) of *Chana chaat*, a handful of nuts, or 2-3 *Shami kebabs* are good portion sizes.
+*   **Preparation:** As you prefer home-cooked meals, prepare snacks like *Shami kebab* or *Chana chaat* at home to control the ingredients and oil content.
+*   **Avoid unhealthy snacks:** Limit intake of chips, juice, biscuits, cake, sandwiches, cold drinks, *aloo cholay*, *gol gappay*, patties, chocolate, burgers, pizza, toffees, bubble gum, milkshakes, pasta, *nimko*, salted biscuits, popcorn
+
+Remember to choose a variety of snacks to get a balanced intake of nutrients! Since you're aiming for 2800 kcal, snacks should contribute a significant portion of your daily calorie intake.",
+Q-07,nutritional_advice,"yo_yo_dieting, weight_loss, sustainability",I've tried many diets in the past. I lose weight but it comes back.,nutritional_advice,nutritional_advice,True,N/A,ok,,2309,True,True,"Losing weight and then regaining it is a common challenge. The key to sustainable weight and muscle gain is focusing on a balanced diet and lifestyle changes, not just short-term diets.
+
+Here's some advice, keeping Pakistani Dietary Guidelines and your preferences in mind:
+
+*   **Focus on Whole, Unprocessed Foods:** Prioritize home-cooked meals with plenty of vegetables, fruits, lean proteins, and complex carbohydrates. This helps with satiety and provides essential nutrients for muscle growth. As the PDGFBN explains, these are cost-effective interventions essential to reduce and control adulthood morbidities and mortalities.
+
+*   **Prioritize Protein:** Since you're aiming for muscle gain, ensure you're getting enough protein. The PDGFBN recommends 2-3 servings of meat, chicken, fish, or eggs per day. Include options like Charga (27.3g protein), chicken in your meals. *Dal (Lentils)* are also a great source of protein, and the PDGFBN encourages their consumption, noting they are almost equivalent to meat protein and a good substitute, especially when paired with *roti (flatbread)* or rice.
+
+*   **Don't Skip Breakfast:** You mentioned skipping breakfast sometimes. This can lead to overeating later in the day. Try a high-protein breakfast like eggs with *roti*, or yogurt with fruit and nuts.
+
+*   **Be Mindful of Portion Sizes:** Even healthy foods can lead to weight gain if eaten in excess. Use Pakistani measurements like *katori* (small bowl) for *dal* or rice and estimate meat portions based on the PDGFBN's serving sizes (28g lean meat=1-2 small pieces of meat).
+
+*   **Limit Sugary Drinks and Processed Foods:** The PDGFBN strongly advises limiting soft drinks, confectionaries, and bakery products due to their high sugar content and link to weight gain and diabetes.
+
+*   **Incorporate Regular Physical Activity:** Your activity level is moderately active, which is great! Continue with your routine, focusing on strength training exercises to build muscle mass.
+
+*   **Consider Cost-Effective Options:** The PDGFBN acknowledges that healthy diets can be more expensive. Prioritize spending on nutrient-rich foods like *dal*, seasonal vegetables, and eggs.
+
+It's important to be patient and consistent with these changes. Sustainable weight and muscle gain takes time and effort.",
+Q-08,nutritional_advice,"supplements, vitamins, minerals",Is vitamin/mineral supplementation necessary?,nutritional_advice,nutritional_advice,True,N/A,ok,,2206,True,True,"As SehatGuru, let's talk about whether you need vitamin and mineral supplements.
+
+Based on the Pakistani Dietary Guidelines, many people in Pakistan, including women and children, have deficiencies in vitamins and minerals like Vitamin D, calcium, iron, zinc, and Vitamin A. The PDGFBN highlights that these deficiencies can lead to health problems like anemia, rickets, and weakened immunity.
+
+Given your goal of gaining weight and building muscle, and considering that you sometimes skip breakfast, it's possible you might not be getting all the necessary micronutrients from your diet alone.
+
+Here's a practical approach:
+
+1.  **Focus on a Balanced Pakistani Diet:** Prioritize including all food groups in your daily meals, as suggested by ""My Plate"":
+    *   **Cereal grains and grain products:** *Roti* (flatbread), rice, *dalia* (porridge)
+    *   **Meat, pulses, and eggs:** Chicken, beef, *dal* (lentils), eggs - essential for protein.
+    *   **Milk and milk products:** *Dahi* (yogurt), *lassi*, milk - for calcium and overall nutrition.
+    *   **Vegetables:** All types, for vitamins and minerals.
+    *   **Fruits:** All types, for vitamins and minerals.
+    *   **Oil and Fats:** Healthy fats in moderation.
+
+2.  **Address Potential Deficiencies:**
+    *   **Vitamin D & Calcium:** The PDGFBN emphasizes the importance of milk and milk products to prevent deficiencies. Consider including a glass of milk or *dahi* (yogurt) daily. Sunlight exposure also helps with Vitamin D.
+    *   **Iron:** Include iron-rich foods like meat, especially liver (kaleji), and pulses.
+    *   **Zinc:** Meat and pulses are good sources of zinc.
+
+3.  **Consider Supplementation (with caution):**
+    *   If you suspect you're not meeting your micronutrient needs through diet alone, consider consulting a doctor or registered dietitian *before* starting any supplements. They can assess your individual needs and recommend appropriate dosages.
+    *   **Caution:** Don't self-prescribe high doses of supplements, as excessive intake can be harmful.
+
+**Important Note:** While supplements *can* help fill gaps, they are not a substitute for a healthy, balanced diet. Focus on optimizing your food intake first.",
+Q-09,nutritional_advice,"weight_loss, cooking_tips, pakistani_food, low_calorie",How can I reduce calories in Pakistani home cooking (like Salan) without losing flavor?,nutritional_advice,nutritional_advice,True,N/A,ok,,2934,True,True,"To reduce calories in Pakistani home cooking while maintaining flavor, consider these strategies, keeping in mind the Pakistani Dietary Guidelines for Better Nutrition (PDGFBN):
+
+*   **Reduce Oil Consumption:**
+    *   The PDGFBN recommends using oils high in unsaturated fatty acids (like corn, sunflower, or olive oil) instead of solid fats (like ghee or vanaspati ghee).
+    *   **Practical Advice:** Measure oil carefully when cooking. For *salan*, start with 1-2 tablespoons of oil and add more only if necessary. Avoid ""bhunna"" (frying) for extended periods, as it increases oil absorption.
+
+*   **Limit Ghee and Solid Fats:**
+    *   Avoid or reduce the consumption of *kababs* and dishes like beef, mutton, and chicken prepared in ghee, as the PDGFBN suggests.
+    *   **Practical Advice:** When making chicken *karahi* (since you enjoy it), use lean chicken breast and reduce the amount of ghee. You can achieve a rich flavor by using yogurt (dahi) and tomatoes as a base instead.
+
+*   **Choose Leaner Protein Sources:**
+    *   Opt for chicken breast over chicken with skin and trim visible fat from beef or mutton before cooking.
+    *   **Practical Advice:** Incorporate more *dal* (lentils) into your diet. *Dal* is a great source of protein and fiber and is naturally lower in fat than meat-based dishes.
+
+*   **Reduce Salt Intake:**
+    *   Use less salt in cooking, as excessive salt intake is linked to hypertension, according to the PDGFBN.
+    *   **Practical Advice:** Enhance flavor with herbs and spices (ginger, garlic, garam masala) instead of relying heavily on salt. Remember to use iodized salt.
+
+*   **Limit Sugar Intake:**
+    *   The PDGFBN advises reducing intake of sugary drinks and foods.
+    *   **Practical Advice:** Be mindful of added sugars in dishes. Use natural sweeteners like dates sparingly if needed.
+
+*   **Increase Vegetable Content:**
+    *   Add more vegetables to your *salan* to increase volume and nutrients while keeping calorie count low.
+    *   **Practical Advice:** Load up on vegetables like spinach (palak), okra (bhindi), or eggplant (baingan) in your curries.
+
+*   **Cooking Methods:**
+    *   Favor methods like steaming, baking, or grilling over deep-frying.
+    *   **Practical Advice:** Instead of deep-fried *samosas*, try baked or air-fried versions.
+
+For example, you can modify your Chicken Karahi recipe:
+
+*   Use 250g boneless, skinless chicken breast instead of chicken with skin.
+*   Use 1-2 tbsp of olive oil instead of ghee.
+*   Add more tomatoes and ginger-garlic paste for flavor.
+*   Serve with 1 roti (made from 60g flour, approximately 160 kcal) instead of 2.
+
+By implementing these strategies, you can enjoy flavorful Pakistani food while achieving your calorie goals for muscle and weight gain, complementing your moderately active lifestyle. Since you sometimes skip breakfast, ensure your other meals are nutrient-dense to meet your 2800 kcal target.",
+Q-10,nutritional_advice,"pcos, hormonal, women, weight_loss, health_condition",What is the best diet for PCOS to help with weight loss and facial hair?,nutritional_advice,nutritional_advice,True,N/A,ok,,148,True,True,"I'm sorry, but the information provided does not contain specific dietary advice for Polycystic Ovary Syndrome (PCOS), weight loss, and facial hair.",
+Q-11,nutritional_advice,"diabetes, carbs, glycemic_index, pakistani_staple",I have Type 2 Diabetes; can I still eat white rice or Roti daily?,nutritional_advice,nutritional_advice,True,N/A,ok,,2086,True,True,"As SehatGuru, I understand you're managing Type 2 Diabetes and are wondering about including white rice and roti in your daily diet. Here's my advice, keeping in mind Pakistani dietary guidelines:
+
+**White Rice:**
+
+*   **Glycemic Index (GI):** White rice generally has a high glycemic index (GI). High GI foods can cause a rapid spike in blood glucose levels, potentially stressing your body's insulin response.
+*   **Recommendation:** The PDGFBN suggests prioritizing whole grains over refined grains. So, instead of daily white rice, opt for brown rice.
+*   **Portion Control:** If you do consume white rice, have a small portion (about 1 cup cooked) and pair it with protein and fiber-rich foods like dal (lentils) or vegetables to help manage blood sugar levels.
+
+**Roti (Flatbread):**
+
+*   **Whole Wheat vs. Refined Flour:** Roti can be made from whole wheat flour (atta) or refined flour (maida). Whole wheat roti is a better choice due to its higher fiber content and lower GI compared to roti made from refined flour.
+*   **Recommendation:** Choose whole wheat roti over white bread.
+*   **Serving Size:** Stick to 1 roti per meal.
+
+**General Dietary Advice for Diabetes (Based on PDGFBN):**
+
+*   **Prioritize Whole Grains:** Aim for half of your daily cereal intake to be whole grains like whole wheat roti or brown rice.
+*   **Pulses (Dalain):** Incorporate pulses (dal) into your diet. They are rich in protein and fiber, which can help regulate blood sugar.
+*   **Limit Refined Foods:** Reduce your intake of refined wheat products like pasta, noodles, and white bread.
+*   **Healthy Fats:** Be mindful of your fat intake, especially saturated fats.
+
+Since you like *Karahi*, consider making it with lean meats like chicken and pair it with whole wheat roti and a bowl of salad for a balanced meal. This combination offers protein, fiber, and essential nutrients.
+
+Remember, managing diabetes requires a holistic approach. Consult with a registered dietitian or healthcare professional for personalized dietary advice tailored to your specific needs and blood sugar control.",
+Q-12,nutritional_advice,"ghee, vegetable_oil, heart_health, fats, comparison",Is 'Desi Ghee' actually healthier than vegetable oil for the heart?,nutritional_advice,nutritional_advice,True,N/A,ok,,1525,True,True,"As SehatGuru, let's talk about desi ghee (clarified butter) versus vegetable oil for your heart, keeping in mind your goals of muscle and weight gain.
+
+The Pakistani Dietary Guidelines emphasize that oils high in unsaturated fatty acids (like soybean, sunflower, corn, olive, rapeseed, and sesame seed oil) are better for you than saturated fats. Desi ghee, like butter and coconut oil, is high in saturated fatty acids.
+
+*   **Impact on Heart Health:** High intake of saturated fatty acids, like those found in desi ghee, can increase LDL (bad cholesterol) levels, increasing the risk of cardiovascular diseases. Vegetable oils, on the other hand, promote the synthesis of HDL (good cholesterol).
+*   **Pakistani Dietary Advice:** Traditional Pakistani foods like *nihari*, *korma*, and *karahi* often contain a lot of *ghee* and ""bad fats"". It's better to reduce these in your diet.
+
+**Recommendation:**
+
+For heart health, it's better to primarily use vegetable oils in your cooking. When you want to use *desi ghee* for the taste, use it sparingly. Since you want to gain weight and build muscle, focus on getting healthy fats from sources like nuts, seeds, and oily fish in moderation, alongside lean proteins like chicken and beef. Also, remember to eat healthy homemade food, which provides protein, vitamins and other nutrients.
+
+Remember, moderation and balance are key! Since you enjoy *karahi*, you don't have to eliminate it completely. Perhaps you can prepare it at home and use less *ghee* and more lean chicken.",
+Q-13,nutritional_advice,"iron, vegetarian, anemia, micronutrients",How can I increase my Iron levels if I am vegetarian or eat less meat?,nutritional_advice,nutritional_advice,True,N/A,ok,,1927,True,True,"As SehatGuru, I understand you're looking to increase your iron levels, especially since you're aiming for muscle and weight gain while preferring less meat. Here's how you can do it, keeping Pakistani cuisine in mind:
+
+**Prioritize Iron-Rich Plant-Based Foods:**
+
+*   **Pulses (Dalain):** According to the Pakistan Dietary Guidelines (PDGFBN), *dalain* like *chickpea (chana), red beans (lobia), lentil (daal), mash and mung beans* are excellent sources of iron. Aim for at least 1-2 *katori* (small bowl) of *dal* daily.
+
+*   **Leafy Green Vegetables:** *Palak* (spinach) and other dark green leafy vegetables are good sources of iron. Include these in your *sabzi* dishes.
+
+*   **Dried Fruits:** *Dried apricots, figs, dates* are also iron sources. Have a handful as a snack.
+
+*   **Fortified Cereals:** The PDGFBN recommends consuming fortified wheat flour and cereals which can significantly improve micronutrient status.
+
+**Enhance Iron Absorption:**
+
+*   **Vitamin C with Meals:** Eat foods rich in Vitamin C (like citrus fruits) along with your iron-rich meals. For example, squeeze lemon (*limu*) juice over your *dal chawal* (lentils and rice). The Pakistan Dietary Guidelines highlight that vitamin C from *lemon* increases iron absorption.
+*   **Combine with Animal Protein:** Even small amounts of chicken and beef can boost iron absorption from plant sources.
+
+**Sample Meal Ideas:**
+
+*   **Breakfast:** *Anda Paratha* (egg stuffed flatbread) with a glass of *lassi* (yogurt drink).
+*   **Lunch:** *Daal chawal* (lentils and rice) with a side of *palak* (spinach).
+*   **Dinner:** Chicken Karahi with roti and a side salad.
+
+**Important Considerations:**
+
+*   **Dietary Diversity:** The PDGFBN emphasizes diversified foods for better nutrient intake.
+*   **Professional Advice:** Consult a registered dietitian or healthcare provider for personalized advice, especially if you suspect you have an iron deficiency.",
+Q-14,nutritional_advice,"protein, breakfast, pakistani_food",What are some protein-rich breakfast options other than just eggs?,nutritional_advice,nutritional_advice,True,N/A,ok,,1706,True,True,"As a university student aiming to gain weight and build muscle, starting your day with a protein-rich breakfast is crucial, especially since you sometimes skip it. While eggs are excellent, variety is key!
+
+Here are some Pakistani-cuisine inspired, protein-rich breakfast ideas, keeping in mind your preference for home-cooked meals and dislike for overly spicy food:
+
+1.  **Dal (Lentils) and Roti:** A classic combination. According to the PDGFBN, pulses like dal are almost equivalent to meat protein. Try having 1 katori of *dal* with 1 *roti*. This is a good source of protein and carbohydrates.
+2.  **Chicken or Beef Keema (Minced Meat) with Roti/Paratha:** Use lean ground meat to avoid excess saturated fat, as the PDGFBN suggests limiting non-lean meat. You can have about 140g of cooked keema as a good source of protein. Consider having it with 1 *paratha* for added calories.
+3.  **Shami Kabab Sandwich:** The PDGFBN suggests ""Shami sandwich or egg sandwich, or chicken sandwich or any other meat or pulses based food providing the similar amount of calories and proteins"" for breakfast.
+4.  **Overnight Oats with Nuts and Seeds:** Soak oats in milk overnight and add a serving of nuts (like almonds or peanuts - around 30g) and seeds (chia or flax seeds). This provides a good source of protein, healthy fats, and sustained energy. You can add a scoop of protein powder to this as well.
+5. **Lassi**: Have a glass of Lassi, as milk is considered a nutrient-rich food by PDGFBN.
+
+Since you are aiming for 2800 kcal, ensure your breakfast contributes significantly to your calorie target. Don't hesitate to add a side of fruit or a glass of milk to further boost your calorie and nutrient intake.",
+Q-15,nutritional_advice,"chai, digestion, iron_absorption, pakistani_habit","Can I drink Chai (tea) right after a meal, or does it affect digestion?",nutritional_advice,nutritional_advice,True,N/A,ok,,1291,True,True,"As SehatGuru, I can help you with your question about drinking chai (tea) after meals.
+
+While the provided information doesn't directly address the timing of tea consumption and digestion, it does mention that drinking black tea can decrease iron absorption. Therefore, if you are trying to increase your iron intake (important for muscle gain and overall health), it might be better to avoid drinking tea immediately after meals, especially those rich in iron, like *dal* (lentils) or meat dishes.
+
+Here's why:
+
+*   **Iron Absorption:** Tea contains compounds that can bind to iron in your food and reduce its absorption.
+
+**Recommendations:**
+
+*   **Timing:** Try to wait at least one hour after a meal before drinking tea. This allows your body to absorb more iron from the food.
+*   **Iron-Rich Foods:** If you're consuming iron-rich foods to help you bulk up, consider drinking tea between meals instead of directly after.
+*   **Healthy beverage choices**: The Pakistani Dietary Guidelines suggest limiting soft drinks and sugary beverages, so unsweetened tea would be a better option.
+
+Since you sometimes skip breakfast and are aiming for muscle gain, ensure your meals are nutrient-dense. For example, *anda paratha* or *dal chapati* are better options than just *chai* and biscuits.",
+Q-16,nutritional_advice,"uric_acid, gout, dietary_restrictions, health_condition",What should I eat to manage high Uric Acid/Gout while living in Pakistan?,nutritional_advice,nutritional_advice,True,N/A,ok,,2193,True,True,"Managing high uric acid/gout in Pakistan involves dietary adjustments and lifestyle changes. Here’s a culturally relevant approach:
+
+*   **Limit High-Purine Foods:** While you enjoy meat, moderate your intake of organ meats (like kidney and liver), as they are high in purines, which can increase uric acid levels.
+*   **Stay Hydrated:** Drink plenty of water throughout the day. Aim for at least 8 glasses (2 liters) daily. This helps flush out uric acid.
+*   **Choose Protein Sources Wisely:** Since you are a meat lover, focus on chicken and beef in moderation. Dal (lentils) are a great alternative protein source and generally lower in purines. Include a katori (small bowl) of dal in your daily diet.
+*   **Limit Sugary Drinks and Sweets:** The Pakistani Dietary Guidelines recommend reducing intake of soft drinks, confectionaries, and bakery products. These can contribute to weight gain and potentially exacerbate gout.
+*   **Healthy Fats:** While you enjoy Karahi, be mindful of the fat content. As mentioned in the provided text, dishes like nihari, korma, and karahi can contain a lot of ""bad fats."" Opt for home-cooked versions with less oil.
+*   **Fortified Foods:** Consume fortified flour and grains, as recommended by the Pakistani Dietary Guidelines. These are good sources of energy, proteins, vitamins, and minerals.
+*   **Prioritize Home-Cooked Meals:** As emphasized in the provided text, home-cooked meals are generally healthier as you can control the ingredients and cooking methods.
+
+**Sample Meal Plan Adjustments:**
+
+*   **Breakfast:** If you skip breakfast, try to incorporate something, even if it's quick. Consider a glass of milk with a roti (flatbread) or some eggs.
+*   **Lunch/Dinner:** If you're having meat, limit the serving size to a palm-sized portion. Pair it with plenty of vegetables and roti. Dal (lentils) is a great alternative a few times a week.
+
+**Important Note:** This dietary advice is general. Consult a healthcare professional or registered dietitian for personalized recommendations, especially since you are trying to gain weight and build muscle. They can help you create a plan that addresses both your goals and your uric acid levels.",
+Q-17,nutritional_advice,"pink_salt, himalayan_salt, weight_loss, myths",Is 'Pink Salt' (Himalayan) better for weight loss than regular salt?,nutritional_advice,nutritional_advice,True,N/A,ok,,1724,True,True,"As SehatGuru, let's address your question about pink (Himalayan) salt versus regular salt for weight loss.
+
+The truth is, **neither pink salt nor regular salt directly contributes to weight loss.** Weight loss is primarily achieved through a calorie deficit (consuming fewer calories than you burn).
+
+However, it's important to manage salt intake for overall health, especially as the Pakistani Dietary Guidelines emphasize limiting salt due to its link to high blood pressure and heart disease.
+
+Here's what you should keep in mind:
+
+*   **Sodium Content:** Both pink salt and regular salt contain sodium, which can contribute to water retention and potentially mask weight loss efforts.
+*   **Iodine:** Regular table salt is often iodized, meaning it has added iodine, which is essential for thyroid function. If you choose pink salt, ensure you get iodine from other sources.
+*   **Pakistani Dietary Guidelines (PDGFBN):** The PDGFBN recommends reducing salt intake to less than 5 grams per day. This applies to all types of salt.
+*   **Practical Tips:** Limit salt in cooking, avoid adding salt to your food at the table, and reduce your consumption of salty snacks.
+*   **Hidden Sodium:** Be aware of hidden sodium in processed foods, pickles, and even some beverages.
+
+Since you are trying to gain weight and build muscle, you need to consume a high calorie diet. Do not be too restrictive with your salt intake, but keep in mind the recommendations outlined above.
+
+**In summary:** Focus on a balanced diet with sufficient protein for muscle gain and an overall calorie surplus to gain weight. Manage your salt intake from both Himalayan and Regular salt according to the Pakistani Dietary Guidelines for good health.",
+Q-18,nutritional_advice,"vitamin_d, fatigue, supplementation, deficiency",I feel tired all the time; could it be a Vitamin D deficiency?,nutritional_advice,nutritional_advice,True,N/A,ok,,1495,True,True,"Assalam-o-alaikum!
+
+Yes, feeling tired all the time could potentially be a sign of Vitamin D deficiency. Based on Pakistani Dietary Guidelines, Vitamin D deficiency is quite common in Pakistan. Studies show many Pakistani women have lower Vitamin D levels.
+
+**Here's why it's important and what you can do:**
+
+*   **Vitamin D's Role:** Vitamin D is crucial for bone health and overall well-being.
+*   **Sunlight Exposure:** The guidelines recommend that children over six months get some sunlight exposure in the early morning or late afternoon to help their skin produce Vitamin D. This applies to adults as well! Even a few minutes a day can help.
+*   **Dietary Sources:** While the context doesn't provide specific Pakistani food sources of Vitamin D, incorporating foods that may be fortified with Vitamin D or naturally contain it (like some dairy products, if you consume them) could be beneficial.
+*   **Get Tested:** The best way to know for sure is to get a blood test to check your Vitamin D levels. A level above 30 ng/mL is generally recommended for adults.
+
+Given your goal to gain weight and build muscle, ensuring you have adequate Vitamin D is important for overall health and energy levels. Since you sometimes skip breakfast, perhaps you could include a Vitamin D-fortified glass of milk (""doodh"") or yogurt (""dahi"") when you do have breakfast. Remember to consult with a doctor or registered dietitian for personalized advice and to rule out other potential causes of fatigue.",
+Q-19,nutritional_advice,"calories, street_food, pakistani_food, awareness","What are 'hidden' calories in common Pakistani street foods (e.g., Samosa, Gol Gappay)?",nutritional_advice,nutritional_advice,True,N/A,ok,,1171,True,True,"As SehatGuru, I can help you identify hidden calories in Pakistani street foods to better achieve your weight and muscle gain goals. It's great you're thinking about this, as these calories can easily add up!
+
+Many Pakistani street foods contain ""hidden"" calories primarily from fats and refined carbohydrates. The *Pakora*, for example, is very high in calories.
+
+Here's a breakdown:
+
+*   **Pakora:** These deep-fried snacks are calorie-dense due to the oil they absorb during frying. A single serving (around 4-5 pieces) can contain approximately 677 kcal, with a whopping 71.8g of fat. *Pakoras* offer minimal protein (1.9g) and carbs (6.0g), making them a poor choice for muscle gain.
+
+It's important to be mindful of these less obvious sources of calories, especially if you're trying to gain weight in a healthy way. As the Pakistani Dietary Guidelines recommend, avoid deep-fried foods like *samosas* and *pakoras*. Instead, focus on home-cooked meals using healthy fats and lean proteins. Even *karahi*, which you enjoy, should be consumed in moderation due to its high fat content. *Nihari* and *Korma* are other Pakistani foods that contain high amounts of fat.",
+Q-20,nutritional_advice,"hydration, water, heatwave, dehydration",How much water should I drink during a heatwave?,nutritional_advice,nutritional_advice,True,N/A,ok,,952,True,True,"During a heatwave, staying hydrated is crucial. The Pakistan Dietary Guidelines recommend that a person of your approximate weight (65kg) should aim for at least 2 liters (8 glasses) of water per day. However, since you are moderately active and it's a heatwave, you'll likely need more.
+
+Here's what I recommend:
+
+*   **Increase your water intake:** Aim for more than 8 glasses of water daily. Monitor your thirst and urine color (it should be pale yellow).
+*   **Don't wait until you're thirsty:** Drink water throughout the day.
+*   **Consider other hydrating drinks:** In addition to plain water, you can include options like *Jeere ka pani* (cumin-infused water) which provides a few electrolytes and can be refreshing. Avoid sugary drinks.
+*   **Be mindful of activity:** If you're exercising or spending time outdoors, increase your water intake accordingly.
+
+Remember to adjust your fluid intake based on your individual needs and how you feel.",

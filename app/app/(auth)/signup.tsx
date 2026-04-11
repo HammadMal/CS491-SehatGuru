@@ -47,7 +47,7 @@ export default function SignupScreen() {
     setLoading(true);
     try {
       await signup(email, password);
-      router.push('/(auth)/email-verification');
+      router.replace('/(auth)/login');
     } catch (error: any) {
       Alert.alert('Signup Failed', error.message || 'Could not create account');
     } finally {

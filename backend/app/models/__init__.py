@@ -8,6 +8,14 @@ from app.models.auth import (
     EmailVerificationRequest,
     UserResponse,
 )
+from app.models.rag import (
+    DocumentChunk,
+    DishDocument,
+    RAGQueryRequest,
+    RAGQueryResponse,
+    KnowledgeBaseResult,
+    DishResult,
+)
 
 __all__ = [
     "UserRegister",
@@ -19,4 +27,10 @@ __all__ = [
     "PasswordResetConfirm",
     "EmailVerificationRequest",
     "UserResponse",
+    "DocumentChunk",
+    "DishDocument",
+    "RAGQueryRequest",
+    "RAGQueryResponse",
+    "KnowledgeBaseResult",
+    "DishResult",
 ]
