@@ -16,7 +16,6 @@ export interface AuthContextType {
 
   // Actions
   login: (email: string, password: string) => Promise<void>;
-  googleLogin: (idToken: string) => Promise<void>;
   signup: (email: string, password: string, fullName?: string) => Promise<void>;
   logout: () => Promise<void>;
   verifyEmail: (code: string) => Promise<boolean>;

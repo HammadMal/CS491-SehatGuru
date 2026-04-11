@@ -1,8 +1,7 @@
 from datetime import datetime
 from typing import Optional, Dict
+import logging
 from fastapi import HTTPException, status
-from google.oauth2 import id_token
-from google.auth.transport import requests
 from google.cloud.firestore_v1.base_query import FieldFilter
 from app.config.firebase import firebase_client
 from app.config.settings import settings
@@ -16,6 +15,9 @@ from app.utils.jwt import (
 from app.utils.email import send_verification_email, send_password_reset_email, send_password_reset_otp_email
 from app.utils.otp import OTPService
 from app.models.auth import UserRegister, UserLogin, Token
+
+# Configure logger
+logger = logging.getLogger(__name__)
 
 
 class AuthService:
@@ -72,12 +74,18 @@ class AuthService:
             users_ref.document(firebase_user.uid).set(user_doc_data)
 
             # Generate email verification link
+            email_verification_status = "pending"
             try:
+                logger.info(f"Generating email verification link for {user_data.email}")
                 verification_link = firebase_client.generate_email_verification_link(user_data.email)
+                logger.info(f"Sending verification email to {user_data.email}")
                 # Send verification email
                 await send_verification_email(user_data.email, verification_link)
+                email_verification_status = "sent"
+                logger.info(f"Verification email successfully sent to {user_data.email}")
             except Exception as e:
-                print(f"Error sending verification email: {str(e)}")
+                email_verification_status = "failed"
+                logger.error(f"Error sending verification email to {user_data.email}: {str(e)}", exc_info=True)
                 # Don't fail registration if email fails
 
             return {
@@ -85,7 +93,8 @@ class AuthService:
                 "email": firebase_user.email,
                 "full_name": user_data.full_name,
                 "email_verified": False,
-                "created_at": user_doc_data["created_at"]
+                "created_at": user_doc_data["created_at"],
+                "email_verification_status": email_verification_status
             }
 
         except HTTPException:
@@ -202,108 +211,6 @@ class AuthService:
             )
 
     @staticmethod
-    async def google_auth(id_token_str: str) -> Token:
-        """
-        Authenticate user with Google OAuth
-
-        Args:
-            id_token_str: Google ID token from client
-
-        Returns:
-            Token object with access and refresh tokens
-
-        Raises:
-            HTTPException: If authentication fails
-        """
-        try:
-            # Verify Google ID token
-            idinfo = id_token.verify_oauth2_token(
-                id_token_str,
-                requests.Request(),
-                settings.GOOGLE_CLIENT_ID
-            )
-
-            # Extract user info
-            email = idinfo.get("email")
-            name = idinfo.get("name")
-            google_uid = idinfo.get("sub")
-            picture = idinfo.get("picture")
-
-            if not email:
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="Email not provided by Google"
-                )
-
-            # Check if user exists
-            users_ref = firebase_client.db.collection(settings.FIRESTORE_COLLECTION_USERS)
-            existing_user = users_ref.where(filter=FieldFilter("email", "==", email)).limit(1).get()
-
-            existing_users_list = list(existing_user)
-
-            if len(existing_users_list) > 0:
-                # User exists, log them in
-                user_doc = existing_users_list[0]
-                uid = user_doc.id
-                user_data = user_doc.to_dict()
-
-                # Update last login
-                users_ref.document(uid).update({
-                    "updated_at": datetime.utcnow()
-                })
-
-            else:
-                # Create new user
-                try:
-                    firebase_user = firebase_client.create_user(
-                        email=email,
-                        display_name=name,
-                        email_verified=True,  # Google already verified
-                        photo_url=picture
-                    )
-                    uid = firebase_user.uid
-                except Exception as e:
-                    # User might exist in Firebase Auth but not Firestore
-                    # Try to get existing user
-                    try:
-                        firebase_user = firebase_client.get_auth().get_user_by_email(email)
-                        uid = firebase_user.uid
-                    except:
-                        raise e
-
-                # Create user document in Firestore
-                user_doc_data = {
-                    "email": email,
-                    "full_name": name,
-                    "email_verified": True,
-                    "created_at": datetime.utcnow(),
-                    "updated_at": datetime.utcnow(),
-                    "auth_provider": "google",
-                    "photo_url": picture,
-                    "google_uid": google_uid
-                }
-
-                users_ref.document(uid).set(user_doc_data)
-
-            # Create JWT tokens
-            token_data = {"sub": uid, "email": email}
-            access_token = create_access_token(token_data)
-            refresh_token_str = create_refresh_token(token_data)
-
-            return Token(
-                access_token=access_token,
-                refresh_token=refresh_token_str,
-                token_type="bearer",
-                expires_in=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60
-            )
-
-        except HTTPException:
-            raise
-        except Exception as e:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail=f"Google authentication failed: {str(e)}"
-            )
 
     @staticmethod
     async def refresh_access_token(uid: str, email: str) -> Token:

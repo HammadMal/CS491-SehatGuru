@@ -44,11 +44,6 @@ class TokenData(BaseModel):
     iat: Optional[int] = None  # Issued at timestamp (for session invalidation)
 
 
-class GoogleAuthRequest(BaseModel):
-    """Google OAuth authentication request"""
-    id_token: str
-
-
 class PasswordResetRequest(BaseModel):
     """Password reset request model"""
     email: EmailStr
