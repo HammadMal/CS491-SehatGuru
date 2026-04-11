@@ -11,7 +11,8 @@ import {
   ActivityIndicator,
   Alert,
   Keyboard,
-  Animated,
+  Modal,
+  FlatList,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -26,22 +27,33 @@ import { OnboardingContext } from '../../context/OnboardingContext';
 import { AuthContext } from '../../context/AuthContext';
 import { getItem } from '../../utils/storage';
 import { API_BASE_URL } from '../../config';
-import type { Message, UserContext } from '../../types/chat.types';
+import type { Message, ChatSession, UserContext } from '../../types/chat.types';
 
 export default function ChatbotScreen() {
   const [inputText, setInputText] = useState('');
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   const [isRecording, setIsRecording] = useState(false);
   const [isTranscribing, setIsTranscribing] = useState(false);
+  const [historyVisible, setHistoryVisible] = useState(false);
   const recordingRef = useRef<Audio.Recording | null>(null);
   const scrollViewRef = useRef<ScrollView>(null);
   const inputRef = useRef<TextInput>(null);
 
-  const { messages, isLoading, addMessage, setLoading } = useChatStore();
+  const {
+    messages,
+    isLoading,
+    sessions,
+    addMessage,
+    setLoading,
+    createNewSession,
+    loadSession,
+    deleteSession,
+    initSessions,
+  } = useChatStore();
+
   const onboardingContext = useContext(OnboardingContext);
   const authContext = useContext(AuthContext);
 
-  // Build user context from onboarding data for personalized RAG responses
   const userContext: UserContext | undefined = useMemo(() => {
     if (!onboardingContext?.onboardingData) return undefined;
     return chatAPI.buildUserContext(
@@ -50,7 +62,12 @@ export default function ChatbotScreen() {
     );
   }, [onboardingContext?.onboardingData, authContext?.user?.daily_calorie_goal]);
 
-  // Keyboard listeners for better scroll handling
+  // Load saved sessions on mount
+  useEffect(() => {
+    initSessions();
+  }, []);
+
+  // Keyboard listeners
   useEffect(() => {
     const keyboardWillShow = Keyboard.addListener(
       Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
@@ -63,18 +80,15 @@ export default function ChatbotScreen() {
     );
     const keyboardWillHide = Keyboard.addListener(
       Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide',
-      () => {
-        setKeyboardHeight(0);
-      }
+      () => setKeyboardHeight(0)
     );
-
     return () => {
       keyboardWillShow.remove();
       keyboardWillHide.remove();
     };
   }, []);
 
-  // Auto-scroll to bottom when new messages arrive
+  // Auto-scroll to bottom on new messages
   useEffect(() => {
     if (messages.length > 0) {
       setTimeout(() => {
@@ -83,9 +97,49 @@ export default function ChatbotScreen() {
     }
   }, [messages]);
 
+  const handleNewChat = () => {
+    if (messages.length === 0) return;
+    Alert.alert(
+      'New Chat',
+      'Start a new conversation? Your current chat will be saved.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'New Chat',
+          onPress: () => createNewSession(),
+        },
+      ]
+    );
+  };
+
+  const handleLoadSession = (session: ChatSession) => {
+    setHistoryVisible(false);
+    loadSession(session.id);
+  };
+
+  const handleDeleteSession = (id: string) => {
+    Alert.alert('Delete Chat', 'Delete this conversation?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: () => deleteSession(id),
+      },
+    ]);
+  };
+
+  const formatDate = (iso: string) => {
+    const date = new Date(iso);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    if (diffDays === 0) return 'Today';
+    if (diffDays === 1) return 'Yesterday';
+    return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+  };
+
   const handleMicPress = async () => {
     if (isRecording) {
-      // Stop recording and transcribe
       try {
         await recordingRef.current?.stopAndUnloadAsync();
         const uri = recordingRef.current?.getURI();
@@ -96,7 +150,6 @@ export default function ChatbotScreen() {
         setIsTranscribing(true);
 
         const token = await getItem('access_token');
-
         const formData = new FormData();
         formData.append('audio', {
           uri,
@@ -126,7 +179,6 @@ export default function ChatbotScreen() {
       return;
     }
 
-    // Start recording
     const { granted } = await Audio.requestPermissionsAsync();
     if (!granted) {
       Alert.alert('Permission required', 'Microphone permission is needed for voice input.');
@@ -151,28 +203,20 @@ export default function ChatbotScreen() {
       timestamp: new Date(),
     };
 
-    // Add user message to store
     addMessage(userMessage);
     const currentMessage = inputText.trim();
     setInputText('');
-
-    // Blur input to hide keyboard
     inputRef.current?.blur();
-
-    // Set loading state
     setLoading(true);
 
     try {
-      // Build session history from current messages (excluding the just-added user message)
       const chatHistory = messages.slice(0, -1).map((m) => ({
         role: m.sender === 'user' ? 'user' : 'assistant',
         content: m.content,
       }));
 
-      // Call API with user context and session history
       const response = await chatAPI.sendMessage(currentMessage, userContext, true, chatHistory);
 
-      // Add bot response to store
       const botMessage: Message = {
         id: Crypto.randomUUID(),
         content: response.response,
@@ -187,15 +231,12 @@ export default function ChatbotScreen() {
         'Error',
         error.response?.data?.detail || 'Failed to get response. Please try again.'
       );
-
-      // Add error message from bot
-      const errorMessage: Message = {
+      addMessage({
         id: Crypto.randomUUID(),
         content: "I'm sorry, I'm having trouble responding right now. Please try again.",
         sender: 'bot',
         timestamp: new Date(),
-      };
-      addMessage(errorMessage);
+      });
     } finally {
       setLoading(false);
     }
@@ -206,17 +247,43 @@ export default function ChatbotScreen() {
       <KeyboardAvoidingView
         style={styles.keyboardView}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
+        keyboardVerticalOffset={0}
       >
         {/* Header */}
         <View style={styles.header}>
-          <View style={styles.headerIcon}>
-            <Ionicons name="nutrition" size={20} color={Colors.primary} />
+          <TouchableOpacity
+            style={styles.headerAction}
+            onPress={handleNewChat}
+            disabled={messages.length === 0}
+          >
+            <Ionicons
+              name="add"
+              size={22}
+              color={messages.length === 0 ? Colors.disabled : Colors.primary}
+            />
+          </TouchableOpacity>
+
+          <View style={styles.headerCenter}>
+            <View style={styles.headerIcon}>
+              <Ionicons name="nutrition" size={20} color={Colors.primary} />
+            </View>
+            <View>
+              <Text style={styles.headerTitle}>SehatGuru</Text>
+              <Text style={styles.headerSubtitle}>Pakistani Nutrition Expert • AI</Text>
+            </View>
           </View>
-          <View style={styles.headerTextContainer}>
-            <Text style={styles.headerTitle}>SehatGuru</Text>
-            <Text style={styles.headerSubtitle}>Your Pakistani Nutrition Expert • AI Powered</Text>
-          </View>
+
+          <TouchableOpacity
+            style={styles.headerAction}
+            onPress={() => setHistoryVisible(true)}
+          >
+            <Ionicons name="time-outline" size={22} color={Colors.primary} />
+            {sessions.length > 0 && (
+              <View style={styles.badge}>
+                <Text style={styles.badgeText}>{sessions.length}</Text>
+              </View>
+            )}
+          </TouchableOpacity>
         </View>
 
         {/* Messages */}
@@ -260,14 +327,11 @@ export default function ChatbotScreen() {
               </View>
             </View>
           ) : (
-            <>
-              {messages.map((message) => (
-                <ChatMessage key={message.id} message={message} />
-              ))}
-            </>
+            messages.map((message) => (
+              <ChatMessage key={message.id} message={message} />
+            ))
           )}
 
-          {/* Loading indicator */}
           {isLoading && (
             <View style={styles.loadingContainer}>
               <View style={styles.loadingBubble}>
@@ -331,6 +395,68 @@ export default function ChatbotScreen() {
           </View>
         </View>
       </KeyboardAvoidingView>
+
+      {/* History Modal */}
+      <Modal
+        visible={historyVisible}
+        animationType="slide"
+        transparent
+        onRequestClose={() => setHistoryVisible(false)}
+      >
+        <TouchableOpacity
+          style={styles.modalOverlay}
+          activeOpacity={1}
+          onPress={() => setHistoryVisible(false)}
+        />
+        <View style={styles.bottomSheet}>
+          <View style={styles.sheetHandle} />
+          <View style={styles.sheetHeader}>
+            <Text style={styles.sheetTitle}>Previous Chats</Text>
+            <Text style={styles.sheetSubtitle}>
+              {sessions.length} of {5} saved
+            </Text>
+          </View>
+
+          {sessions.length === 0 ? (
+            <View style={styles.emptyHistory}>
+              <Ionicons name="chatbubbles-outline" size={40} color={Colors.disabled} />
+              <Text style={styles.emptyHistoryText}>No saved chats yet</Text>
+            </View>
+          ) : (
+            <FlatList
+              data={sessions}
+              keyExtractor={(item) => item.id}
+              contentContainerStyle={{ paddingBottom: 24 }}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  style={styles.sessionCard}
+                  onPress={() => handleLoadSession(item)}
+                  activeOpacity={0.7}
+                >
+                  <View style={styles.sessionIcon}>
+                    <Ionicons name="chatbubble-ellipses-outline" size={18} color={Colors.primary} />
+                  </View>
+                  <View style={styles.sessionInfo}>
+                    <Text style={styles.sessionTitle} numberOfLines={1}>
+                      {item.title}
+                    </Text>
+                    <Text style={styles.sessionMeta}>
+                      {item.messages.length} messages • {formatDate(item.updatedAt)}
+                    </Text>
+                  </View>
+                  <TouchableOpacity
+                    style={styles.deleteButton}
+                    onPress={() => handleDeleteSession(item.id)}
+                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                  >
+                    <Ionicons name="trash-outline" size={16} color={Colors.error} />
+                  </TouchableOpacity>
+                </TouchableOpacity>
+              )}
+            />
+          )}
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -345,41 +471,68 @@ const styles = StyleSheet.create({
   },
   header: {
     backgroundColor: Colors.backgroundLight,
-    paddingVertical: 14,
-    paddingHorizontal: 20,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
     borderBottomWidth: 1,
     borderBottomColor: Colors.borderLight,
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     shadowColor: Colors.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.03,
     shadowRadius: 8,
     elevation: 2,
   },
-  headerIcon: {
+  headerAction: {
     width: 38,
     height: 38,
     borderRadius: 19,
+    backgroundColor: `${Colors.primary}12`,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  headerCenter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  headerIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     backgroundColor: `${Colors.primary}15`,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 12,
-  },
-  headerTextContainer: {
-    flex: 1,
   },
   headerTitle: {
-    fontSize: 18,
+    fontSize: 17,
     fontWeight: '700',
     color: Colors.textPrimary,
     letterSpacing: -0.3,
   },
   headerSubtitle: {
-    fontSize: 12,
+    fontSize: 11,
     color: Colors.textLight,
-    marginTop: 2,
+    marginTop: 1,
     fontWeight: '500',
+  },
+  badge: {
+    position: 'absolute',
+    top: -2,
+    right: -2,
+    backgroundColor: Colors.primary,
+    borderRadius: 8,
+    minWidth: 16,
+    height: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 3,
+  },
+  badgeText: {
+    color: '#fff',
+    fontSize: 10,
+    fontWeight: '700',
   },
   messagesContainer: {
     flex: 1,
@@ -472,15 +625,9 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     backgroundColor: Colors.primary,
   },
-  dot1: {
-    opacity: 0.4,
-  },
-  dot2: {
-    opacity: 0.6,
-  },
-  dot3: {
-    opacity: 0.8,
-  },
+  dot1: { opacity: 0.4 },
+  dot2: { opacity: 0.6 },
+  dot3: { opacity: 0.8 },
   inputContainer: {
     backgroundColor: Colors.backgroundLight,
     borderTopWidth: 1,
@@ -541,5 +688,92 @@ const styles = StyleSheet.create({
   },
   micButtonActive: {
     backgroundColor: '#ef4444',
+  },
+  // Modal / Bottom Sheet
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+  },
+  bottomSheet: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: Colors.backgroundLight,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    paddingTop: 12,
+    maxHeight: '60%',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 16,
+    elevation: 20,
+  },
+  sheetHandle: {
+    width: 40,
+    height: 4,
+    backgroundColor: Colors.borderLight,
+    borderRadius: 2,
+    alignSelf: 'center',
+    marginBottom: 16,
+  },
+  sheetHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    marginBottom: 12,
+  },
+  sheetTitle: {
+    fontSize: 17,
+    fontWeight: '700',
+    color: Colors.textPrimary,
+  },
+  sheetSubtitle: {
+    fontSize: 13,
+    color: Colors.textLight,
+  },
+  emptyHistory: {
+    alignItems: 'center',
+    paddingVertical: 40,
+    gap: 12,
+  },
+  emptyHistoryText: {
+    fontSize: 15,
+    color: Colors.textLight,
+  },
+  sessionCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.borderLight,
+    gap: 12,
+  },
+  sessionIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: `${Colors.primary}12`,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  sessionInfo: {
+    flex: 1,
+  },
+  sessionTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: Colors.textPrimary,
+    marginBottom: 3,
+  },
+  sessionMeta: {
+    fontSize: 12,
+    color: Colors.textLight,
+  },
+  deleteButton: {
+    padding: 4,
   },
 });

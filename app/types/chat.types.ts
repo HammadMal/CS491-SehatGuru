@@ -5,6 +5,14 @@ export interface Message {
   timestamp: Date;
 }
 
+export interface ChatSession {
+  id: string;
+  title: string;
+  messages: Message[];
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface UserContext {
   health_goals?: string[];
   dietary_restrictions?: string[];

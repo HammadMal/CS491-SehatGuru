@@ -198,7 +198,7 @@ async def transcribe_audio(
         model = genai.GenerativeModel("gemini-2.0-flash")
         response = model.generate_content([
             {"inline_data": {"mime_type": "audio/mp4", "data": audio_b64}},
-            "Transcribe the speech in this audio exactly as spoken. Return only the transcribed text, nothing else.",
+            "Transcribe the speech in this audio exactly as spoken. If the speaker is speaking Urdu, always return the transcription in Urdu script (Nastaliq/Arabic script), never in Hindi or Devanagari script. If the speaker is speaking English, return in English. Return only the transcribed text, nothing else.",
         ])
         transcript = response.text.strip()
         logger.info(f"[TRANSCRIBE] Result: {transcript}")
