@@ -1,17 +1,11 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Tabs, usePathname } from 'expo-router';
+import { Tabs } from 'expo-router';
 
 export default function Layout() {
-  const pathname = usePathname();
-
-  // Hide tab bar ONLY on the manual screen
-  const hideTabBar = pathname === '/manual';
-
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarStyle: hideTabBar ? { display: 'none' } : {},
         tabBarActiveTintColor: '#22c55e',
         tabBarInactiveTintColor: '#888',
       }}

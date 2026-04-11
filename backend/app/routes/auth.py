@@ -4,7 +4,6 @@ from app.models.auth import (
     UserRegister,
     UserLogin,
     Token,
-    GoogleAuthRequest,
     PasswordResetRequest,
     PasswordResetConfirm,
     OTPVerifyRequest,
@@ -49,20 +48,6 @@ async def login(login_data: UserLogin):
     Returns JWT access token and refresh token
     """
     token = await AuthService.login_user(login_data)
-    return token
-
-
-@router.post("/google", response_model=Token)
-async def google_auth(auth_request: GoogleAuthRequest):
-    """
-    Authenticate with Google OAuth
-
-    - **id_token**: Google ID token from client-side OAuth flow
-
-    Returns JWT access token and refresh token.
-    Creates new user if doesn't exist.
-    """
-    token = await AuthService.google_auth(auth_request.id_token)
     return token
 
 

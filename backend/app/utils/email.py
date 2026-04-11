@@ -1,8 +1,12 @@
 import smtplib
+import logging
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from app.config.settings import settings
 from typing import Optional
+
+# Configure logger
+logger = logging.getLogger(__name__)
 
 
 async def send_email(
@@ -24,6 +28,8 @@ async def send_email(
         True if email sent successfully, False otherwise
     """
     try:
+        logger.info(f"Preparing to send email to {to_email} with subject '{subject}'")
+        
         # Create message
         message = MIMEMultipart("alternative")
         message["From"] = f"{settings.EMAIL_FROM_NAME} <{settings.EMAIL_FROM}>"
@@ -40,15 +46,17 @@ async def send_email(
             message.attach(html_part)
 
         # Connect to SMTP server and send email
+        logger.debug(f"Connecting to SMTP server {settings.SMTP_HOST}:{settings.SMTP_PORT}")
         with smtplib.SMTP(settings.SMTP_HOST, settings.SMTP_PORT) as server:
             server.starttls()
             server.login(settings.SMTP_USER, settings.SMTP_PASSWORD)
             server.send_message(message)
 
+        logger.info(f"Email successfully sent to {to_email}")
         return True
 
     except Exception as e:
-        print(f"Error sending email: {str(e)}")
+        logger.error(f"Error sending email to {to_email}: {str(e)}", exc_info=True)
         return False
 
 
@@ -63,6 +71,8 @@ async def send_verification_email(email: str, verification_link: str) -> bool:
     Returns:
         True if email sent successfully
     """
+    logger.info(f"Initiating email verification process for {email}")
+    
     subject = "Verify your SehatGuru account"
 
     body = f"""

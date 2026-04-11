@@ -3,7 +3,6 @@ from app.models.auth import (
     UserLogin,
     Token,
     TokenData,
-    GoogleAuthRequest,
     PasswordResetRequest,
     PasswordResetConfirm,
     EmailVerificationRequest,

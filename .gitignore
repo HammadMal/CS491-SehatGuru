@@ -26,3 +26,5 @@
  # Testing
  coverage/
  .nyc_output/
+.venv/
+/.venv/

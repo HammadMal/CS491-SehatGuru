@@ -101,14 +101,14 @@ export default function BasicInfoScreen() {
             <View style={styles.halfWidth}>
               <CustomInput
                 label="Height"
-                placeholder="0"
+                placeholder={heightUnit === 'cm' ? 'e.g. 170' : 'e.g. 5 7'}
                 value={height}
                 onChangeText={(text) => {
                   setHeight(text);
                   setErrors({ ...errors, height: null });
                 }}
                 error={errors.height}
-                keyboardType="decimal-pad"
+                keyboardType={'decimal-pad'}
               />
             </View>
             <View style={styles.unitSelector}>
