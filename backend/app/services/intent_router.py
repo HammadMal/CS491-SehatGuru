@@ -67,6 +67,14 @@ At the bottom, include a **Daily Total** row with sum of all meals' calories, pr
 CALORIE RULE: If the user has a daily calorie target, the daily total MUST be within ±10% of that target.
 If no target is given, aim for a balanced 1800-2200 kcal day.
 
+PRACTICALITY RULES (strictly follow these):
+- Prioritize simple, everyday Pakistani home meals that a person can realistically cook and eat on a weekday — e.g., anda (eggs), daal, sabzi (vegetable curry), roti, paratha, dahi (yogurt), chawal, khichdi, aloo dishes.
+- Elaborate restaurant-style dishes (Nihari, Chicken Karahi, Biryani, Haleem, Paya, etc.) are time-consuming to prepare and should appear AT MOST ONCE in the entire day plan, only at dinner if needed. Never suggest more than one such dish per day.
+- Breakfast must be a quick-prep meal: e.g., anda (boiled/fried/omelette), paratha, bread with dahi or chutney, dalia (porridge), fruits.
+- Lunch should be a simple home-cooked meal: e.g., roti with daal, sabzi, aloo, chawal with a simple curry.
+- Snacks must be light: e.g., fruits, dahi, nuts, lassi, roasted chana.
+- The overall plan should feel like something a real Pakistani household would eat in one day — not a restaurant menu.
+
 Use Urdu food names alongside English where helpful (e.g., "Dal Chawal (Lentils & Rice)").
 Only use dishes listed in the retrieved context. If no suitable option exists for a slot, use a simple staple (e.g., plain roti with daal).
 Each dish must appear AT MOST ONCE across the entire meal plan — do not repeat the same dish in multiple meal slots.
@@ -301,19 +309,19 @@ async def retrieve_meal_plan_context(state: RouterState) -> dict:
         # Four concurrent queries — one per meal slot for appropriate dish variety
         breakfast_r, lunch_r, dinner_r, snacks_r = await asyncio.gather(
             rag_service.hybrid_search_async(
-                query=f"breakfast morning dishes {base_query}",
+                query=f"quick easy breakfast morning home dishes eggs paratha dahi {base_query}",
                 user_context=user_ctx, guidelines_top_k=0, dishes_top_k=3,
             ),
             rag_service.hybrid_search_async(
-                query=f"lunch dishes {base_query}{preference_suffix}",
-                user_context=user_ctx, guidelines_top_k=0, dishes_top_k=3,
+                query=f"simple everyday home cooked lunch daal sabzi roti chawal {base_query}{preference_suffix}",
+                user_context=user_ctx, guidelines_top_k=0, dishes_top_k=4,
             ),
             rag_service.hybrid_search_async(
-                query=f"dinner main course dishes {base_query}{preference_suffix}",
-                user_context=user_ctx, guidelines_top_k=0, dishes_top_k=3,
+                query=f"simple home dinner curry roti daal sabzi {base_query}{preference_suffix}",
+                user_context=user_ctx, guidelines_top_k=0, dishes_top_k=4,
             ),
             rag_service.hybrid_search_async(
-                query=f"snacks light snack dishes {base_query}",
+                query=f"light snacks fruits dahi lassi roasted chana {base_query}",
                 user_context=user_ctx, guidelines_top_k=1, dishes_top_k=2,
             ),
         )
