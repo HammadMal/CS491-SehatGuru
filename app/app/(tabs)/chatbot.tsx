@@ -20,14 +20,19 @@ import * as Crypto from 'expo-crypto';
 import { Audio } from 'expo-av';
 
 import { useChatStore } from '../../store/useChatStore';
+import { useMealPlanStore } from '../../store/useMealPlanStore';
 import { chatAPI } from '../../services/chat.api';
 import { ChatMessage } from '../../components/ChatMessage';
+import { MealPlanActions } from '../../components/MealPlanActions';
 import { Colors } from '../../constants/colors';
 import { OnboardingContext } from '../../context/OnboardingContext';
 import { AuthContext } from '../../context/AuthContext';
 import { getItem } from '../../utils/storage';
 import { API_BASE_URL } from '../../config';
+import { parseMealPlan } from '../../utils/mealPlanParser';
+import { saveMealPlanToFirestore } from '../../services/mealPlans.firestore';
 import type { Message, ChatSession, UserContext } from '../../types/chat.types';
+import type { MealPlanItem } from '../../types/meal.types';
 
 export default function ChatbotScreen() {
   const [inputText, setInputText] = useState('');
@@ -35,6 +40,9 @@ export default function ChatbotScreen() {
   const [isRecording, setIsRecording] = useState(false);
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [historyVisible, setHistoryVisible] = useState(false);
+  const [pendingMealPlanMessageId, setPendingMealPlanMessageId] = useState<string | null>(null);
+  const [pendingMealPlanMarkdown, setPendingMealPlanMarkdown] = useState<string | null>(null);
+  const [mealPlanSaving, setMealPlanSaving] = useState(false);
   const recordingRef = useRef<Audio.Recording | null>(null);
   const scrollViewRef = useRef<ScrollView>(null);
   const inputRef = useRef<TextInput>(null);
@@ -225,6 +233,14 @@ export default function ChatbotScreen() {
       };
 
       addMessage(botMessage);
+
+      if (response.intent === 'meal_plan_generation') {
+        setPendingMealPlanMessageId(botMessage.id);
+        setPendingMealPlanMarkdown(response.response);
+      } else {
+        setPendingMealPlanMessageId(null);
+        setPendingMealPlanMarkdown(null);
+      }
     } catch (error: any) {
       console.error('Error sending message:', error);
       Alert.alert(
@@ -239,6 +255,37 @@ export default function ChatbotScreen() {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleMealPlanApprove = async () => {
+    if (!pendingMealPlanMarkdown || !authContext?.user?.id) return;
+    const parsed = parseMealPlan(pendingMealPlanMarkdown);
+    if (!parsed.length) {
+      Alert.alert('Error', 'Could not read the meal plan. Please try again.');
+      return;
+    }
+    setMealPlanSaving(true);
+    try {
+      const planId = Crypto.randomUUID();
+      const now = new Date().toISOString();
+      const items: MealPlanItem[] = parsed.map((p) => ({
+        id: Crypto.randomUUID(),
+        userId: authContext.user!.id,
+        planId,
+        ...p,
+        logged: false,
+        createdAt: now,
+      }));
+      await saveMealPlanToFirestore(items);
+      useMealPlanStore.getState().addPlanItems(items);
+      setPendingMealPlanMessageId(null);
+      setPendingMealPlanMarkdown(null);
+      Alert.alert('Saved!', 'Meal plan saved. View it in the Meal Plans tab.');
+    } catch {
+      Alert.alert('Error', 'Failed to save meal plan. Please try again.');
+    } finally {
+      setMealPlanSaving(false);
     }
   };
 
@@ -328,7 +375,19 @@ export default function ChatbotScreen() {
             </View>
           ) : (
             messages.map((message) => (
-              <ChatMessage key={message.id} message={message} />
+              <React.Fragment key={message.id}>
+                <ChatMessage message={message} />
+                {message.id === pendingMealPlanMessageId && (
+                  <MealPlanActions
+                    loading={mealPlanSaving}
+                    onApprove={handleMealPlanApprove}
+                    onReject={() => {
+                      setPendingMealPlanMessageId(null);
+                      setPendingMealPlanMarkdown(null);
+                    }}
+                  />
+                )}
+              </React.Fragment>
             ))
           )}
 

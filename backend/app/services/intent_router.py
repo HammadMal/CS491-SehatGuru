@@ -57,10 +57,14 @@ You are creating a ONE-DAY MEAL PLAN. Structure it as:
 - **Dinner** (~30% of daily calories)
 - **Snacks** (~10% of daily calories)
 
-For each meal:
-- List 1-2 specific Pakistani dishes from the retrieved options
-- Provide portion sizes in Pakistani measurements (roti count, katori, cup, etc.)
-- Show calories and macros (protein/carbs/fat) per dish
+For each meal, list 1-2 dishes. Each dish MUST be on its own line in EXACTLY this format (no variations):
+  - DISH_NAME | PORTION | CAL kcal | PRO g protein | CARB g carbs | FAT g fat
+
+Example:
+  - Anda Bhurji (Egg Scramble) | 2 eggs | 180 kcal | 13g protein | 2g carbs | 12g fat
+  - Dal Chawal (Lentils & Rice) | 1 katori dal + 1 cup rice | 450 kcal | 15g protein | 75g carbs | 8g fat
+
+Do NOT change this format. Do NOT use any other separators or layouts for dish lines.
 
 At the bottom, include a **Daily Total** row with sum of all meals' calories, protein, carbs, fat.
 

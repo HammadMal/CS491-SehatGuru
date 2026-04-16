@@ -11,7 +11,8 @@
       "Bash(pip3 install:*)",
       "Bash(ls backend/venv/bin/python*)",
       "Bash(ls backend/.venv/bin/python*)",
-      "Read(//mnt/c/Users/Hammad/**)"
+      "Read(//mnt/c/Users/Hammad/**)",
+      "Bash(python -c ':*)"
     ],
     "deny": [],
     "ask": []

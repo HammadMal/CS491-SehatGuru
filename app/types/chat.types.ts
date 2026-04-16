@@ -33,4 +33,5 @@ export interface ChatRequest {
 export interface ChatResponse {
   response: string;
   rag_used?: boolean;
+  intent?: string;
 }

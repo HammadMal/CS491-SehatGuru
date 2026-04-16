@@ -31,6 +31,16 @@ export default function Layout() {
       />
 
       <Tabs.Screen
+        name="meal-plans"
+        options={{
+          title: 'Meal Plans',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="calendar-outline" size={size} color={color} />
+          ),
+        }}
+      />
+
+      <Tabs.Screen
         name="chatbot"
         options={{
           title: 'SehatGuru',
