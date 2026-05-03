@@ -13,6 +13,8 @@ import { useMealStore } from '../store/useMealStore';
 import { useAuth } from '../hooks/useAuth';
 import * as Crypto from 'expo-crypto';
 import { saveMealToFirestore } from '../services/meals.firestore';
+import { updateStreakAndXP } from '../services/gamification.firestore';
+import { useGamificationStore } from '../store/useGamificationStore';
 import apiClient from '../services/api';
 import AddMealModal from '../components/AddMealModal';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -36,6 +38,7 @@ export default function ManualMealScreen() {
   const [customDishes, setCustomDishes] = useState<CustomDish[]>([]);
   const { addMeal } = useMealStore();
   const { user } = useAuth();
+  const setGamificationData = useGamificationStore((s) => s.setData);
 
   const currentMealType = urlMealType || 'Dinner';
   const meta = MEAL_META[currentMealType] || MEAL_META.Dinner;
@@ -99,6 +102,7 @@ export default function ManualMealScreen() {
     };
     await saveMealToFirestore(meal);
     addMeal(meal);
+    updateStreakAndXP(user.id).then(setGamificationData).catch(console.error);
     setSelectedFood(null);
     setTimeout(() => router.push('/(tabs)/' as any), 150);
   };
