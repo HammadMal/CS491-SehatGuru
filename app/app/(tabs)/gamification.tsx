@@ -16,6 +16,7 @@ import { useGamificationStore } from '../../store/useGamificationStore';
 import { useMealStore } from '../../store/useMealStore';
 import { getGamificationData, awardBonusTaskXP } from '../../services/gamification.firestore';
 import { getLevelInfo } from '../../types/gamification.types';
+import { Fonts } from '../../constants/fonts';
 import type { Meal } from '../../types/meal.types';
 
 const LEVEL_COLORS = ['#9ca3af', '#22c55e', '#3b82f6', '#f59e0b', '#8b5cf6', '#ef4444'];
@@ -378,22 +379,22 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
     borderWidth: 1, borderColor: '#E8EDF2',
   },
-  heading: { fontSize: 22, fontWeight: '800', color: '#111' },
+  heading: { fontSize: 22, fontWeight: '800', fontFamily: Fonts.extrabold, color: '#111' },
 
   /* Level card */
   levelCard:   { borderWidth: 1.5 },
   levelTopRow: { flexDirection: 'row', alignItems: 'center', gap: 14, marginBottom: 18 },
   levelBadge:  { width: 56, height: 56, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
-  levelLabel:  { fontSize: 12, color: '#999', fontWeight: '600' },
-  levelTitle:  { fontSize: 22, fontWeight: '900', marginTop: 2 },
+  levelLabel:  { fontSize: 12, color: '#999', fontWeight: '600', fontFamily: Fonts.semibold },
+  levelTitle:  { fontSize: 22, fontWeight: '900', fontFamily: Fonts.extrabold, marginTop: 2 },
   xpPill: {
     backgroundColor: '#f0fdf4', paddingHorizontal: 14, paddingVertical: 8,
     borderRadius: 20, borderWidth: 1, borderColor: '#d1fae5',
   },
-  xpPillText:    { fontSize: 15, fontWeight: '800', color: '#15803d' },
+  xpPillText:    { fontSize: 15, fontWeight: '800', fontFamily: Fonts.extrabold, color: '#15803d' },
   progressTrack: { height: 8, backgroundColor: '#F3F4F6', borderRadius: 99, overflow: 'hidden', marginBottom: 8 },
   progressFill:  { height: '100%', borderRadius: 99 },
-  progressHint:  { fontSize: 12, color: '#999' },
+  progressHint:  { fontSize: 12, fontFamily: Fonts.regular, color: '#999' },
 
   /* Shared card */
   card: {
@@ -403,7 +404,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.05, shadowRadius: 8, elevation: 3,
   },
   cardTitle: {
-    fontSize: 11, fontWeight: '800', color: '#aaa',
+    fontSize: 11, fontWeight: '800', fontFamily: Fonts.extrabold, color: '#aaa',
     letterSpacing: 1.2, textTransform: 'uppercase', marginBottom: 14,
   },
 
@@ -413,13 +414,13 @@ const styles = StyleSheet.create({
     flex: 1, alignItems: 'center', gap: 6, paddingVertical: 18,
     borderRadius: 18, borderWidth: 1.5,
   },
-  streakNum: { fontSize: 38, fontWeight: '900', lineHeight: 42 },
-  streakSub: { fontSize: 12, color: '#999', fontWeight: '600' },
+  streakNum: { fontSize: 38, fontWeight: '900', fontFamily: Fonts.extrabold, lineHeight: 42 },
+  streakSub: { fontSize: 12, color: '#999', fontWeight: '600', fontFamily: Fonts.semibold },
   streakHint: {
     flexDirection: 'row', alignItems: 'center', gap: 8,
     borderRadius: 12, paddingHorizontal: 12, paddingVertical: 10,
   },
-  streakHintText: { fontSize: 12, fontWeight: '500', flex: 1 },
+  streakHintText: { fontSize: 12, fontWeight: '500', fontFamily: Fonts.medium, flex: 1 },
 
   /* Tasks */
   taskHeader: {
@@ -431,7 +432,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#f0fdf4', paddingHorizontal: 10,
     paddingVertical: 5, borderRadius: 20,
   },
-  dayChipText: { fontSize: 12, fontWeight: '700', color: '#22c55e' },
+  dayChipText: { fontSize: 12, fontWeight: '700', fontFamily: Fonts.bold, color: '#22c55e' },
 
   taskRow: {
     flexDirection: 'row', alignItems: 'center', gap: 12,
@@ -446,21 +447,21 @@ const styles = StyleSheet.create({
     width: 44, height: 44, borderRadius: 13,
     alignItems: 'center', justifyContent: 'center',
   },
-  taskLabel:     { fontSize: 14, fontWeight: '700', color: '#111' },
+  taskLabel:     { fontSize: 14, fontWeight: '700', fontFamily: Fonts.bold, color: '#111' },
   taskLabelDone: { color: '#bbb', textDecorationLine: 'line-through' },
-  taskDesc:      { fontSize: 11, color: '#aaa', marginTop: 3 },
+  taskDesc:      { fontSize: 11, fontFamily: Fonts.regular, color: '#aaa', marginTop: 3 },
   xpTag: {
     paddingHorizontal: 10, paddingVertical: 5,
     borderRadius: 12, borderWidth: 1,
   },
-  xpTagText: { fontSize: 12, fontWeight: '800' },
+  xpTagText: { fontSize: 12, fontWeight: '800', fontFamily: Fonts.extrabold },
 
   allDone: {
     flexDirection: 'row', alignItems: 'center', gap: 8,
     backgroundColor: '#f0fdf4', borderRadius: 12,
     paddingHorizontal: 14, paddingVertical: 12, marginTop: 2,
   },
-  allDoneText: { fontSize: 13, color: '#15803d', fontWeight: '600', flex: 1 },
+  allDoneText: { fontSize: 13, color: '#15803d', fontWeight: '600', fontFamily: Fonts.semibold, flex: 1 },
 
   /* Level ladder */
   ladderRow: {
@@ -471,11 +472,11 @@ const styles = StyleSheet.create({
     width: 30, height: 30, borderRadius: 15,
     alignItems: 'center', justifyContent: 'center', borderWidth: 2,
   },
-  ladderCircleNum: { fontSize: 12, fontWeight: '700', color: '#d1d5db' },
-  ladderLabel: { flex: 1, fontSize: 14, fontWeight: '600' },
-  ladderXP:    { fontSize: 12, fontWeight: '600' },
+  ladderCircleNum: { fontSize: 12, fontWeight: '700', fontFamily: Fonts.bold, color: '#d1d5db' },
+  ladderLabel: { flex: 1, fontSize: 14, fontWeight: '600', fontFamily: Fonts.semibold },
+  ladderXP:    { fontSize: 12, fontWeight: '600', fontFamily: Fonts.semibold },
   youBadge: {
     paddingHorizontal: 9, paddingVertical: 4, borderRadius: 8,
   },
-  youBadgeText: { fontSize: 10, fontWeight: '900', color: '#fff', letterSpacing: 0.5 },
+  youBadgeText: { fontSize: 10, fontWeight: '900', fontFamily: Fonts.extrabold, color: '#fff', letterSpacing: 0.5 },
 });

@@ -19,6 +19,7 @@ import { CustomButton } from '../../components/auth/CustomButton';
 import { useAuth } from '../../hooks/useAuth';
 import { validateEmail, validatePassword } from '../../utils/validation';
 import { Colors } from '../../constants/colors';
+import { Fonts } from '../../constants/fonts';
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -191,12 +192,14 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: '700',
+    fontFamily: Fonts.bold,
     color: Colors.textPrimary,
     textAlign: 'center',
     marginTop: 24,
   },
   subtitle: {
     fontSize: 15,
+    fontFamily: Fonts.regular,
     color: Colors.textSecondary,
     textAlign: 'center',
     marginTop: 8,
@@ -214,6 +217,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: Colors.primary,
     fontWeight: '600',
+    fontFamily: Fonts.semibold,
   },
   loginButton: {
     marginBottom: 24,
@@ -225,11 +229,13 @@ const styles = StyleSheet.create({
   },
   signupText: {
     fontSize: 14,
+    fontFamily: Fonts.regular,
     color: Colors.textSecondary,
   },
   signupLink: {
     fontSize: 14,
     color: Colors.primary,
     fontWeight: '600',
+    fontFamily: Fonts.semibold,
   },
 });

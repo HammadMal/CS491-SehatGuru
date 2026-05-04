@@ -16,6 +16,7 @@ import {
   getAvatarData, setAvatarPreset, setAvatarPhoto,
   type AvatarData,
 } from '../../services/avatar.firestore';
+import { Fonts } from '../../constants/fonts';
 
 /* ── Level colors (index = level - 1) ── */
 const LEVEL_COLORS = ['#9ca3af', '#22c55e', '#3b82f6', '#f59e0b', '#8b5cf6', '#ef4444'];
@@ -372,7 +373,7 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
   },
   avatarPhoto: { width: 68, height: 68, borderRadius: 34 },
-  avatarInitials: { fontSize: 24, fontWeight: '800', color: '#22c55e' },
+  avatarInitials: { fontSize: 24, fontWeight: '800', color: '#22c55e', fontFamily: Fonts.extrabold },
   editBadge: {
     position: 'absolute', bottom: 0, right: 0,
     width: 24, height: 24, borderRadius: 12,
@@ -381,17 +382,17 @@ const styles = StyleSheet.create({
     borderWidth: 2, borderColor: '#fff',
   },
   headerInfo: { flex: 1, gap: 3 },
-  userName: { fontSize: 18, fontWeight: '800', color: '#111' },
-  userEmail: { fontSize: 12, color: '#9ca3af' },
+  userName: { fontSize: 18, fontWeight: '800', color: '#111', fontFamily: Fonts.extrabold },
+  userEmail: { fontSize: 12, color: '#9ca3af', fontFamily: Fonts.regular },
   levelPill: {
     flexDirection: 'row', alignItems: 'center', gap: 5,
     alignSelf: 'flex-start',
     paddingHorizontal: 10, paddingVertical: 5,
     borderRadius: 20, marginTop: 6,
   },
-  levelPillText: { fontSize: 12, fontWeight: '700' },
+  levelPillText: { fontSize: 12, fontWeight: '700', fontFamily: Fonts.bold },
   xpDot: { width: 3, height: 3, borderRadius: 2, opacity: 0.6 },
-  levelPillXP: { fontSize: 12, fontWeight: '600', opacity: 0.85 },
+  levelPillXP: { fontSize: 12, fontWeight: '600', opacity: 0.85, fontFamily: Fonts.semibold },
 
   /* Macro 2×2 grid */
   macroGrid: {
@@ -412,15 +413,15 @@ const styles = StyleSheet.create({
     width: 32, height: 32, borderRadius: 8,
     alignItems: 'center', justifyContent: 'center',
   },
-  macroValue: { fontSize: 20, fontWeight: '800' },
-  macroUnit: { fontSize: 13, fontWeight: '500', color: '#9ca3af' },
-  macroLabel: { fontSize: 11, color: '#9ca3af', fontWeight: '600', textTransform: 'uppercase', letterSpacing: 0.5 },
+  macroValue: { fontSize: 20, fontWeight: '800', fontFamily: Fonts.extrabold },
+  macroUnit: { fontSize: 13, fontWeight: '500', color: '#9ca3af', fontFamily: Fonts.medium },
+  macroLabel: { fontSize: 11, color: '#9ca3af', fontWeight: '600', textTransform: 'uppercase', letterSpacing: 0.5, fontFamily: Fonts.semibold },
 
   /* Section */
   section: { marginBottom: 14 },
   sectionLabel: {
     fontSize: 11, fontWeight: '700', color: '#9ca3af',
-    letterSpacing: 1.2, marginBottom: 8, paddingLeft: 4, textTransform: 'uppercase',
+    letterSpacing: 1.2, marginBottom: 8, paddingLeft: 4, textTransform: 'uppercase', fontFamily: Fonts.bold,
   },
 
   /* Card */
@@ -435,8 +436,8 @@ const styles = StyleSheet.create({
   /* Setting row */
   settingRow: { flexDirection: 'row', alignItems: 'center', padding: 14, gap: 14 },
   settingIconBox: { width: 36, height: 36, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
-  settingLabel: { fontSize: 15, fontWeight: '600', color: '#111' },
-  settingSub: { fontSize: 12, color: '#9ca3af', marginTop: 2 },
+  settingLabel: { fontSize: 15, fontWeight: '600', color: '#111', fontFamily: Fonts.semibold },
+  settingSub: { fontSize: 12, color: '#9ca3af', marginTop: 2, fontFamily: Fonts.regular },
 
   /* Modal */
   modalBackdrop: {
@@ -452,7 +453,7 @@ const styles = StyleSheet.create({
     width: 40, height: 4, borderRadius: 2, backgroundColor: '#e5e7eb',
     alignSelf: 'center', marginBottom: 16,
   },
-  modalTitle: { fontSize: 17, fontWeight: '800', color: '#111', marginBottom: 20 },
+  modalTitle: { fontSize: 17, fontWeight: '800', color: '#111', marginBottom: 20, fontFamily: Fonts.extrabold },
   presetGrid: {
     flexDirection: 'row', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between',
     marginBottom: 20,
@@ -471,7 +472,7 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
     borderWidth: 1.5, borderColor: '#fff',
   },
-  presetCellLabel: { fontSize: 10, color: '#6b7280', fontWeight: '500', textAlign: 'center' },
+  presetCellLabel: { fontSize: 10, color: '#6b7280', fontWeight: '500', textAlign: 'center', fontFamily: Fonts.medium },
   modalDivider: { height: 1, backgroundColor: '#f3f4f6', marginBottom: 12 },
   uploadRow: {
     flexDirection: 'row', alignItems: 'center', gap: 14, padding: 14,
@@ -481,12 +482,12 @@ const styles = StyleSheet.create({
     width: 40, height: 40, borderRadius: 12, backgroundColor: '#eff6ff',
     alignItems: 'center', justifyContent: 'center',
   },
-  uploadLabel: { fontSize: 15, fontWeight: '600', color: '#111' },
-  uploadSub: { fontSize: 12, color: '#9ca3af', marginTop: 2 },
+  uploadLabel: { fontSize: 15, fontWeight: '600', color: '#111', fontFamily: Fonts.semibold },
+  uploadSub: { fontSize: 12, color: '#9ca3af', marginTop: 2, fontFamily: Fonts.regular },
   uploadActiveDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#22c55e' },
   savingRow: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
     gap: 8, paddingTop: 12,
   },
-  savingText: { fontSize: 13, color: '#9ca3af' },
+  savingText: { fontSize: 13, color: '#9ca3af', fontFamily: Fonts.regular },
 });

@@ -8,6 +8,7 @@ import { CustomButton } from '../../components/auth/CustomButton';
 import { useAuth } from '../../hooks/useAuth';
 import { validateEmail } from '../../utils/validation';
 import { Colors } from '../../constants/colors';
+import { Fonts } from '../../constants/fonts';
 
 export default function ForgotPasswordScreen() {
   const router = useRouter();
@@ -91,11 +92,13 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: '700',
+    fontFamily: Fonts.bold,
     color: Colors.textPrimary,
     marginBottom: 12,
   },
   subtitle: {
     fontSize: 15,
+    fontFamily: Fonts.regular,
     color: Colors.textSecondary,
     marginBottom: 32,
     lineHeight: 22,

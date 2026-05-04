@@ -2,6 +2,7 @@ import React from 'react';
 import { TouchableOpacity, View, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../constants/colors';
+import { Fonts } from '../../constants/fonts';
 
 interface CheckboxProps {
   checked: boolean;
@@ -51,6 +52,7 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 14,
+    fontFamily: Fonts.regular,
     color: Colors.textSecondary,
     lineHeight: 20,
   },

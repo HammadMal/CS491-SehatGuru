@@ -20,6 +20,7 @@ import AddMealModal from '../components/AddMealModal';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { getCustomDishes, type CustomDish } from '../services/custom-dish.api';
+import { Fonts } from '../constants/fonts';
 
 const MEAL_META: Record<string, { icon: any; color: string; bg: string }> = {
   Breakfast: { icon: 'sunny-outline', color: '#f59e0b', bg: '#fffbeb' },
@@ -293,8 +294,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#E8EDF2',
   },
-  heading: { fontSize: 18, fontWeight: '800', color: '#111' },
-  subheading: { fontSize: 12, color: '#888', marginTop: 2 },
+  heading: { fontSize: 18, fontWeight: '800', color: '#111', fontFamily: Fonts.extrabold },
+  subheading: { fontSize: 12, color: '#888', marginTop: 2, fontFamily: Fonts.regular },
 
   mealPill: {
     flexDirection: 'row',
@@ -304,7 +305,7 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
     borderRadius: 20,
   },
-  mealPillText: { fontSize: 11, fontWeight: '700' },
+  mealPillText: { fontSize: 11, fontWeight: '700', fontFamily: Fonts.bold },
 
   /* Search */
   searchWrapper: {
@@ -328,6 +329,7 @@ const styles = StyleSheet.create({
     paddingVertical: 13,
     fontSize: 15,
     color: '#111',
+    fontFamily: Fonts.regular,
   },
 
   /* Center states */
@@ -338,8 +340,8 @@ const styles = StyleSheet.create({
     gap: 8,
     paddingBottom: 80,
   },
-  centerStateTitle: { fontSize: 18, fontWeight: '700', color: '#374151' },
-  centerStateText: { fontSize: 14, color: '#9ca3af' },
+  centerStateTitle: { fontSize: 18, fontWeight: '700', color: '#374151', fontFamily: Fonts.bold },
+  centerStateText: { fontSize: 14, color: '#9ca3af', fontFamily: Fonts.regular },
 
   /* Food item */
   foodItem: {
@@ -357,15 +359,15 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   foodLeft: { flex: 1, gap: 6 },
-  foodName: { fontSize: 14, fontWeight: '600', color: '#111' },
+  foodName: { fontSize: 14, fontWeight: '600', color: '#111', fontFamily: Fonts.semibold },
 
   macroRow: { flexDirection: 'row', gap: 6 },
   macroBadge: { paddingHorizontal: 7, paddingVertical: 2, borderRadius: 6 },
-  macroBadgeText: { fontSize: 11, fontWeight: '600' },
+  macroBadgeText: { fontSize: 11, fontWeight: '600', fontFamily: Fonts.semibold },
 
   calBadge: { alignItems: 'center', minWidth: 48 },
-  calValue: { fontSize: 18, fontWeight: '900', color: '#111' },
-  calUnit: { fontSize: 10, color: '#999', fontWeight: '500' },
+  calValue: { fontSize: 18, fontWeight: '900', color: '#111', fontFamily: Fonts.extrabold },
+  calUnit: { fontSize: 10, color: '#999', fontWeight: '500', fontFamily: Fonts.medium },
 
   /* Custom dish button */
   customDishBtn: {
@@ -378,5 +380,5 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderRadius: 14,
   },
-  customDishBtnText: { color: '#fff', fontSize: 14, fontWeight: '700' as const },
+  customDishBtnText: { color: '#fff', fontSize: 14, fontWeight: '700' as const, fontFamily: Fonts.bold },
 });

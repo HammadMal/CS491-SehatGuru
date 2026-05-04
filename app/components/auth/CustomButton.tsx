@@ -1,6 +1,7 @@
 import React from 'react';
 import { TouchableOpacity, Text, StyleSheet, ActivityIndicator, ViewStyle, TextStyle } from 'react-native';
 import { Colors } from '../../constants/colors';
+import { Fonts } from '../../constants/fonts';
 
 interface CustomButtonProps {
   title: string;
@@ -86,6 +87,7 @@ const styles = StyleSheet.create({
   text: {
     fontSize: 16,
     fontWeight: '600',
+    fontFamily: Fonts.semibold,
   },
   primaryText: {
     color: Colors.backgroundLight,

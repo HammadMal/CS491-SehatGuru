@@ -27,6 +27,7 @@ import {
     type CustomDishIngredient,
 } from '../services/custom-dish.api';
 import type { MealType } from '../types/meal.types';
+import { Fonts } from '../constants/fonts';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 interface BasketItem {
@@ -380,16 +381,16 @@ const styles = StyleSheet.create({
         backgroundColor: '#fff', alignItems: 'center', justifyContent: 'center',
         borderWidth: 1, borderColor: '#E8EDF2',
     },
-    heading: { fontSize: 18, fontWeight: '800', color: '#111' },
-    subheading: { fontSize: 12, color: '#888', marginTop: 2 },
+    heading: { fontSize: 18, fontWeight: '800', color: '#111', fontFamily: Fonts.extrabold },
+    subheading: { fontSize: 12, color: '#888', marginTop: 2, fontFamily: Fonts.regular },
     mealPill: {
         flexDirection: 'row', alignItems: 'center', gap: 4,
         paddingHorizontal: 10, paddingVertical: 5, borderRadius: 20,
     },
-    mealPillText: { fontSize: 11, fontWeight: '700' },
+    mealPillText: { fontSize: 11, fontWeight: '700', fontFamily: Fonts.bold },
 
     section: { paddingHorizontal: 16, marginBottom: 16 },
-    sectionLabel: { fontSize: 13, fontWeight: '700', color: '#374151', marginBottom: 8 },
+    sectionLabel: { fontSize: 13, fontWeight: '700', color: '#374151', marginBottom: 8, fontFamily: Fonts.bold },
 
     dishNameInput: {
         backgroundColor: '#fff', borderRadius: 14, paddingHorizontal: 16,
@@ -397,6 +398,7 @@ const styles = StyleSheet.create({
         borderWidth: 1, borderColor: '#E8EDF2',
         shadowColor: '#000', shadowOffset: { width: 0, height: 1 },
         shadowOpacity: 0.04, shadowRadius: 4, elevation: 2,
+        fontFamily: Fonts.regular,
     },
 
     /* Basket */
@@ -405,8 +407,8 @@ const styles = StyleSheet.create({
         borderRadius: 12, padding: 12, marginBottom: 8,
         borderWidth: 1, borderColor: '#F0F0F0',
     },
-    basketName: { fontSize: 14, fontWeight: '600', color: '#111' },
-    basketMacros: { fontSize: 11, color: '#888', marginTop: 2 },
+    basketName: { fontSize: 14, fontWeight: '600', color: '#111', fontFamily: Fonts.semibold },
+    basketMacros: { fontSize: 11, color: '#888', marginTop: 2, fontFamily: Fonts.regular },
     removeBtn: { padding: 6 },
 
     totalsBar: {
@@ -416,8 +418,8 @@ const styles = StyleSheet.create({
     totalChip: {
         flex: 1, borderRadius: 10, paddingVertical: 8, alignItems: 'center',
     },
-    totalChipValue: { fontSize: 14, fontWeight: '800' },
-    totalChipLabel: { fontSize: 9, color: '#888', marginTop: 1, fontWeight: '600' },
+    totalChipValue: { fontSize: 14, fontWeight: '800', fontFamily: Fonts.extrabold },
+    totalChipLabel: { fontSize: 9, color: '#888', marginTop: 1, fontWeight: '600', fontFamily: Fonts.semibold },
 
     /* Search */
     searchWrapper: {
@@ -429,6 +431,7 @@ const styles = StyleSheet.create({
     searchInput: {
         flex: 1, paddingHorizontal: 10, paddingVertical: 13,
         fontSize: 15, color: '#111',
+        fontFamily: Fonts.regular,
     },
 
     /* Results */
@@ -439,14 +442,14 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.04, shadowRadius: 4, elevation: 2,
         marginBottom: 8,
     },
-    resultName: { fontSize: 14, fontWeight: '600', color: '#111' },
-    resultMacros: { fontSize: 11, color: '#9ca3af', marginTop: 3 },
+    resultName: { fontSize: 14, fontWeight: '600', color: '#111', fontFamily: Fonts.semibold },
+    resultMacros: { fontSize: 11, color: '#9ca3af', marginTop: 3, fontFamily: Fonts.regular },
     kcalBadge: { alignItems: 'center', minWidth: 48 },
-    kcalValue: { fontSize: 18, fontWeight: '900', color: '#111' },
-    kcalUnit: { fontSize: 10, color: '#999', fontWeight: '500' },
+    kcalValue: { fontSize: 18, fontWeight: '900', color: '#111', fontFamily: Fonts.extrabold },
+    kcalUnit: { fontSize: 10, color: '#999', fontWeight: '500', fontFamily: Fonts.medium },
 
     emptyState: { alignItems: 'center', paddingVertical: 24, gap: 8 },
-    emptyText: { fontSize: 13, color: '#9ca3af' },
+    emptyText: { fontSize: 13, color: '#9ca3af', fontFamily: Fonts.regular },
 
     /* FAB */
     fabArea: {
@@ -461,7 +464,7 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.3, shadowRadius: 10, elevation: 6,
     },
     saveBtnDisabled: { backgroundColor: '#a3e4b4', shadowOpacity: 0 },
-    saveBtnText: { color: '#fff', fontSize: 16, fontWeight: '700' },
+    saveBtnText: { color: '#fff', fontSize: 16, fontWeight: '700', fontFamily: Fonts.bold },
 
     /* Gram modal */
     modalOverlay: {
@@ -471,24 +474,25 @@ const styles = StyleSheet.create({
         backgroundColor: '#fff', borderTopLeftRadius: 24, borderTopRightRadius: 24,
         padding: 24, paddingBottom: 36,
     },
-    modalTitle: { fontSize: 17, fontWeight: '800', color: '#111', marginBottom: 4 },
-    modalSub: { fontSize: 13, color: '#9ca3af', marginBottom: 20 },
-    modalLabel: { fontSize: 14, fontWeight: '600', color: '#374151', marginBottom: 10 },
+    modalTitle: { fontSize: 17, fontWeight: '800', color: '#111', marginBottom: 4, fontFamily: Fonts.extrabold },
+    modalSub: { fontSize: 13, color: '#9ca3af', marginBottom: 20, fontFamily: Fonts.regular },
+    modalLabel: { fontSize: 14, fontWeight: '600', color: '#374151', marginBottom: 10, fontFamily: Fonts.semibold },
     gramInput: {
         backgroundColor: '#F3F6FA', borderRadius: 12, paddingHorizontal: 16,
         paddingVertical: 14, fontSize: 28, fontWeight: '800', color: '#111',
         textAlign: 'center', marginBottom: 6, borderWidth: 1, borderColor: '#E8EDF2',
+        fontFamily: Fonts.extrabold,
     },
-    gramPreview: { textAlign: 'center', color: '#9ca3af', fontSize: 13, marginBottom: 24 },
+    gramPreview: { textAlign: 'center', color: '#9ca3af', fontSize: 13, marginBottom: 24, fontFamily: Fonts.regular },
     modalBtns: { flexDirection: 'row', gap: 12 },
     modalCancel: {
         flex: 1, paddingVertical: 14, borderRadius: 12,
         borderWidth: 1, borderColor: '#E8EDF2', alignItems: 'center',
     },
-    modalCancelText: { fontSize: 15, fontWeight: '600', color: '#6b7280' },
+    modalCancelText: { fontSize: 15, fontWeight: '600', color: '#6b7280', fontFamily: Fonts.semibold },
     modalAdd: {
         flex: 2, paddingVertical: 14, borderRadius: 12,
         backgroundColor: '#22c55e', alignItems: 'center',
     },
-    modalAddText: { fontSize: 15, fontWeight: '700', color: '#fff' },
+    modalAddText: { fontSize: 15, fontWeight: '700', color: '#fff', fontFamily: Fonts.bold },
 });

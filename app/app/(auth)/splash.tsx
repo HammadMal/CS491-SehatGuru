@@ -3,6 +3,7 @@ import { View, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Logo } from '../../components/auth/Logo';
 import { Colors } from '../../constants/colors';
+import { Fonts } from '../../constants/fonts';
 
 export default function SplashScreen() {
   const router = useRouter();
