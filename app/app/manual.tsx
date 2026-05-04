@@ -6,6 +6,8 @@ import {
   StyleSheet,
   FlatList,
   TouchableOpacity,
+  TouchableWithoutFeedback,
+  Keyboard,
   ActivityIndicator,
 } from 'react-native';
 import { Stack, router, useLocalSearchParams } from 'expo-router';
@@ -109,6 +111,7 @@ export default function ManualMealScreen() {
   };
 
   return (
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
     <SafeAreaView style={styles.safe}>
       <Stack.Screen options={{ headerShown: false }} />
 
@@ -263,6 +266,7 @@ export default function ManualMealScreen() {
         defaultMealType={currentMealType}
       />
     </SafeAreaView>
+    </TouchableWithoutFeedback>
   );
 }
 
