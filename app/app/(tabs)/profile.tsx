@@ -130,7 +130,7 @@ export default function ProfileScreen() {
   const levelColor = levelInfo ? LEVEL_COLORS[levelInfo.current.level - 1] : '#9ca3af';
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <SafeAreaView style={styles.safe} edges={['top']}>
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
 
         {/* ── Header ── */}
@@ -177,6 +177,7 @@ export default function ProfileScreen() {
         </View>
 
         {/* ── Macro goals (2×2 grid) ── */}
+        <Text style={styles.sectionLabel}>DAILY GOALS</Text>
         <View style={styles.macroGrid}>
           <MacroCard
             icon="flame-outline" color="#ef4444" bg="#fff5f5"

@@ -487,11 +487,8 @@ const styles = StyleSheet.create({
   /* ── Header ── */
   header: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    backgroundColor: '#fff',
+    backgroundColor: '#F3F6FA',
     paddingVertical: 10, paddingHorizontal: 14,
-    borderBottomWidth: 1, borderBottomColor: '#f0f0f0',
-    shadowColor: '#000', shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04, shadowRadius: 8, elevation: 3,
   },
   headerBtn: {
     width: 38, height: 38, borderRadius: 12,

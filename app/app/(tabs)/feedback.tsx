@@ -11,6 +11,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
 
 import { Fonts } from '../../constants/fonts';
 import { feedbackAPI } from '../../services/feedback.api';
@@ -158,6 +159,7 @@ const buildSections = (): FeedbackSection[] => [
 ];
 
 export default function FeedbackScreen() {
+  const router = useRouter();
   const [sections, setSections] = useState<FeedbackSection[]>(() => buildSections());
   const [comment, setComment] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -242,7 +244,16 @@ export default function FeedbackScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <SafeAreaView style={styles.safe} edges={['top']}>
+      {/* ── Header ── */}
+      <View style={styles.navHeader}>
+        <TouchableOpacity onPress={() => router.push('/(tabs)/profile')} style={styles.backBtn} activeOpacity={0.7}>
+          <Ionicons name="chevron-back" size={22} color="#111" />
+        </TouchableOpacity>
+        <Text style={styles.navTitle}>Send Feedback</Text>
+        <View style={styles.backBtn} />
+      </View>
+
       <ScrollView style={styles.scroll} contentContainerStyle={styles.container}>
         <View style={styles.heroCard}>
           <Text style={styles.heroTitle}>Help Us Improve SehatGuru</Text>
@@ -367,8 +378,15 @@ export default function FeedbackScreen() {
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: '#F3F6FA' },
+  navHeader: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    paddingHorizontal: 12, paddingVertical: 10,
+    backgroundColor: '#F3F6FA',
+  },
+  backBtn: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
+  navTitle: { fontSize: 17, fontWeight: '700', fontFamily: Fonts.bold, color: '#111' },
   scroll: { flex: 1, backgroundColor: '#F3F6FA' },
-  container: { paddingHorizontal: 18, paddingTop: 20, paddingBottom: 32 },
+  container: { paddingHorizontal: 18, paddingTop: 8, paddingBottom: 32 },
   heroCard: {
     backgroundColor: '#ecfdf5',
     borderRadius: 24,

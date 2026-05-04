@@ -9,6 +9,7 @@ import {
   Modal,
   Pressable,
 } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { Fonts } from "../../constants/fonts";
@@ -122,6 +123,12 @@ export default function Dashboard() {
   };
 
   return (
+    <LinearGradient
+      colors={['#e8fdf2', '#F3F6FA', '#F3F6FA']}
+      start={{ x: 0.5, y: 0 }}
+      end={{ x: 0.5, y: 0.35 }}
+      style={styles.gradient}
+    >
     <ScrollView style={styles.scroll} contentContainerStyle={styles.container}>
 
       {/* ── HEADER ── */}
@@ -277,6 +284,7 @@ export default function Dashboard() {
 
       <View style={{ height: 40 }} />
     </ScrollView>
+    </LinearGradient>
   );
 }
 
@@ -330,7 +338,8 @@ const MacroCard = ({
 
 /* ===== STYLES ===== */
 const styles = StyleSheet.create({
-  scroll: { flex: 1, backgroundColor: "#F3F6FA" },
+  gradient: { flex: 1 },
+  scroll: { flex: 1 },
   container: { paddingHorizontal: 18, paddingTop: 54, paddingBottom: 40 },
 
   /* Header */

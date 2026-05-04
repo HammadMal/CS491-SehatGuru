@@ -67,12 +67,7 @@ export default function Layout() {
 
       <Tabs.Screen
         name="feedback"
-        options={{
-          title: 'Feedback',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="clipboard-outline" size={size} color={color} />
-          ),
-        }}
+        options={{ href: null }}
       />
     </Tabs>
   );
