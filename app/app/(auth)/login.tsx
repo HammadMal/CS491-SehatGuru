@@ -2,132 +2,110 @@ import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
+  Image,
   StyleSheet,
   ScrollView,
   KeyboardAvoidingView,
   Platform,
   TouchableOpacity,
   Alert,
-  ActivityIndicator,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Logo } from '../../components/auth/Logo';
 import { CustomInput } from '../../components/auth/CustomInput';
 import { PasswordInput } from '../../components/auth/PasswordInput';
 import { CustomButton } from '../../components/auth/CustomButton';
 import { useAuth } from '../../hooks/useAuth';
 import { validateEmail, validatePassword } from '../../utils/validation';
-import { Colors } from '../../constants/colors';
 import { Fonts } from '../../constants/fonts';
 
 export default function LoginScreen() {
   const router = useRouter();
-  const { login, isAuthenticated, hasCompletedOnboarding } = useAuth();
+  const { login, isAuthenticated } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [emailError, setEmailError] = useState<string | null>(null);
   const [passwordError, setPasswordError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const loadingTimeoutRef = useRef<number | null>(null);
+  const loadingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Clear loading state when authentication succeeds
   useEffect(() => {
     if (loading && isAuthenticated) {
-      // Set a small delay to allow navigation to start
-      const timer = setTimeout(() => {
-        setLoading(false);
-      }, 500);
+      const timer = setTimeout(() => setLoading(false), 500);
       return () => clearTimeout(timer);
     }
   }, [loading, isAuthenticated]);
 
-  // Cleanup timeout on unmount
   useEffect(() => {
     return () => {
-      if (loadingTimeoutRef.current) {
-        clearTimeout(loadingTimeoutRef.current);
-      }
+      if (loadingTimeoutRef.current) clearTimeout(loadingTimeoutRef.current);
     };
   }, []);
 
-
-
   const handleLogin = async () => {
-    // Validate inputs
     const emailErr = validateEmail(email);
     const passwordErr = validatePassword(password);
-
     setEmailError(emailErr);
     setPasswordError(passwordErr);
-
-    if (emailErr || passwordErr) {
-      return;
-    }
+    if (emailErr || passwordErr) return;
 
     setLoading(true);
-
-    // Safety timeout: clear loading state after 5 seconds if still loading
-    // This prevents infinite spinner if navigation fails
-    loadingTimeoutRef.current = setTimeout(() => {
-      if (loading) {
-        console.warn('Login timeout: clearing loading state');
-        setLoading(false);
-      }
-    }, 5000);
+    loadingTimeoutRef.current = setTimeout(() => setLoading(false), 5000);
 
     try {
       await login(email, password);
-      // Navigation is handled by root layout based on auth state
-      // Loading state will be cleared by useEffect when isAuthenticated changes
     } catch (error: any) {
-      // Clear timeout on error
       if (loadingTimeoutRef.current) {
         clearTimeout(loadingTimeoutRef.current);
         loadingTimeoutRef.current = null;
       }
-
-      // Check if error is due to unverified email
-      const errorMessage = error.message || 'Invalid email or password';
-      if (errorMessage.toLowerCase().includes('verify your email')) {
-        Alert.alert(
-          'Email Not Verified',
-          'Please verify your email before logging in. Check your inbox for the verification link.',
-          [
-            {
-              text: 'OK',
-              style: 'default',
-            },
-          ]
-        );
+      const msg = error.message || 'Invalid email or password';
+      if (msg.toLowerCase().includes('verify your email')) {
+        Alert.alert('Email Not Verified', 'Please verify your email before logging in.');
       } else {
-        Alert.alert('Login Failed', errorMessage);
+        Alert.alert('Login Failed', msg);
       }
       setLoading(false);
     }
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.keyboardAvoid}
-      >
-        <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-          <Logo size={150} variant="transparent" />
+    <SafeAreaView style={styles.outer} edges={['top']}>
+      <View style={styles.gradient}>
+        {/* top link */}
+        <View style={styles.topBar}>
+          <View style={{ flex: 1 }} />
+          <TouchableOpacity onPress={() => router.replace('/(auth)/signup')} activeOpacity={0.7}>
+            <Text style={styles.topLink}>New User?</Text>
+          </TouchableOpacity>
+        </View>
 
-          <Text style={styles.title}>Welcome to SehatGuru</Text>
-          <Text style={styles.subtitle}>Sign in to continue to your account</Text>
+        {/* Logo */}
+        <View style={styles.logoArea}>
+          <Image
+            source={require('../../assets/images/new.png')}
+            style={styles.logoImg}
+            resizeMode="contain"
+          />
+        </View>
 
-          <View style={styles.form}>
+        {/* Card */}
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={styles.cardWrapper}
+        >
+          <ScrollView
+            style={styles.card}
+            contentContainerStyle={styles.cardContent}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+          >
+            <Text style={styles.cardTitle}>Welcome Back. Log in to Continue</Text>
+
             <CustomInput
-              label="Email"
               placeholder="Enter your email"
               value={email}
-              onChangeText={(text) => {
-                setEmail(text);
-                setEmailError(null);
-              }}
+              onChangeText={(t) => { setEmail(t); setEmailError(null); }}
               error={emailError}
               keyboardType="email-address"
               autoCapitalize="none"
@@ -135,21 +113,19 @@ export default function LoginScreen() {
             />
 
             <PasswordInput
-              label="Password"
               placeholder="Enter your password"
               value={password}
-              onChangeText={(text) => {
-                setPassword(text);
-                setPasswordError(null);
-              }}
+              onChangeText={(t) => { setPassword(t); setPasswordError(null); }}
               error={passwordError}
             />
 
             <TouchableOpacity
               onPress={() => router.push('/(auth)/forgot-password')}
-              style={styles.forgotPassword}
+              style={styles.forgotRow}
+              activeOpacity={0.7}
             >
-              <Text style={styles.forgotPasswordText}>Forgot password?</Text>
+              <Text style={styles.forgotBase}>Forgot password? </Text>
+              <Text style={styles.forgotLink}>Reset it</Text>
             </TouchableOpacity>
 
             <CustomButton
@@ -157,85 +133,96 @@ export default function LoginScreen() {
               onPress={handleLogin}
               loading={loading}
               disabled={loading}
-              style={styles.loginButton}
+              style={styles.mainBtn}
             />
 
-
-
-            <View style={styles.signupContainer}>
-              <Text style={styles.signupText}>Don't have an account? </Text>
-              <TouchableOpacity onPress={() => router.push('/(auth)/signup')}>
-                <Text style={styles.signupLink}>Sign up</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
+            <Text style={styles.terms}>
+              By signing in, I accept the{' '}
+              <Text style={styles.termsLink}>Terms & Conditions</Text>
+            </Text>
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </View>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.background,
-  },
-  keyboardAvoid: {
-    flex: 1,
-  },
-  scrollContent: {
-    flexGrow: 1,
+  outer: { flex: 1, backgroundColor: '#F3F6FA' },
+  gradient: { flex: 1, backgroundColor: '#F3F6FA' },
+
+  topBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingHorizontal: 20,
-    paddingTop: 40,
-    paddingBottom: 20,
+    paddingTop: 6,
+    paddingBottom: 0,
   },
-  title: {
-    fontSize: 28,
+  topLink: {
+    color: '#22c55e',
+    fontSize: 14,
+    fontFamily: Fonts.semibold,
+    fontWeight: '600',
+  },
+
+  logoArea: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingTop: 8,
+    paddingBottom: 12,
+  },
+  logoImg: { width: 180, height: 180, marginBottom: -12, marginRight: 10 },
+  appName: {
+    fontSize: 14,
+    fontWeight: '400',
+    fontFamily: Fonts.regular,
+    color: '#111',
+    letterSpacing: 0.2,
+  },
+
+  cardWrapper: { flex: 1 },
+  card: {
+    flex: 1,
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+  },
+  cardContent: {
+    paddingHorizontal: 24,
+    paddingTop: 32,
+    paddingBottom: 40,
+  },
+  cardTitle: {
+    fontSize: 18,
     fontWeight: '700',
     fontFamily: Fonts.bold,
-    color: Colors.textPrimary,
+    color: '#111',
     textAlign: 'center',
-    marginTop: 24,
+    marginBottom: 28,
   },
-  subtitle: {
-    fontSize: 15,
-    fontFamily: Fonts.regular,
-    color: Colors.textSecondary,
-    textAlign: 'center',
-    marginTop: 8,
-    marginBottom: 32,
-  },
-  form: {
-    width: '100%',
-  },
-  forgotPassword: {
-    alignSelf: 'flex-end',
-    marginTop: -8,
-    marginBottom: 24,
-  },
-  forgotPasswordText: {
-    fontSize: 14,
-    color: Colors.primary,
-    fontWeight: '600',
-    fontFamily: Fonts.semibold,
-  },
-  loginButton: {
-    marginBottom: 24,
-  },
-  signupContainer: {
+
+  forgotRow: {
     flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
+    alignSelf: 'flex-end',
+    marginTop: -4,
+    marginBottom: 20,
   },
-  signupText: {
-    fontSize: 14,
+  forgotBase: { fontSize: 13, color: '#888', fontFamily: Fonts.regular },
+  forgotLink: { fontSize: 13, color: '#22c55e', fontFamily: Fonts.semibold, fontWeight: '600' },
+
+  mainBtn: { marginBottom: 20 },
+
+  terms: {
+    textAlign: 'center',
+    fontSize: 12,
+    color: '#9ca3af',
     fontFamily: Fonts.regular,
-    color: Colors.textSecondary,
+    lineHeight: 18,
   },
-  signupLink: {
-    fontSize: 14,
-    color: Colors.primary,
-    fontWeight: '600',
+  termsLink: {
+    color: '#374151',
     fontFamily: Fonts.semibold,
+    fontWeight: '600',
+    textDecorationLine: 'underline',
   },
 });

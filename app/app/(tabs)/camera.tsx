@@ -145,7 +145,7 @@ export default function CameraScreen() {
     addMeal(meal);
     updateStreakAndXP(user.id).then(setGamificationData).catch(console.error);
     handleModalClose();
-    setTimeout(() => router.push('/(tabs)/'), 150);
+    setTimeout(() => router.replace('/(tabs)/'), 150);
   };
 
   const detectFood = async (imageUri: string) => {

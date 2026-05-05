@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import {
   View,
   Text,
+  Image,
   StyleSheet,
   ScrollView,
   KeyboardAvoidingView,
@@ -11,13 +12,11 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
 import { CustomInput } from '../../components/auth/CustomInput';
 import { PasswordInput } from '../../components/auth/PasswordInput';
 import { CustomButton } from '../../components/auth/CustomButton';
 import { useAuth } from '../../hooks/useAuth';
 import { validateEmail, validatePassword, validateConfirmPassword } from '../../utils/validation';
-import { Colors } from '../../constants/colors';
 import { Fonts } from '../../constants/fonts';
 
 export default function SignupScreen() {
@@ -32,18 +31,13 @@ export default function SignupScreen() {
   const [loading, setLoading] = useState(false);
 
   const handleSignup = async () => {
-    // Validate inputs
     const emailErr = validateEmail(email);
     const passwordErr = validatePassword(password);
     const confirmPasswordErr = validateConfirmPassword(password, confirmPassword);
-
     setEmailError(emailErr);
     setPasswordError(passwordErr);
     setConfirmPasswordError(confirmPasswordErr);
-
-    if (emailErr || passwordErr || confirmPasswordErr) {
-      return;
-    }
+    if (emailErr || passwordErr || confirmPasswordErr) return;
 
     setLoading(true);
     try {
@@ -57,31 +51,42 @@ export default function SignupScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.keyboardAvoid}
-      >
-        <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-          <TouchableOpacity
-            onPress={() => router.back()}
-            style={styles.backButton}
-          >
-            <Ionicons name="arrow-back" size={24} color={Colors.textPrimary} />
+    <SafeAreaView style={styles.outer} edges={['top']}>
+      <View style={styles.gradient}>
+        {/* top link */}
+        <View style={styles.topBar}>
+          <View style={{ flex: 1 }} />
+          <TouchableOpacity onPress={() => router.replace('/(auth)/login')} activeOpacity={0.7}>
+            <Text style={styles.topLink}>Already a User?</Text>
           </TouchableOpacity>
+        </View>
 
-          <Text style={styles.title}>Create Account</Text>
-          <Text style={styles.subtitle}>Sign up to get started with SehatGuru</Text>
+        {/* Logo */}
+        <View style={styles.logoArea}>
+          <Image
+            source={require('../../assets/images/new.png')}
+            style={styles.logoImg}
+            resizeMode="contain"
+          />
+        </View>
 
-          <View style={styles.form}>
+        {/* Card */}
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={styles.cardWrapper}
+        >
+          <ScrollView
+            style={styles.card}
+            contentContainerStyle={styles.cardContent}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+          >
+            <Text style={styles.cardTitle}>Let's Create Your Account</Text>
+
             <CustomInput
-              label="Email"
               placeholder="Enter your email"
               value={email}
-              onChangeText={(text) => {
-                setEmail(text);
-                setEmailError(null);
-              }}
+              onChangeText={(t) => { setEmail(t); setEmailError(null); }}
               error={emailError}
               keyboardType="email-address"
               autoCapitalize="none"
@@ -89,24 +94,16 @@ export default function SignupScreen() {
             />
 
             <PasswordInput
-              label="Password"
               placeholder="Create a password"
               value={password}
-              onChangeText={(text) => {
-                setPassword(text);
-                setPasswordError(null);
-              }}
+              onChangeText={(t) => { setPassword(t); setPasswordError(null); }}
               error={passwordError}
             />
 
             <PasswordInput
-              label="Confirm Password"
               placeholder="Confirm your password"
               value={confirmPassword}
-              onChangeText={(text) => {
-                setConfirmPassword(text);
-                setConfirmPasswordError(null);
-              }}
+              onChangeText={(t) => { setConfirmPassword(t); setConfirmPasswordError(null); }}
               error={confirmPasswordError}
             />
 
@@ -115,73 +112,89 @@ export default function SignupScreen() {
               onPress={handleSignup}
               loading={loading}
               disabled={loading}
-              style={styles.signupButton}
+              style={styles.mainBtn}
             />
 
-            <View style={styles.loginContainer}>
-              <Text style={styles.loginText}>Already have an account? </Text>
-              <TouchableOpacity onPress={() => router.back()}>
-                <Text style={styles.loginLink}>Sign in</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
+            <Text style={styles.terms}>
+              By signing up, I agree to the{' '}
+              <Text style={styles.termsLink}>Terms of Service</Text>
+              {' '}and{' '}
+              <Text style={styles.termsLink}>Privacy Policy</Text>
+            </Text>
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </View>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.background,
-  },
-  keyboardAvoid: {
-    flex: 1,
-  },
-  scrollContent: {
-    flexGrow: 1,
+  outer: { flex: 1, backgroundColor: '#F3F6FA' },
+  gradient: { flex: 1, backgroundColor: '#F3F6FA' },
+
+  topBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingHorizontal: 20,
-    paddingTop: 20,
-    paddingBottom: 20,
+    paddingTop: 6,
+    paddingBottom: 0,
   },
-  backButton: {
-    marginBottom: 24,
+  topLink: {
+    color: '#22c55e',
+    fontSize: 14,
+    fontFamily: Fonts.semibold,
+    fontWeight: '600',
   },
-  title: {
-    fontSize: 28,
+
+  logoArea: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingTop: 8,
+    paddingBottom: 12,
+  },
+  logoImg: { width: 180, height: 180, marginBottom: -12, marginRight: 10 },
+  appName: {
+    fontSize: 14,
+    fontWeight: '400',
+    fontFamily: Fonts.regular,
+    color: '#111',
+    letterSpacing: 0.2,
+  },
+
+  cardWrapper: { flex: 1 },
+  card: {
+    flex: 1,
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+  },
+  cardContent: {
+    paddingHorizontal: 24,
+    paddingTop: 32,
+    paddingBottom: 40,
+  },
+  cardTitle: {
+    fontSize: 18,
     fontWeight: '700',
     fontFamily: Fonts.bold,
-    color: Colors.textPrimary,
-    marginBottom: 8,
+    color: '#111',
+    textAlign: 'center',
+    marginBottom: 28,
   },
-  subtitle: {
-    fontSize: 15,
+
+  mainBtn: { marginTop: 8, marginBottom: 20 },
+
+  terms: {
+    textAlign: 'center',
+    fontSize: 12,
+    color: '#9ca3af',
     fontFamily: Fonts.regular,
-    color: Colors.textSecondary,
-    marginBottom: 32,
+    lineHeight: 18,
   },
-  form: {
-    width: '100%',
-  },
-  signupButton: {
-    marginTop: 8,
-    marginBottom: 24,
-  },
-  loginContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  loginText: {
-    fontSize: 14,
-    fontFamily: Fonts.regular,
-    color: Colors.textSecondary,
-  },
-  loginLink: {
-    fontSize: 14,
-    color: Colors.primary,
-    fontWeight: '600',
+  termsLink: {
+    color: '#374151',
     fontFamily: Fonts.semibold,
+    fontWeight: '600',
+    textDecorationLine: 'underline',
   },
 });

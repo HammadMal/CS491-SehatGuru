@@ -107,7 +107,7 @@ export default function ManualMealScreen() {
     addMeal(meal);
     updateStreakAndXP(user.id).then(setGamificationData).catch(console.error);
     setSelectedFood(null);
-    setTimeout(() => router.push('/(tabs)/' as any), 150);
+    setTimeout(() => router.replace('/(tabs)/' as any), 150);
   };
 
   return (

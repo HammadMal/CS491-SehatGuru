@@ -54,13 +54,14 @@ function RootLayoutNav() {
   }, [isAuthenticated, isLoading, hasCompletedOnboarding, hasAcceptedConsent, segments, router]);
 
   return (
-    <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="(auth)" />
-      <Stack.Screen name="(onboarding)" />
-      <Stack.Screen name="(tabs)" />
-      <Stack.Screen name="manual" />
-      <Stack.Screen name="analytics" />
-      <Stack.Screen name="custom-dish" />
+    <Stack screenOptions={{ headerShown: false, animation: 'fade' }}>
+      <Stack.Screen name="(auth)" options={{ animation: 'fade' }} />
+      <Stack.Screen name="(onboarding)" options={{ animation: 'slide_from_right' }} />
+      <Stack.Screen name="(tabs)" options={{ animation: 'fade' }} />
+      <Stack.Screen name="manual" options={{ animation: 'slide_from_bottom' }} />
+      <Stack.Screen name="analytics" options={{ animation: 'slide_from_right' }} />
+      <Stack.Screen name="edit-profile" options={{ animation: 'slide_from_right' }} />
+      <Stack.Screen name="custom-dish" options={{ animation: 'slide_from_bottom' }} />
     </Stack>
   );
 }

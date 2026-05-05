@@ -168,7 +168,7 @@ export default function CustomDishScreen() {
             Alert.alert(
                 '✅ Dish saved!',
                 `"${dishName.trim()}" has been logged as ${currentMealType}.`,
-                [{ text: 'OK', onPress: () => router.push('/(tabs)/' as any) }]
+                [{ text: 'OK', onPress: () => router.replace('/(tabs)/' as any) }]
             );
         } catch (err: any) {
             Alert.alert('Error', err?.message ?? 'Something went wrong. Please try again.');
