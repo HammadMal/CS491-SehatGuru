@@ -13,7 +13,7 @@ import { authAPI } from '../../services/auth.api';
 import { useGamificationStore } from '../../store/useGamificationStore';
 import { getLevelInfo } from '../../types/gamification.types';
 import {
-  getAvatarData, setAvatarPreset, setAvatarPhoto,
+  getCachedAvatarData, getAvatarData, setAvatarPreset, setAvatarPhoto,
   type AvatarData,
 } from '../../services/avatar.firestore';
 import { Fonts } from '../../constants/fonts';
@@ -47,8 +47,11 @@ export default function ProfileScreen() {
 
   const loadAvatar = useCallback(async () => {
     if (!user?.id) return;
-    const data = await getAvatarData(user.id);
-    setAvatar(data);
+    // show cached version instantly, then refresh from Firestore in background
+    const cached = await getCachedAvatarData(user.id);
+    if (cached) setAvatar(cached);
+    const fresh = await getAvatarData(user.id);
+    setAvatar(fresh);
   }, [user?.id]);
 
   useEffect(() => { loadAvatar(); }, [loadAvatar]);

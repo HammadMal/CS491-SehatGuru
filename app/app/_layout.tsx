@@ -13,8 +13,12 @@ import {
   Outfit_800ExtraBold,
 } from '@expo-google-fonts/outfit';
 import * as SplashScreen from 'expo-splash-screen';
+import { Asset } from 'expo-asset';
 
 SplashScreen.preventAutoHideAsync();
+
+// Kick off image preload immediately — runs before any screen mounts
+Asset.loadAsync([require('../assets/images/foodhero.png')]);
 
 /* Apply Outfit as the default font for every Text in the app */
 if (!Text.defaultProps) (Text as any).defaultProps = {};

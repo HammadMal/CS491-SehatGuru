@@ -9,7 +9,9 @@ import {
   Platform,
   TouchableOpacity,
   Alert,
+  Dimensions,
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { CustomInput } from '../../components/auth/CustomInput';
@@ -18,6 +20,9 @@ import { CustomButton } from '../../components/auth/CustomButton';
 import { useAuth } from '../../hooks/useAuth';
 import { validateEmail, validatePassword } from '../../utils/validation';
 import { Fonts } from '../../constants/fonts';
+
+const { width: W, height: H } = Dimensions.get('window');
+const IMG_H = H * 0.52;
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -70,37 +75,39 @@ export default function LoginScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.outer} edges={['top']}>
-      <View style={styles.gradient}>
-        {/* top link */}
-        <View style={styles.topBar}>
-          <View style={{ flex: 1 }} />
-          <TouchableOpacity onPress={() => router.replace('/(auth)/signup')} activeOpacity={0.7}>
-            <Text style={styles.topLink}>New User?</Text>
-          </TouchableOpacity>
-        </View>
+    <View style={styles.root}>
+      {/* Hero image — top portion only, keeps landscape image from over-zooming */}
+      <Image
+        source={require('../../assets/images/foodhero.png')}
+        style={styles.bgImage}
+        resizeMode="cover"
+      />
+      {/* Gradient fades image into black toward the card */}
+      <LinearGradient
+        colors={['rgba(0,0,0,0.1)', 'rgba(0,0,0,0.55)', '#000']}
+        locations={[0, 0.6, 1]}
+        style={styles.gradient}
+      />
 
-        {/* Logo */}
-        <View style={styles.logoArea}>
-          <Image
-            source={require('../../assets/images/new.png')}
-            style={styles.logoImg}
-            resizeMode="contain"
-          />
-        </View>
-
-        {/* Card */}
+      <SafeAreaView style={styles.safeArea} edges={['top']}>
         <KeyboardAvoidingView
+          style={{ flex: 1 }}
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          style={styles.cardWrapper}
         >
+          {/* Hero text */}
+          <View style={styles.heroArea}>
+            <Text style={styles.heroTitle}>Welcome Back</Text>
+            <Text style={styles.heroSub}>Log in to track your nutrition{'\n'}and reach your goals</Text>
+          </View>
+
+          {/* White card */}
           <ScrollView
             style={styles.card}
             contentContainerStyle={styles.cardContent}
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled"
           >
-            <Text style={styles.cardTitle}>Welcome Back. Log in to Continue</Text>
+            <Text style={styles.cardSub}>Enter your credentials below</Text>
 
             <CustomInput
               placeholder="Enter your email"
@@ -140,65 +147,75 @@ export default function LoginScreen() {
               By signing in, I accept the{' '}
               <Text style={styles.termsLink}>Terms & Conditions</Text>
             </Text>
+
+            <TouchableOpacity onPress={() => router.replace('/(auth)/signup')} activeOpacity={0.8} style={styles.switchPill}>
+              <Text style={styles.switchText}>New here? </Text>
+              <Text style={styles.switchLink}>Create an account</Text>
+            </TouchableOpacity>
           </ScrollView>
         </KeyboardAvoidingView>
-      </View>
-    </SafeAreaView>
+      </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  outer: { flex: 1, backgroundColor: '#F3F6FA' },
-  gradient: { flex: 1, backgroundColor: '#F3F6FA' },
+  root: { flex: 1, backgroundColor: '#000' },
+  safeArea: { flex: 1 },
+  bgImage: { position: 'absolute', top: 0, left: 0, width: W, height: IMG_H },
+  gradient: { position: 'absolute', top: 0, left: 0, width: W, height: IMG_H },
 
-  topBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingTop: 6,
-    paddingBottom: 0,
-  },
-  topLink: {
-    color: '#22c55e',
-    fontSize: 14,
-    fontFamily: Fonts.semibold,
-    fontWeight: '600',
-  },
-
-  logoArea: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingTop: 8,
-    paddingBottom: 12,
-  },
-  logoImg: { width: 180, height: 180, marginBottom: -12, marginRight: 10 },
-  appName: {
-    fontSize: 14,
-    fontWeight: '400',
-    fontFamily: Fonts.regular,
-    color: '#111',
-    letterSpacing: 0.2,
-  },
-
-  cardWrapper: { flex: 1 },
-  card: {
+  heroArea: {
     flex: 1,
+    justifyContent: 'flex-end',
+    paddingHorizontal: 28,
+    paddingBottom: 32,
+  },
+  heroTitle: {
+    color: '#fff',
+    fontSize: 30,
+    fontWeight: '800',
+    fontFamily: Fonts.extrabold,
+    marginBottom: 8,
+  },
+  heroSub: {
+    color: 'rgba(255,255,255,0.7)',
+    fontSize: 14,
+    fontFamily: Fonts.regular,
+    lineHeight: 22,
+  },
+
+  card: {
     backgroundColor: '#fff',
-    borderTopLeftRadius: 28,
-    borderTopRightRadius: 28,
+    borderTopLeftRadius: 32,
+    borderTopRightRadius: 32,
   },
   cardContent: {
     paddingHorizontal: 24,
     paddingTop: 32,
     paddingBottom: 40,
   },
+
+  cardLogo: {
+    width: 52,
+    height: 52,
+    alignSelf: 'center',
+    marginTop: 20,
+    opacity: 0.5,
+  },
+
   cardTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    fontFamily: Fonts.bold,
+    fontSize: 20,
+    fontWeight: '800',
+    fontFamily: Fonts.extrabold,
     color: '#111',
-    textAlign: 'center',
-    marginBottom: 28,
+    marginBottom: 4,
+  },
+  cardSub: {
+    fontSize: 13,
+    color: '#9ca3af',
+    fontFamily: Fonts.regular,
+    marginBottom: 24,
   },
 
   forgotRow: {
@@ -211,6 +228,21 @@ const styles = StyleSheet.create({
   forgotLink: { fontSize: 13, color: '#22c55e', fontFamily: Fonts.semibold, fontWeight: '600' },
 
   mainBtn: { marginBottom: 20 },
+
+  switchPill: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignSelf: 'center',
+    marginTop: 16,
+    backgroundColor: 'rgba(0,0,0,0.04)',
+    borderRadius: 24,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.07)',
+  },
+  switchText: { fontSize: 13, color: '#9ca3af', fontFamily: Fonts.regular },
+  switchLink: { fontSize: 13, color: '#22c55e', fontFamily: Fonts.semibold, fontWeight: '600' },
 
   terms: {
     textAlign: 'center',
