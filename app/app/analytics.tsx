@@ -11,6 +11,7 @@ import { router } from "expo-router";
 import { useMealStore } from "../store/useMealStore";
 import { Meal, MealType } from "../types/meal.types";
 import { useMemo } from "react";
+import { Fonts } from '../constants/fonts';
 
 const { width } = Dimensions.get("window");
 
@@ -261,6 +262,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "700",
     color: "#111",
+    fontFamily: Fonts.bold,
   },
 
   scroll: {
@@ -277,6 +279,7 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     color: "#111",
     marginBottom: 15,
+    fontFamily: Fonts.bold,
   },
 
   statsGrid: {
@@ -298,12 +301,14 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     color: "#111",
     marginTop: 8,
+    fontFamily: Fonts.bold,
   },
 
   statLabel: {
     fontSize: 13,
     color: "#666",
     marginTop: 4,
+    fontFamily: Fonts.regular,
   },
 
   chartContainer: {
@@ -326,6 +331,7 @@ const styles = StyleSheet.create({
     color: "#111",
     marginBottom: 4,
     height: 14,
+    fontFamily: Fonts.semibold,
   },
 
   barWrapper: {
@@ -344,6 +350,7 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: "#666",
     marginTop: 8,
+    fontFamily: Fonts.regular,
   },
 
   pieContainer: {
@@ -370,6 +377,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: "600",
     color: "#111",
+    fontFamily: Fonts.semibold,
   },
 
   pieValue: {
@@ -377,11 +385,13 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     color: "#111",
     marginRight: 8,
+    fontFamily: Fonts.bold,
   },
 
   pieCalories: {
     fontSize: 13,
     color: "#666",
+    fontFamily: Fonts.regular,
   },
 
   totalCard: {
@@ -396,11 +406,13 @@ const styles = StyleSheet.create({
     fontWeight: "800",
     color: "#111",
     marginTop: 10,
+    fontFamily: Fonts.extrabold,
   },
 
   totalLabel: {
     fontSize: 16,
     color: "#666",
     marginTop: 8,
+    fontFamily: Fonts.regular,
   },
 });

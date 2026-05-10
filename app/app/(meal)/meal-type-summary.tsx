@@ -6,6 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useMealStore } from '../../store/useMealStore';
 import { deleteMealFromFirestore } from '../../services/meals.firestore';
 import type { MealType } from '../../types/meal.types';
+import { Fonts } from '../../constants/fonts';
 
 const MEAL_META: Record<string, { icon: any; color: string; bg: string }> = {
   Breakfast: { icon: 'sunny-outline', color: '#f59e0b', bg: '#fffbeb' },
@@ -180,6 +181,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#111',
     fontWeight: '700',
+    fontFamily: Fonts.bold,
   },
   headerCard: {
     borderRadius: 18,
@@ -209,11 +211,13 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '800',
     color: '#111',
+    fontFamily: Fonts.extrabold,
   },
   mealTypeDesc: {
     fontSize: 13,
     fontWeight: '600',
     marginTop: 2,
+    fontFamily: Fonts.semibold,
   },
   statsGrid: {
     flexDirection: 'row',
@@ -236,16 +240,19 @@ const styles = StyleSheet.create({
     color: '#6b7280',
     fontWeight: '600',
     marginBottom: 8,
+    fontFamily: Fonts.semibold,
   },
   statValue: {
     fontSize: 20,
     fontWeight: '800',
+    fontFamily: Fonts.extrabold,
   },
   sectionHeading: {
     fontSize: 16,
     fontWeight: '800',
     color: '#111',
     marginBottom: 12,
+    fontFamily: Fonts.extrabold,
   },
   emptyContainer: {
     alignItems: 'center',
@@ -257,6 +264,7 @@ const styles = StyleSheet.create({
     color: '#999',
     marginTop: 12,
     marginBottom: 16,
+    fontFamily: Fonts.regular,
   },
   addMealButton: {
     flexDirection: 'row',
@@ -270,6 +278,7 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: '700',
     fontSize: 14,
+    fontFamily: Fonts.bold,
   },
   itemsList: {
     gap: 8,
@@ -299,11 +308,13 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     color: '#111',
+    fontFamily: Fonts.semibold,
   },
   itemWeight: {
     fontSize: 12,
     color: '#999',
     marginTop: 2,
+    fontFamily: Fonts.regular,
   },
   itemRight: {
     alignItems: 'flex-end',
@@ -312,6 +323,7 @@ const styles = StyleSheet.create({
   itemCalories: {
     fontSize: 14,
     fontWeight: '700',
+    fontFamily: Fonts.bold,
   },
   deleteButton: {
     padding: 6,

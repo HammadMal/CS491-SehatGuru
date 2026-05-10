@@ -1,0 +1,7 @@
+node_modules/
+dist/
+target/
+*.lock
+*.min.js
+__pycache__/
+.claude/sessions/

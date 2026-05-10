@@ -12,6 +12,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import * as Crypto from "expo-crypto";
 
+import { Fonts } from "../../constants/fonts";
 import { AuthContext } from "../../context/AuthContext";
 import { useMealPlanStore } from "../../store/useMealPlanStore";
 import { useMealStore } from "../../store/useMealStore";
@@ -312,19 +313,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 8,
     paddingBottom: 12,
-    backgroundColor: "#fff",
-    borderBottomWidth: 1,
-    borderBottomColor: "#f1f5f9",
+    backgroundColor: "#f8fafc",
   },
-  title: { fontSize: 22, fontWeight: "700", color: "#1f2937" },
-  subtitle: { fontSize: 13, color: "#6b7280", marginTop: 2 },
+  title: { fontSize: 22, fontWeight: "700", fontFamily: Fonts.bold, color: "#1f2937" },
+  subtitle: { fontSize: 13, fontFamily: Fonts.regular, color: "#6b7280", marginTop: 2 },
   center: { flex: 1, alignItems: "center", justifyContent: "center", padding: 32 },
   emptyTitle: {
-    fontSize: 18, fontWeight: "600", color: "#1f2937",
+    fontSize: 18, fontWeight: "600", fontFamily: Fonts.semibold, color: "#1f2937",
     marginTop: 16, textAlign: "center",
   },
   emptySubtitle: {
-    fontSize: 14, color: "#6b7280", marginTop: 8,
+    fontSize: 14, fontFamily: Fonts.regular, color: "#6b7280", marginTop: 8,
     textAlign: "center", lineHeight: 20,
   },
   scroll: { flex: 1 },
@@ -355,9 +354,9 @@ const styles = StyleSheet.create({
     alignItems: "center", justifyContent: "center",
   },
   planBadgeDone: { backgroundColor: "#86efac" },
-  planBadgeText: { color: "#fff", fontWeight: "700", fontSize: 15 },
-  planTitle: { fontSize: 16, fontWeight: "700", color: "#1f2937" },
-  planMeta: { fontSize: 12, color: "#6b7280", marginTop: 2 },
+  planBadgeText: { color: "#fff", fontWeight: "700", fontFamily: Fonts.bold, fontSize: 15 },
+  planTitle: { fontSize: 16, fontWeight: "700", fontFamily: Fonts.bold, color: "#1f2937" },
+  planMeta: { fontSize: 12, fontFamily: Fonts.regular, color: "#6b7280", marginTop: 2 },
 
   // Expanded body
   planBody: {
@@ -371,7 +370,7 @@ const styles = StyleSheet.create({
   // Meal type slot
   slotSection: { paddingTop: 12, gap: 8 },
   slotHeader: { flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 2 },
-  slotTitle: { fontSize: 13, fontWeight: "700", color: "#374151", textTransform: "uppercase", letterSpacing: 0.5 },
+  slotTitle: { fontSize: 13, fontWeight: "700", fontFamily: Fonts.bold, color: "#374151", textTransform: "uppercase", letterSpacing: 0.5 },
 
   // Item row
   itemRow: {
@@ -381,8 +380,8 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
   },
   itemInfo: { flex: 1, marginRight: 12 },
-  itemName: { fontSize: 14, fontWeight: "600", color: "#1f2937" },
-  itemMacros: { fontSize: 12, color: "#6b7280", marginTop: 2 },
+  itemName: { fontSize: 14, fontWeight: "600", fontFamily: Fonts.semibold, color: "#1f2937" },
+  itemMacros: { fontSize: 12, fontFamily: Fonts.regular, color: "#6b7280", marginTop: 2 },
   logBtn: {
     backgroundColor: Colors.primary,
     paddingVertical: 6,
@@ -391,7 +390,7 @@ const styles = StyleSheet.create({
     minWidth: 56,
     alignItems: "center",
   },
-  logBtnText: { color: "#fff", fontSize: 13, fontWeight: "600" },
+  logBtnText: { color: "#fff", fontSize: 13, fontWeight: "600", fontFamily: Fonts.semibold },
   loggedBadge: { flexDirection: "row", alignItems: "center", gap: 4 },
-  loggedText: { fontSize: 13, color: Colors.primary, fontWeight: "600" },
+  loggedText: { fontSize: 13, color: Colors.primary, fontWeight: "600", fontFamily: Fonts.semibold },
 });

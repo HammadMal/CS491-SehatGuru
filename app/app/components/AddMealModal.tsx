@@ -8,6 +8,7 @@ import {
   StyleSheet,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { Fonts } from '../../constants/fonts';
 
 export default function AddMealModal({
   visible,
@@ -86,6 +87,7 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: "700",
     marginBottom: 12,
+    fontFamily: Fonts.bold,
   },
 
   macroContainer: {
@@ -105,12 +107,14 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     color: "#374151",
     fontSize: 14,
+    fontFamily: Fonts.regular,
   },
 
   calories: {
     fontSize: 30,
     fontWeight: "700",
     color: "#111827",
+    fontFamily: Fonts.bold,
   },
 
   saveBtn: {

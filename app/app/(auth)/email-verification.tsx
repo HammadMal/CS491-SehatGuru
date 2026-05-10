@@ -5,6 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { CustomButton } from '../../components/auth/CustomButton';
 import { useAuth } from '../../hooks/useAuth';
 import { Colors } from '../../constants/colors';
+import { Fonts } from '../../constants/fonts';
 import { Ionicons } from '@expo/vector-icons';
 import { authAPI } from '../../services/auth.api';
 
@@ -112,12 +113,14 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: '700',
+    fontFamily: Fonts.bold,
     color: Colors.textPrimary,
     textAlign: 'center',
     marginBottom: 12,
   },
   subtitle: {
     fontSize: 15,
+    fontFamily: Fonts.regular,
     color: Colors.textSecondary,
     textAlign: 'center',
     marginBottom: 32,
@@ -125,6 +128,7 @@ const styles = StyleSheet.create({
   },
   email: {
     fontWeight: '600',
+    fontFamily: Fonts.semibold,
     color: Colors.textPrimary,
   },
   instructionsContainer: {
@@ -140,12 +144,14 @@ const styles = StyleSheet.create({
   },
   instructionText: {
     fontSize: 14,
+    fontFamily: Fonts.regular,
     color: Colors.textPrimary,
     marginLeft: 12,
     flex: 1,
   },
   noteText: {
     fontSize: 13,
+    fontFamily: Fonts.regular,
     color: Colors.textLight,
     textAlign: 'center',
     marginBottom: 24,
@@ -160,6 +166,7 @@ const styles = StyleSheet.create({
   },
   resendText: {
     fontSize: 14,
+    fontFamily: Fonts.regular,
     color: Colors.textSecondary,
     marginBottom: 12,
   },
@@ -169,6 +176,7 @@ const styles = StyleSheet.create({
   },
   helpText: {
     fontSize: 12,
+    fontFamily: Fonts.regular,
     color: Colors.textLight,
     textAlign: 'center',
   },

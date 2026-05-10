@@ -12,6 +12,7 @@ import { userAPI } from '../services/user.api';
 import { OnboardingContext } from '../context/OnboardingContext';
 import { validateName, validateHeight, validateWeight, validateAge } from '../utils/validation';
 import type { ActivityLevel, HealthGoal } from '../types/onboarding.types';
+import { Fonts } from '../constants/fonts';
 
 /* ── Static data (mirrors onboarding screens) ── */
 const ACTIVITY_LEVELS: { value: ActivityLevel; label: string; desc: string; icon: any }[] = [
@@ -312,7 +313,7 @@ const styles = StyleSheet.create({
     scroll: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 40 },
 
     loadingCenter: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12 },
-    loadingText: { fontSize: 14, color: '#888' },
+    loadingText: { fontSize: 14, color: '#888', fontFamily: Fonts.regular },
 
     /* Header */
     header: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 20, paddingTop: 4 },
@@ -321,8 +322,8 @@ const styles = StyleSheet.create({
         alignItems: 'center', justifyContent: 'center',
         borderWidth: 1, borderColor: '#E8EDF2',
     },
-    heading: { fontSize: 20, fontWeight: '800', color: '#111' },
-    subheading: { fontSize: 12, color: '#888', marginTop: 2 },
+    heading: { fontSize: 20, fontWeight: '800', color: '#111', fontFamily: Fonts.extrabold },
+    subheading: { fontSize: 12, color: '#888', marginTop: 2, fontFamily: Fonts.regular },
 
     /* Section card */
     sectionCard: {
@@ -336,30 +337,30 @@ const styles = StyleSheet.create({
         width: 30, height: 30, borderRadius: 9, backgroundColor: '#f0fdf4',
         alignItems: 'center', justifyContent: 'center',
     },
-    sectionTitle: { fontSize: 15, fontWeight: '700', color: '#111' },
+    sectionTitle: { fontSize: 15, fontWeight: '700', color: '#111', fontFamily: Fonts.bold },
 
     /* Row + unit toggle */
     row: { flexDirection: 'row', gap: 12, alignItems: 'flex-start' },
     unitToggle: { width: 90, marginTop: 2 },
-    unitToggleLabel: { fontSize: 13, fontWeight: '600', color: '#333', marginBottom: 6 },
+    unitToggleLabel: { fontSize: 13, fontWeight: '600', color: '#333', marginBottom: 6, fontFamily: Fonts.semibold },
     unitBtns: { flexDirection: 'row', gap: 6 },
     unitBtn: {
         flex: 1, paddingVertical: 12, borderRadius: 10,
         borderWidth: 1, borderColor: '#E5E7EB', backgroundColor: '#F9FAFB', alignItems: 'center',
     },
     unitBtnActive: { borderColor: '#22c55e', backgroundColor: '#22c55e' },
-    unitBtnText: { fontSize: 13, fontWeight: '600', color: '#666' },
+    unitBtnText: { fontSize: 13, fontWeight: '600', color: '#666', fontFamily: Fonts.semibold },
     unitBtnTextActive: { color: '#fff' },
 
     /* Gender chips */
-    fieldLabel: { fontSize: 13, fontWeight: '600', color: '#333', marginBottom: 8, marginTop: 4 },
+    fieldLabel: { fontSize: 13, fontWeight: '600', color: '#333', marginBottom: 8, marginTop: 4, fontFamily: Fonts.semibold },
     chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 4 },
     chip: {
         paddingVertical: 10, paddingHorizontal: 14, borderRadius: 10,
         borderWidth: 1, borderColor: '#E5E7EB', backgroundColor: '#F9FAFB',
     },
     chipActive: { borderColor: '#22c55e', backgroundColor: '#f0fdf4' },
-    chipText: { fontSize: 13, fontWeight: '600', color: '#666' },
+    chipText: { fontSize: 13, fontWeight: '600', color: '#666', fontFamily: Fonts.semibold },
     chipTextActive: { color: '#22c55e' },
 
     /* Activity level option cards */
@@ -374,20 +375,20 @@ const styles = StyleSheet.create({
         alignItems: 'center', justifyContent: 'center',
     },
     optionIconActive: { backgroundColor: '#22c55e' },
-    optionTitle: { fontSize: 14, fontWeight: '700', color: '#111' },
+    optionTitle: { fontSize: 14, fontWeight: '700', color: '#111', fontFamily: Fonts.bold },
     optionTitleActive: { color: '#16a34a' },
-    optionDesc: { fontSize: 12, color: '#888', marginTop: 2 },
+    optionDesc: { fontSize: 12, color: '#888', marginTop: 2, fontFamily: Fonts.regular },
     optionDescActive: { color: '#4ade80' },
 
     /* Health goal grid */
-    multiSelectHint: { fontSize: 12, color: '#aaa', marginBottom: 12, marginTop: -4 },
+    multiSelectHint: { fontSize: 12, color: '#aaa', marginBottom: 12, marginTop: -4, fontFamily: Fonts.regular },
     goalGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
     goalCard: {
         width: '47%', padding: 14, borderRadius: 14, alignItems: 'center', gap: 6,
         borderWidth: 1.5, borderColor: '#E8EDF2', backgroundColor: '#F9FAFB', position: 'relative',
     },
     goalCardActive: { borderColor: '#22c55e', backgroundColor: '#f0fdf4' },
-    goalLabel: { fontSize: 12, fontWeight: '600', color: '#555', textAlign: 'center' },
+    goalLabel: { fontSize: 12, fontWeight: '600', color: '#555', textAlign: 'center', fontFamily: Fonts.semibold },
     goalLabelActive: { color: '#16a34a' },
     goalCheck: {
         position: 'absolute', top: 6, right: 6, width: 16, height: 16,
@@ -401,5 +402,5 @@ const styles = StyleSheet.create({
         shadowColor: '#22c55e', shadowOffset: { width: 0, height: 6 },
         shadowOpacity: 0.35, shadowRadius: 12, elevation: 6,
     },
-    saveBtnText: { fontSize: 16, fontWeight: '800', color: '#fff' },
+    saveBtnText: { fontSize: 16, fontWeight: '800', color: '#fff', fontFamily: Fonts.extrabold },
 });

@@ -1,6 +1,7 @@
 import React from 'react';
 import { TouchableOpacity, View, Text, StyleSheet } from 'react-native';
 import { Colors } from '../../constants/colors';
+import { Fonts } from '../../constants/fonts';
 
 interface ActivityLevelCardProps {
   title: string;
@@ -64,6 +65,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 16,
     fontWeight: '600',
+    fontFamily: Fonts.semibold,
     color: Colors.textPrimary,
     marginBottom: 4,
   },
@@ -72,6 +74,7 @@ const styles = StyleSheet.create({
   },
   description: {
     fontSize: 14,
+    fontFamily: Fonts.regular,
     color: Colors.textSecondary,
     lineHeight: 18,
   },

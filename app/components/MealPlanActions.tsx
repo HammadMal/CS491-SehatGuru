@@ -1,78 +1,91 @@
-import React from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  ActivityIndicator,
-  StyleSheet,
-} from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import React from 'react';
+import { View, Text, TouchableOpacity, ActivityIndicator, StyleSheet } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
+import { Fonts } from '../constants/fonts';
 
 interface MealPlanActionsProps {
   onApprove: () => void;
-  onReject: () => void;
-  loading?: boolean;
+  onReject:  () => void;
+  loading?:  boolean;
 }
 
 export function MealPlanActions({ onApprove, onReject, loading = false }: MealPlanActionsProps) {
   return (
-    <View style={styles.container}>
-      <TouchableOpacity
-        style={[styles.button, styles.approveBtn]}
-        onPress={onApprove}
-        disabled={loading}
-      >
-        {loading ? (
-          <ActivityIndicator size="small" color="#fff" />
-        ) : (
-          <Ionicons name="checkmark-circle-outline" size={18} color="#fff" />
-        )}
-        <Text style={styles.btnText}>{loading ? "Saving…" : "Approve Plan"}</Text>
-      </TouchableOpacity>
+    <View style={styles.wrap}>
+      <View style={styles.card}>
+        {/* Label row */}
+        <View style={styles.labelRow}>
+          <View style={styles.labelIcon}>
+            <MaterialCommunityIcons name="silverware-fork-knife" size={14} color="#22c55e" />
+          </View>
+          <Text style={styles.labelText}>Save this meal plan?</Text>
+        </View>
 
-      <TouchableOpacity
-        style={[styles.button, styles.rejectBtn]}
-        onPress={onReject}
-        disabled={loading}
-      >
-        <Ionicons name="close-circle-outline" size={18} color="#555" />
-        <Text style={[styles.btnText, styles.rejectText]}>Reject</Text>
-      </TouchableOpacity>
+        {/* Buttons */}
+        <View style={styles.actions}>
+          <TouchableOpacity
+            style={[styles.approveBtn, loading && { opacity: 0.75 }]}
+            onPress={onApprove}
+            disabled={loading}
+            activeOpacity={0.85}
+          >
+            {loading
+              ? <ActivityIndicator size="small" color="#fff" />
+              : <MaterialCommunityIcons name="check-circle" size={18} color="#fff" />
+            }
+            <Text style={styles.approveTxt}>{loading ? 'Saving…' : 'Save to Meal Plans'}</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.rejectBtn}
+            onPress={onReject}
+            disabled={loading}
+            activeOpacity={0.7}
+          >
+            <Ionicons name="close" size={18} color="#9ca3af" />
+          </TouchableOpacity>
+        </View>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flexDirection: "row",
-    gap: 10,
-    marginTop: 8,
-    marginBottom: 12,
-    paddingHorizontal: 16,
+  wrap: { paddingHorizontal: 14, paddingVertical: 6 },
+
+  card: {
+    backgroundColor: '#fff',
+    borderRadius: 18,
+    padding: 14,
+    borderWidth: 1, borderColor: '#eef0f3',
+    shadowColor: '#000', shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.07, shadowRadius: 8, elevation: 3,
+    gap: 12,
   },
-  button: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderRadius: 20,
-    gap: 6,
+
+  labelRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  labelIcon: {
+    width: 26, height: 26, borderRadius: 8,
+    backgroundColor: '#f0fdf4',
+    alignItems: 'center', justifyContent: 'center',
   },
+  labelText: { fontSize: 14, fontWeight: '600', fontFamily: Fonts.semibold, color: '#374151' },
+
+  actions: { flexDirection: 'row', gap: 10 },
+
   approveBtn: {
-    backgroundColor: "#22c55e",
-    flex: 1,
-    justifyContent: "center",
+    flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+    backgroundColor: '#22c55e',
+    borderRadius: 14, paddingVertical: 12, gap: 7,
+    shadowColor: '#22c55e', shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3, shadowRadius: 8, elevation: 4,
   },
+  approveTxt: { color: '#fff', fontSize: 14, fontWeight: '700', fontFamily: Fonts.bold },
+
   rejectBtn: {
-    backgroundColor: "#f1f5f9",
-    paddingHorizontal: 18,
-  },
-  btnText: {
-    color: "#fff",
-    fontSize: 14,
-    fontWeight: "600",
-  },
-  rejectText: {
-    color: "#555",
+    width: 46, height: 46, borderRadius: 14,
+    backgroundColor: '#f3f4f6',
+    alignItems: 'center', justifyContent: 'center',
   },
 });

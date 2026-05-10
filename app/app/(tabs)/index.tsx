@@ -9,8 +9,10 @@ import {
   Modal,
   Pressable,
 } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import { Fonts } from "../../constants/fonts";
 import { useMealStore } from "../../store/useMealStore";
 import { Meal, MealType } from "../../types/meal.types";
 import React, { useEffect, useState, useMemo } from "react";
@@ -121,6 +123,12 @@ export default function Dashboard() {
   };
 
   return (
+    <LinearGradient
+      colors={['#e8fdf2', '#F3F6FA', '#F3F6FA']}
+      start={{ x: 0.5, y: 0 }}
+      end={{ x: 0.5, y: 0.35 }}
+      style={styles.gradient}
+    >
     <ScrollView style={styles.scroll} contentContainerStyle={styles.container}>
 
       {/* ── HEADER ── */}
@@ -276,6 +284,7 @@ export default function Dashboard() {
 
       <View style={{ height: 40 }} />
     </ScrollView>
+    </LinearGradient>
   );
 }
 
@@ -329,7 +338,8 @@ const MacroCard = ({
 
 /* ===== STYLES ===== */
 const styles = StyleSheet.create({
-  scroll: { flex: 1, backgroundColor: "#F3F6FA" },
+  gradient: { flex: 1 },
+  scroll: { flex: 1 },
   container: { paddingHorizontal: 18, paddingTop: 54, paddingBottom: 40 },
 
   /* Header */
@@ -339,8 +349,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 20,
   },
-  greetingText: { fontSize: 22, fontWeight: "800", color: "#111" },
-  subGreeting: { fontSize: 13, color: "#888", marginTop: 2 },
+  greetingText: { fontSize: 22, fontWeight: "800", fontFamily: Fonts.extrabold, color: "#111" },
+  subGreeting: { fontSize: 13, fontFamily: Fonts.regular, color: "#888", marginTop: 2 },
   dateChip: {
     flexDirection: "row",
     alignItems: "center",
@@ -357,7 +367,7 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 2,
   },
-  dateChipText: { fontSize: 13, fontWeight: "600", color: "#333" },
+  dateChipText: { fontSize: 13, fontWeight: "600", fontFamily: Fonts.semibold, color: "#333" },
 
   /* Modal */
   modalOverlay: {
@@ -378,7 +388,7 @@ const styles = StyleSheet.create({
     shadowRadius: 20,
     elevation: 10,
   },
-  modalTitle: { fontSize: 20, fontWeight: "700", marginBottom: 15, color: "#111" },
+  modalTitle: { fontSize: 20, fontWeight: "700", fontFamily: Fonts.bold, marginBottom: 15, color: "#111" },
   dateList: { maxHeight: 400 },
   dateOption: {
     paddingVertical: 14,
@@ -388,9 +398,9 @@ const styles = StyleSheet.create({
     backgroundColor: "#F9FAFB",
   },
   dateOptionSelected: { backgroundColor: "#22c55e" },
-  dateOptionText: { fontSize: 16, fontWeight: "600", color: "#111" },
+  dateOptionText: { fontSize: 16, fontWeight: "600", fontFamily: Fonts.semibold, color: "#111" },
   dateOptionTextSelected: { color: "#fff" },
-  dateOptionSubtext: { fontSize: 13, color: "#666", marginTop: 3 },
+  dateOptionSubtext: { fontSize: 13, fontFamily: Fonts.regular, color: "#666", marginTop: 3 },
   dateOptionSubtextSelected: { color: "#d1fae5" },
 
   /* Summary Card */
@@ -410,6 +420,7 @@ const styles = StyleSheet.create({
   summaryCardLabel: {
     fontSize: 12,
     fontWeight: "700",
+    fontFamily: Fonts.bold,
     color: "#888",
     letterSpacing: 1,
     textTransform: "uppercase",
@@ -442,8 +453,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  ringNumber: { fontSize: 28, fontWeight: "900", color: "#111" },
-  ringLabel: { fontSize: 11, color: "#888", marginTop: 2 },
+  ringNumber: { fontSize: 28, fontWeight: "900", fontFamily: Fonts.extrabold, color: "#111" },
+  ringLabel: { fontSize: 11, fontFamily: Fonts.regular, color: "#888", marginTop: 2 },
 
   /* Stats */
   statsColumn: { flex: 1, gap: 10 },
@@ -455,9 +466,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  statLabel: { fontSize: 11, color: "#999" },
-  statValue: { fontSize: 14, fontWeight: "700", color: "#111" },
-  statUnit: { fontSize: 11, color: "#999", fontWeight: "400" },
+  statLabel: { fontSize: 11, fontFamily: Fonts.regular, color: "#999" },
+  statValue: { fontSize: 14, fontWeight: "700", fontFamily: Fonts.bold, color: "#111" },
+  statUnit: { fontSize: 11, color: "#999", fontWeight: "400", fontFamily: Fonts.regular },
 
   /* Calorie progress bar */
   calProgressTrack: {
@@ -477,7 +488,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
   },
-  calProgressPct: { fontSize: 12, color: "#888" },
+  calProgressPct: { fontSize: 12, fontFamily: Fonts.regular, color: "#888" },
   analyticsChip: {
     flexDirection: "row",
     alignItems: "center",
@@ -487,12 +498,13 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     borderRadius: 20,
   },
-  analyticsChipText: { fontSize: 11, color: "#22c55e", fontWeight: "700" },
+  analyticsChipText: { fontSize: 11, color: "#22c55e", fontWeight: "700", fontFamily: Fonts.bold },
 
   /* Section heading */
   sectionHeading: {
     fontSize: 16,
     fontWeight: "800",
+    fontFamily: Fonts.extrabold,
     color: "#111",
     marginBottom: 12,
   },
@@ -529,10 +541,10 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  macroLabel: { fontSize: 12, fontWeight: "600", color: "#555" },
-  macroValue: { fontSize: 20, fontWeight: "900", color: "#111" },
-  macroUnit: { fontSize: 12, fontWeight: "500", color: "#777" },
-  macroGoal: { fontSize: 11, color: "#aaa", marginTop: 1, marginBottom: 8 },
+  macroLabel: { fontSize: 12, fontWeight: "600", fontFamily: Fonts.semibold, color: "#555" },
+  macroValue: { fontSize: 20, fontWeight: "900", fontFamily: Fonts.extrabold, color: "#111" },
+  macroUnit: { fontSize: 12, fontWeight: "500", fontFamily: Fonts.medium, color: "#777" },
+  macroGoal: { fontSize: 11, fontFamily: Fonts.regular, color: "#aaa", marginTop: 1, marginBottom: 8 },
   macroTrack: {
     height: 5,
     backgroundColor: "#F3F4F6",
@@ -544,7 +556,7 @@ const styles = StyleSheet.create({
     height: "100%",
     borderRadius: 99,
   },
-  macroPct: { fontSize: 10, fontWeight: "700" },
+  macroPct: { fontSize: 10, fontWeight: "700", fontFamily: Fonts.bold },
 
   /* Meal Cards */
   mealCard: {
@@ -573,8 +585,8 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  mealTitle: { fontSize: 15, fontWeight: "700", color: "#111" },
-  mealCalBadge: { fontSize: 12, fontWeight: "600", marginTop: 1 },
+  mealTitle: { fontSize: 15, fontWeight: "700", fontFamily: Fonts.bold, color: "#111" },
+  mealCalBadge: { fontSize: 12, fontWeight: "600", fontFamily: Fonts.semibold, marginTop: 1 },
   addButton: {
     width: 34,
     height: 34,
@@ -585,6 +597,7 @@ const styles = StyleSheet.create({
 
   emptyText: {
     fontSize: 13,
+    fontFamily: Fonts.regular,
     color: "#bbb",
     fontStyle: "italic",
     paddingLeft: 4,
@@ -607,8 +620,8 @@ const styles = StyleSheet.create({
     borderRadius: 3,
     backgroundColor: "#D1D5DB",
   },
-  mealItemName: { flex: 1, fontSize: 13, color: "#333", fontWeight: "500" },
-  mealItemCal: { fontSize: 12, color: "#888", fontWeight: "600" },
+  mealItemName: { flex: 1, fontSize: 13, color: "#333", fontWeight: "500", fontFamily: Fonts.medium },
+  mealItemCal: { fontSize: 12, color: "#888", fontWeight: "600", fontFamily: Fonts.semibold },
   deleteBtn: {
     padding: 4,
     borderRadius: 6,

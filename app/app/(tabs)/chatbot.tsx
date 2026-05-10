@@ -1,21 +1,12 @@
 import React, { useState, useRef, useEffect, useContext, useMemo } from 'react';
 import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  ScrollView,
-  StyleSheet,
-  KeyboardAvoidingView,
-  Platform,
-  ActivityIndicator,
-  Alert,
-  Keyboard,
-  Modal,
-  FlatList,
+  View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet,
+  KeyboardAvoidingView, Platform, ActivityIndicator, Alert, Keyboard,
+  Modal, FlatList, Animated,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import * as Crypto from 'expo-crypto';
 import { Audio } from 'expo-av';
 
@@ -25,6 +16,7 @@ import { chatAPI } from '../../services/chat.api';
 import { ChatMessage } from '../../components/ChatMessage';
 import { MealPlanActions } from '../../components/MealPlanActions';
 import { Colors } from '../../constants/colors';
+import { Fonts } from '../../constants/fonts';
 import { OnboardingContext } from '../../context/OnboardingContext';
 import { AuthContext } from '../../context/AuthContext';
 import { getItem } from '../../utils/storage';
@@ -34,33 +26,38 @@ import { saveMealPlanToFirestore } from '../../services/mealPlans.firestore';
 import type { Message, ChatSession, UserContext } from '../../types/chat.types';
 import type { MealPlanItem } from '../../types/meal.types';
 
+/* ── Suggestion chips ── */
+const SUGGESTIONS = [
+  { icon: 'food-variant',  color: '#f97316', bg: '#fff7ed', text: 'Biryani calories?' },
+  { icon: 'heart-pulse',   color: '#ef4444', bg: '#fff5f5', text: 'Diet for diabetics' },
+  { icon: 'dumbbell',      color: '#3b82f6', bg: '#eff6ff', text: 'High protein dishes' },
+  { icon: 'scale',         color: '#8b5cf6', bg: '#f5f3ff', text: 'Weight loss tips' },
+];
+
 export default function ChatbotScreen() {
-  const [inputText, setInputText] = useState('');
+  const [inputText, setInputText]         = useState('');
   const [keyboardHeight, setKeyboardHeight] = useState(0);
-  const [isRecording, setIsRecording] = useState(false);
+  const [isRecording, setIsRecording]     = useState(false);
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [historyVisible, setHistoryVisible] = useState(false);
   const [pendingMealPlanMessageId, setPendingMealPlanMessageId] = useState<string | null>(null);
-  const [pendingMealPlanMarkdown, setPendingMealPlanMarkdown] = useState<string | null>(null);
+  const [pendingMealPlanMarkdown, setPendingMealPlanMarkdown]   = useState<string | null>(null);
   const [mealPlanSaving, setMealPlanSaving] = useState(false);
-  const recordingRef = useRef<Audio.Recording | null>(null);
+
+  const recordingRef  = useRef<Audio.Recording | null>(null);
   const scrollViewRef = useRef<ScrollView>(null);
-  const inputRef = useRef<TextInput>(null);
+  const inputRef      = useRef<TextInput>(null);
+  const pulseAnim     = useRef(new Animated.Value(1)).current;
+  const pulseLoop     = useRef<Animated.CompositeAnimation | null>(null);
 
   const {
-    messages,
-    isLoading,
-    sessions,
-    addMessage,
-    setLoading,
-    createNewSession,
-    loadSession,
-    deleteSession,
-    initSessions,
+    messages, isLoading, sessions,
+    addMessage, setLoading, createNewSession,
+    loadSession, deleteSession, initSessions,
   } = useChatStore();
 
   const onboardingContext = useContext(OnboardingContext);
-  const authContext = useContext(AuthContext);
+  const authContext       = useContext(AuthContext);
 
   const userContext: UserContext | undefined = useMemo(() => {
     if (!onboardingContext?.onboardingData) return undefined;
@@ -70,54 +67,53 @@ export default function ChatbotScreen() {
     );
   }, [onboardingContext?.onboardingData, authContext?.user?.daily_calorie_goal]);
 
-  // Load saved sessions on mount
-  useEffect(() => {
-    initSessions();
-  }, []);
+  useEffect(() => { initSessions(); }, []);
 
-  // Keyboard listeners
+  /* Keyboard listeners */
   useEffect(() => {
-    const keyboardWillShow = Keyboard.addListener(
+    const show = Keyboard.addListener(
       Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
       (e) => {
         setKeyboardHeight(e.endCoordinates.height);
-        setTimeout(() => {
-          scrollViewRef.current?.scrollToEnd({ animated: true });
-        }, 100);
+        setTimeout(() => scrollViewRef.current?.scrollToEnd({ animated: true }), 100);
       }
     );
-    const keyboardWillHide = Keyboard.addListener(
+    const hide = Keyboard.addListener(
       Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide',
       () => setKeyboardHeight(0)
     );
-    return () => {
-      keyboardWillShow.remove();
-      keyboardWillHide.remove();
-    };
+    return () => { show.remove(); hide.remove(); };
   }, []);
 
-  // Auto-scroll to bottom on new messages
+  /* Auto-scroll on new messages */
   useEffect(() => {
-    if (messages.length > 0) {
-      setTimeout(() => {
-        scrollViewRef.current?.scrollToEnd({ animated: true });
-      }, 150);
-    }
+    if (messages.length > 0)
+      setTimeout(() => scrollViewRef.current?.scrollToEnd({ animated: true }), 150);
   }, [messages]);
 
+  /* Mic pulse animation */
+  useEffect(() => {
+    if (isRecording) {
+      pulseLoop.current = Animated.loop(
+        Animated.sequence([
+          Animated.timing(pulseAnim, { toValue: 1.18, duration: 550, useNativeDriver: true }),
+          Animated.timing(pulseAnim, { toValue: 1,    duration: 550, useNativeDriver: true }),
+        ])
+      );
+      pulseLoop.current.start();
+    } else {
+      pulseLoop.current?.stop();
+      pulseAnim.setValue(1);
+    }
+  }, [isRecording]);
+
+  /* ── Handlers (unchanged logic) ── */
   const handleNewChat = () => {
     if (messages.length === 0) return;
-    Alert.alert(
-      'New Chat',
-      'Start a new conversation? Your current chat will be saved.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'New Chat',
-          onPress: () => createNewSession(),
-        },
-      ]
-    );
+    Alert.alert('New Chat', 'Start a new conversation? Your current chat will be saved.', [
+      { text: 'Cancel', style: 'cancel' },
+      { text: 'New Chat', onPress: () => createNewSession() },
+    ]);
   };
 
   const handleLoadSession = (session: ChatSession) => {
@@ -128,19 +124,14 @@ export default function ChatbotScreen() {
   const handleDeleteSession = (id: string) => {
     Alert.alert('Delete Chat', 'Delete this conversation?', [
       { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Delete',
-        style: 'destructive',
-        onPress: () => deleteSession(id),
-      },
+      { text: 'Delete', style: 'destructive', onPress: () => deleteSession(id) },
     ]);
   };
 
   const formatDate = (iso: string) => {
-    const date = new Date(iso);
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    const date    = new Date(iso);
+    const diffMs  = Date.now() - date.getTime();
+    const diffDays = Math.floor(diffMs / 86_400_000);
     if (diffDays === 0) return 'Today';
     if (diffDays === 1) return 'Yesterday';
     return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
@@ -153,24 +144,16 @@ export default function ChatbotScreen() {
         const uri = recordingRef.current?.getURI();
         recordingRef.current = null;
         setIsRecording(false);
-
         if (!uri) return;
         setIsTranscribing(true);
-
-        const token = await getItem('access_token');
+        const token    = await getItem('access_token');
         const formData = new FormData();
-        formData.append('audio', {
-          uri,
-          type: 'audio/mp4',
-          name: 'voice.m4a',
-        } as any);
-
+        formData.append('audio', { uri, type: 'audio/mp4', name: 'voice.m4a' } as any);
         const res = await fetch(`${API_BASE_URL}/api/chat/transcribe`, {
           method: 'POST',
           headers: { Authorization: `Bearer ${token}` },
           body: formData,
         });
-
         if (res.ok) {
           const data = await res.json();
           if (data.transcript) setInputText(data.transcript);
@@ -186,54 +169,39 @@ export default function ChatbotScreen() {
       }
       return;
     }
-
     const { granted } = await Audio.requestPermissionsAsync();
     if (!granted) {
       Alert.alert('Permission required', 'Microphone permission is needed for voice input.');
       return;
     }
-
     await Audio.setAudioModeAsync({ allowsRecordingIOS: true, playsInSilentModeIOS: true });
-    const { recording } = await Audio.Recording.createAsync(
-      Audio.RecordingOptionsPresets.HIGH_QUALITY
-    );
+    const { recording } = await Audio.Recording.createAsync(Audio.RecordingOptionsPresets.HIGH_QUALITY);
     recordingRef.current = recording;
     setIsRecording(true);
   };
 
   const handleSend = async () => {
     if (!inputText.trim() || isLoading) return;
-
     const userMessage: Message = {
-      id: Crypto.randomUUID(),
-      content: inputText.trim(),
-      sender: 'user',
-      timestamp: new Date(),
+      id: Crypto.randomUUID(), content: inputText.trim(),
+      sender: 'user', timestamp: new Date(),
     };
-
     addMessage(userMessage);
     const currentMessage = inputText.trim();
     setInputText('');
     inputRef.current?.blur();
     setLoading(true);
-
     try {
       const chatHistory = messages.slice(0, -1).map((m) => ({
         role: m.sender === 'user' ? 'user' : 'assistant',
         content: m.content,
       }));
-
       const response = await chatAPI.sendMessage(currentMessage, userContext, true, chatHistory);
-
       const botMessage: Message = {
-        id: Crypto.randomUUID(),
-        content: response.response,
-        sender: 'bot',
-        timestamp: new Date(),
+        id: Crypto.randomUUID(), content: response.response,
+        sender: 'bot', timestamp: new Date(),
       };
-
       addMessage(botMessage);
-
       if (response.intent === 'meal_plan_generation') {
         setPendingMealPlanMessageId(botMessage.id);
         setPendingMealPlanMarkdown(response.response);
@@ -242,16 +210,11 @@ export default function ChatbotScreen() {
         setPendingMealPlanMarkdown(null);
       }
     } catch (error: any) {
-      console.error('Error sending message:', error);
-      Alert.alert(
-        'Error',
-        error.response?.data?.detail || 'Failed to get response. Please try again.'
-      );
+      Alert.alert('Error', error.response?.data?.detail || 'Failed to get response. Please try again.');
       addMessage({
         id: Crypto.randomUUID(),
         content: "I'm sorry, I'm having trouble responding right now. Please try again.",
-        sender: 'bot',
-        timestamp: new Date(),
+        sender: 'bot', timestamp: new Date(),
       });
     } finally {
       setLoading(false);
@@ -268,14 +231,10 @@ export default function ChatbotScreen() {
     setMealPlanSaving(true);
     try {
       const planId = Crypto.randomUUID();
-      const now = new Date().toISOString();
+      const now    = new Date().toISOString();
       const items: MealPlanItem[] = parsed.map((p) => ({
-        id: Crypto.randomUUID(),
-        userId: authContext.user!.id,
-        planId,
-        ...p,
-        logged: false,
-        createdAt: now,
+        id: Crypto.randomUUID(), userId: authContext.user!.id,
+        ...p, planId, logged: false, createdAt: now,
       }));
       await saveMealPlanToFirestore(items);
       useMealPlanStore.getState().addPlanItems(items);
@@ -289,42 +248,40 @@ export default function ChatbotScreen() {
     }
   };
 
+  const canSend = !!inputText.trim() && !isLoading;
+
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView style={styles.safe} edges={['top']}>
       <KeyboardAvoidingView
-        style={styles.keyboardView}
+        style={styles.flex}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         keyboardVerticalOffset={0}
       >
-        {/* Header */}
+        {/* ── Header ── */}
         <View style={styles.header}>
           <TouchableOpacity
-            style={styles.headerAction}
+            style={[styles.headerBtn, messages.length === 0 && { opacity: 0.4 }]}
             onPress={handleNewChat}
             disabled={messages.length === 0}
           >
-            <Ionicons
-              name="add"
-              size={22}
-              color={messages.length === 0 ? Colors.disabled : Colors.primary}
-            />
+            <Ionicons name="add" size={21} color={Colors.primary} />
           </TouchableOpacity>
 
           <View style={styles.headerCenter}>
-            <View style={styles.headerIcon}>
-              <Ionicons name="nutrition" size={20} color={Colors.primary} />
+            <View style={styles.headerAvatarWrap}>
+              <View style={styles.headerAvatar}>
+                <MaterialCommunityIcons name="robot-outline" size={19} color="#fff" />
+              </View>
+              <View style={styles.onlineDot} />
             </View>
             <View>
               <Text style={styles.headerTitle}>SehatGuru</Text>
-              <Text style={styles.headerSubtitle}>Pakistani Nutrition Expert • AI</Text>
+              <Text style={styles.headerSub}>Nutrition Expert · AI</Text>
             </View>
           </View>
 
-          <TouchableOpacity
-            style={styles.headerAction}
-            onPress={() => setHistoryVisible(true)}
-          >
-            <Ionicons name="time-outline" size={22} color={Colors.primary} />
+          <TouchableOpacity style={styles.headerBtn} onPress={() => setHistoryVisible(true)}>
+            <Ionicons name="time-outline" size={21} color={Colors.primary} />
             {sessions.length > 0 && (
               <View style={styles.badge}>
                 <Text style={styles.badgeText}>{sessions.length}</Text>
@@ -333,10 +290,10 @@ export default function ChatbotScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* Messages */}
+        {/* ── Messages ── */}
         <ScrollView
           ref={scrollViewRef}
-          style={styles.messagesContainer}
+          style={styles.messagesList}
           contentContainerStyle={[
             styles.messagesContent,
             { paddingBottom: keyboardHeight > 0 ? 20 : 100 },
@@ -345,33 +302,34 @@ export default function ChatbotScreen() {
           keyboardShouldPersistTaps="handled"
         >
           {messages.length === 0 ? (
-            <View style={styles.emptyState}>
-              <View style={styles.emptyIconContainer}>
-                <Ionicons name="leaf" size={48} color={Colors.primary} />
+            /* ── Empty state ── */
+            <View style={styles.empty}>
+              <View style={styles.emptyAvatarRing}>
+                <View style={styles.emptyAvatarInner}>
+                  <MaterialCommunityIcons name="robot-outline" size={46} color={Colors.primary} />
+                </View>
               </View>
-              <Text style={styles.emptyStateTitle}>SehatGuru</Text>
-              <Text style={styles.emptyStateText}>
-                Get personalized Pakistani nutrition advice based on dietary guidelines
-              </Text>
-              <View style={styles.suggestionContainer}>
-                <Text style={styles.suggestionLabel}>Try asking:</Text>
-                {[
-                  '🍚 How many calories are in biryani?',
-                  '🥗 What should a diabetic person eat?',
-                  '💪 High protein Pakistani dishes for fitness',
-                ].map((suggestion, index) => (
+              <Text style={styles.emptyTitle}>SehatGuru</Text>
+              <Text style={styles.emptySub}>Your Pakistani nutrition expert</Text>
+
+              <Text style={styles.tryLabel}>Try asking</Text>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.chipsRow}
+              >
+                {SUGGESTIONS.map((s, i) => (
                   <TouchableOpacity
-                    key={index}
-                    style={styles.suggestionBubble}
-                    onPress={() => {
-                      setInputText(suggestion.substring(3));
-                      inputRef.current?.focus();
-                    }}
+                    key={i}
+                    style={[styles.chip, { backgroundColor: s.bg }]}
+                    onPress={() => { setInputText(s.text); inputRef.current?.focus(); }}
+                    activeOpacity={0.75}
                   >
-                    <Text style={styles.suggestionText}>{suggestion}</Text>
+                    <MaterialCommunityIcons name={s.icon as any} size={16} color={s.color} />
+                    <Text style={[styles.chipText, { color: s.color }]}>{s.text}</Text>
                   </TouchableOpacity>
                 ))}
-              </View>
+              </ScrollView>
             </View>
           ) : (
             messages.map((message) => (
@@ -391,71 +349,74 @@ export default function ChatbotScreen() {
             ))
           )}
 
+          {/* ── Typing indicator ── */}
           {isLoading && (
-            <View style={styles.loadingContainer}>
-              <View style={styles.loadingBubble}>
-                <View style={styles.dotContainer}>
-                  <View style={[styles.dot, styles.dot1]} />
-                  <View style={[styles.dot, styles.dot2]} />
-                  <View style={[styles.dot, styles.dot3]} />
+            <View style={styles.typingRow}>
+              <View style={styles.typingAvatar}>
+                <MaterialCommunityIcons name="robot-outline" size={13} color="#fff" />
+              </View>
+              <View style={styles.typingBubble}>
+                <View style={styles.dots}>
+                  <View style={[styles.dot, { opacity: 0.4 }]} />
+                  <View style={[styles.dot, { opacity: 0.65 }]} />
+                  <View style={[styles.dot, { opacity: 0.9 }]} />
                 </View>
               </View>
             </View>
           )}
         </ScrollView>
 
-        {/* Input bar */}
-        <View style={styles.inputContainer}>
-          <View style={styles.inputWrapper}>
+        {/* ── Input bar ── */}
+        <View style={styles.inputBar}>
+          <View style={styles.inputPill}>
             <TextInput
               ref={inputRef}
               style={styles.input}
               value={inputText}
               onChangeText={setInputText}
-              placeholder="Ask me anything..."
+              placeholder="Ask me anything…"
               placeholderTextColor={Colors.placeholder}
               multiline
               maxLength={2000}
               editable={!isLoading}
-              onFocus={() => {
-                setTimeout(() => {
-                  scrollViewRef.current?.scrollToEnd({ animated: true });
-                }, 200);
-              }}
-            />
-            <TouchableOpacity
-              style={[styles.micButton, isRecording && styles.micButtonActive]}
-              onPress={handleMicPress}
-              disabled={isLoading || isTranscribing}
-            >
-              {isTranscribing
-                ? <ActivityIndicator size="small" color={Colors.primary} />
-                : <Ionicons
-                    name={isRecording ? 'stop' : 'mic'}
-                    size={18}
-                    color={isRecording ? '#FFFFFF' : Colors.primary}
-                  />
+              onFocus={() =>
+                setTimeout(() => scrollViewRef.current?.scrollToEnd({ animated: true }), 200)
               }
-            </TouchableOpacity>
+            />
+
+            {/* Mic button — pulses when recording */}
+            <Animated.View style={{ transform: [{ scale: pulseAnim }] }}>
+              <TouchableOpacity
+                style={[styles.micBtn, isRecording && styles.micBtnActive]}
+                onPress={handleMicPress}
+                disabled={isLoading || isTranscribing}
+                activeOpacity={0.8}
+              >
+                {isTranscribing
+                  ? <ActivityIndicator size="small" color={Colors.primary} />
+                  : <Ionicons
+                      name={isRecording ? 'stop' : 'mic'}
+                      size={18}
+                      color={isRecording ? '#fff' : Colors.primary}
+                    />
+                }
+              </TouchableOpacity>
+            </Animated.View>
+
+            {/* Send button */}
             <TouchableOpacity
-              style={[
-                styles.sendButton,
-                (!inputText.trim() || isLoading) && styles.sendButtonDisabled,
-              ]}
+              style={[styles.sendBtn, !canSend && styles.sendBtnDisabled]}
               onPress={handleSend}
-              disabled={!inputText.trim() || isLoading}
+              disabled={!canSend}
+              activeOpacity={0.85}
             >
-              <Ionicons
-                name="send"
-                size={18}
-                color={!inputText.trim() || isLoading ? Colors.disabled : '#FFFFFF'}
-              />
+              <Ionicons name="send" size={17} color={canSend ? '#fff' : Colors.disabled} />
             </TouchableOpacity>
           </View>
         </View>
       </KeyboardAvoidingView>
 
-      {/* History Modal */}
+      {/* ── History bottom sheet ── */}
       <Modal
         visible={historyVisible}
         animationType="slide"
@@ -463,22 +424,23 @@ export default function ChatbotScreen() {
         onRequestClose={() => setHistoryVisible(false)}
       >
         <TouchableOpacity
-          style={styles.modalOverlay}
+          style={styles.modalBackdrop}
           activeOpacity={1}
           onPress={() => setHistoryVisible(false)}
         />
-        <View style={styles.bottomSheet}>
+        <View style={styles.sheet}>
           <View style={styles.sheetHandle} />
+
           <View style={styles.sheetHeader}>
             <Text style={styles.sheetTitle}>Previous Chats</Text>
-            <Text style={styles.sheetSubtitle}>
-              {sessions.length} of {5} saved
-            </Text>
+            <View style={styles.sheetCountPill}>
+              <Text style={styles.sheetCountText}>{sessions.length} / 5</Text>
+            </View>
           </View>
 
           {sessions.length === 0 ? (
             <View style={styles.emptyHistory}>
-              <Ionicons name="chatbubbles-outline" size={40} color={Colors.disabled} />
+              <MaterialCommunityIcons name="chat-outline" size={40} color={Colors.disabled} />
               <Text style={styles.emptyHistoryText}>No saved chats yet</Text>
             </View>
           ) : (
@@ -488,23 +450,21 @@ export default function ChatbotScreen() {
               contentContainerStyle={{ paddingBottom: 24 }}
               renderItem={({ item }) => (
                 <TouchableOpacity
-                  style={styles.sessionCard}
+                  style={styles.sessionRow}
                   onPress={() => handleLoadSession(item)}
                   activeOpacity={0.7}
                 >
                   <View style={styles.sessionIcon}>
-                    <Ionicons name="chatbubble-ellipses-outline" size={18} color={Colors.primary} />
+                    <MaterialCommunityIcons name="robot-outline" size={17} color={Colors.primary} />
                   </View>
                   <View style={styles.sessionInfo}>
-                    <Text style={styles.sessionTitle} numberOfLines={1}>
-                      {item.title}
-                    </Text>
+                    <Text style={styles.sessionTitle} numberOfLines={1}>{item.title}</Text>
                     <Text style={styles.sessionMeta}>
-                      {item.messages.length} messages • {formatDate(item.updatedAt)}
+                      {item.messages.length} messages · {formatDate(item.updatedAt)}
                     </Text>
                   </View>
                   <TouchableOpacity
-                    style={styles.deleteButton}
+                    style={styles.sessionDelete}
                     onPress={() => handleDeleteSession(item.id)}
                     hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                   >
@@ -521,318 +481,180 @@ export default function ChatbotScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#F8FAFB',
-  },
-  keyboardView: {
-    flex: 1,
-  },
+  safe: { flex: 1, backgroundColor: '#F3F6FA' },
+  flex: { flex: 1 },
+
+  /* ── Header ── */
   header: {
-    backgroundColor: Colors.backgroundLight,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.borderLight,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    shadowColor: Colors.shadow,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.03,
-    shadowRadius: 8,
-    elevation: 2,
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    backgroundColor: '#F3F6FA',
+    paddingVertical: 10, paddingHorizontal: 14,
   },
-  headerAction: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
+  headerBtn: {
+    width: 38, height: 38, borderRadius: 12,
     backgroundColor: `${Colors.primary}12`,
-    justifyContent: 'center',
-    alignItems: 'center',
+    alignItems: 'center', justifyContent: 'center',
   },
-  headerCenter: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
+  headerCenter: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  headerAvatarWrap: { position: 'relative' },
+  headerAvatar: {
+    width: 38, height: 38, borderRadius: 19,
+    backgroundColor: Colors.primary,
+    alignItems: 'center', justifyContent: 'center',
+    shadowColor: Colors.primary, shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.3, shadowRadius: 6, elevation: 4,
   },
-  headerIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: `${Colors.primary}15`,
-    justifyContent: 'center',
-    alignItems: 'center',
+  onlineDot: {
+    position: 'absolute', bottom: 0, right: 0,
+    width: 11, height: 11, borderRadius: 6,
+    backgroundColor: '#4ade80',
+    borderWidth: 2, borderColor: '#fff',
   },
-  headerTitle: {
-    fontSize: 17,
-    fontWeight: '700',
-    color: Colors.textPrimary,
-    letterSpacing: -0.3,
-  },
-  headerSubtitle: {
-    fontSize: 11,
-    color: Colors.textLight,
-    marginTop: 1,
-    fontWeight: '500',
-  },
+  headerTitle: { fontSize: 16, fontWeight: '800', fontFamily: Fonts.extrabold, color: '#111', letterSpacing: -0.2 },
+  headerSub:   { fontSize: 11, color: Colors.placeholder, marginTop: 1, fontWeight: '500', fontFamily: Fonts.medium },
   badge: {
-    position: 'absolute',
-    top: -2,
-    right: -2,
-    backgroundColor: Colors.primary,
-    borderRadius: 8,
-    minWidth: 16,
-    height: 16,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 3,
+    position: 'absolute', top: -3, right: -3,
+    backgroundColor: Colors.primary, borderRadius: 8,
+    minWidth: 16, height: 16,
+    alignItems: 'center', justifyContent: 'center', paddingHorizontal: 3,
   },
-  badgeText: {
-    color: '#fff',
-    fontSize: 10,
-    fontWeight: '700',
+  badgeText: { color: '#fff', fontSize: 10, fontWeight: '700', fontFamily: Fonts.bold },
+
+  /* ── Messages ── */
+  messagesList:   { flex: 1 },
+  messagesContent:{ paddingTop: 20, flexGrow: 1 },
+
+  /* ── Empty state ── */
+  empty: {
+    flex: 1, alignItems: 'center', justifyContent: 'center',
+    paddingHorizontal: 24, paddingTop: 40,
   },
-  messagesContainer: {
-    flex: 1,
-  },
-  messagesContent: {
-    paddingTop: 20,
-    flexGrow: 1,
-  },
-  emptyState: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 32,
-  },
-  emptyIconContainer: {
-    width: 84,
-    height: 84,
-    borderRadius: 42,
-    backgroundColor: `${Colors.primary}12`,
-    justifyContent: 'center',
-    alignItems: 'center',
+  emptyAvatarRing: {
+    width: 100, height: 100, borderRadius: 50,
+    borderWidth: 2.5, borderColor: `${Colors.primary}30`,
+    alignItems: 'center', justifyContent: 'center',
     marginBottom: 20,
+    shadowColor: Colors.primary, shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.12, shadowRadius: 16, elevation: 5,
   },
-  emptyStateTitle: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: Colors.textPrimary,
-    marginBottom: 8,
-    letterSpacing: -0.5,
+  emptyAvatarInner: {
+    width: 82, height: 82, borderRadius: 41,
+    backgroundColor: `${Colors.primary}10`,
+    alignItems: 'center', justifyContent: 'center',
   },
-  emptyStateText: {
-    fontSize: 15,
-    color: Colors.textSecondary,
-    textAlign: 'center',
-    lineHeight: 22,
-    marginBottom: 32,
+  emptyTitle:  { fontSize: 26, fontWeight: '800', fontFamily: Fonts.extrabold, color: '#111', letterSpacing: -0.5 },
+  emptySub:    { fontSize: 14, color: Colors.placeholder, marginTop: 6, marginBottom: 32, fontFamily: Fonts.regular },
+  tryLabel:    { fontSize: 12, fontWeight: '700', fontFamily: Fonts.bold, color: '#9ca3af', letterSpacing: 0.8, marginBottom: 14, textTransform: 'uppercase' },
+  chipsRow:    { gap: 10, paddingHorizontal: 4, paddingBottom: 4 },
+  chip: {
+    flexDirection: 'row', alignItems: 'center', gap: 8,
+    paddingHorizontal: 14, paddingVertical: 11,
+    borderRadius: 22,
+    shadowColor: '#000', shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05, shadowRadius: 4, elevation: 1,
   },
-  suggestionContainer: {
-    width: '100%',
-    alignItems: 'stretch',
+  chipText: { fontSize: 13, fontWeight: '600', fontFamily: Fonts.semibold },
+
+  /* ── Typing indicator ── */
+  typingRow: {
+    flexDirection: 'row', alignItems: 'flex-end',
+    paddingHorizontal: 14, paddingVertical: 8, gap: 8,
   },
-  suggestionLabel: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: Colors.textSecondary,
-    marginBottom: 12,
-    textAlign: 'center',
-  },
-  suggestionBubble: {
-    backgroundColor: Colors.backgroundLight,
-    paddingVertical: 14,
-    paddingHorizontal: 18,
-    borderRadius: 14,
-    marginBottom: 10,
-    borderWidth: 1,
-    borderColor: Colors.borderLight,
-    shadowColor: Colors.shadow,
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.04,
-    shadowRadius: 4,
-    elevation: 1,
-  },
-  suggestionText: {
-    fontSize: 14,
-    color: Colors.textPrimary,
-    fontWeight: '500',
-  },
-  loadingContainer: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    alignItems: 'flex-start',
-  },
-  loadingBubble: {
-    backgroundColor: Colors.backgroundLight,
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: Colors.borderLight,
-    borderBottomLeftRadius: 6,
-  },
-  dotContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  dot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
+  typingAvatar: {
+    width: 26, height: 26, borderRadius: 13,
     backgroundColor: Colors.primary,
+    alignItems: 'center', justifyContent: 'center',
+    shadowColor: Colors.primary, shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3, shadowRadius: 4, elevation: 3,
   },
-  dot1: { opacity: 0.4 },
-  dot2: { opacity: 0.6 },
-  dot3: { opacity: 0.8 },
-  inputContainer: {
-    backgroundColor: Colors.backgroundLight,
-    borderTopWidth: 1,
-    borderTopColor: Colors.borderLight,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    paddingBottom: Platform.OS === 'ios' ? 12 : 16,
-    shadowColor: Colors.shadow,
-    shadowOffset: { width: 0, height: -2 },
-    shadowOpacity: 0.03,
-    shadowRadius: 8,
-    elevation: 8,
+  typingBubble: {
+    backgroundColor: '#fff', paddingHorizontal: 18, paddingVertical: 16,
+    borderRadius: 20, borderBottomLeftRadius: 5,
+    borderWidth: 1, borderColor: '#eef0f3',
+    shadowColor: '#000', shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.06, shadowRadius: 6, elevation: 2,
   },
-  inputWrapper: {
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-    backgroundColor: Colors.background,
-    borderRadius: 24,
-    paddingHorizontal: 4,
-    paddingVertical: 4,
-    borderWidth: 1,
-    borderColor: Colors.borderLight,
+  dots: { flexDirection: 'row', gap: 5, alignItems: 'center' },
+  dot:  { width: 8, height: 8, borderRadius: 4, backgroundColor: Colors.primary },
+
+  /* ── Input bar ── */
+  inputBar: {
+    backgroundColor: '#fff',
+    borderTopWidth: 1, borderTopColor: '#f0f0f0',
+    paddingHorizontal: 14, paddingVertical: 10,
+    paddingBottom: Platform.OS === 'ios' ? 10 : 14,
+    shadowColor: '#000', shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.04, shadowRadius: 8, elevation: 8,
+  },
+  inputPill: {
+    flexDirection: 'row', alignItems: 'flex-end',
+    backgroundColor: '#F3F6FA',
+    borderRadius: 26, borderWidth: 1, borderColor: '#e5e7eb',
+    paddingHorizontal: 6, paddingVertical: 6, gap: 4,
   },
   input: {
-    flex: 1,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    fontSize: 15,
-    maxHeight: 100,
-    color: Colors.textPrimary,
-    lineHeight: 20,
+    flex: 1, paddingHorizontal: 12, paddingVertical: 8,
+    fontSize: 15, maxHeight: 100,
+    color: Colors.textPrimary, lineHeight: 20, fontFamily: Fonts.regular,
   },
-  sendButton: {
+  micBtn: {
+    width: 38, height: 38, borderRadius: 19,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  micBtnActive: { backgroundColor: '#ef4444' },
+  sendBtn: {
+    width: 40, height: 40, borderRadius: 20,
     backgroundColor: Colors.primary,
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: Colors.primary,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 3,
+    alignItems: 'center', justifyContent: 'center',
+    shadowColor: Colors.primary, shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.35, shadowRadius: 6, elevation: 4,
   },
-  sendButtonDisabled: {
-    backgroundColor: Colors.borderLight,
-    shadowOpacity: 0,
-    elevation: 0,
+  sendBtnDisabled: {
+    backgroundColor: '#e5e7eb',
+    shadowOpacity: 0, elevation: 0,
   },
-  micButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 4,
+
+  /* ── History modal ── */
+  modalBackdrop: {
+    flex: 1, backgroundColor: 'rgba(0,0,0,0.4)',
   },
-  micButtonActive: {
-    backgroundColor: '#ef4444',
-  },
-  // Modal / Bottom Sheet
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
-  },
-  bottomSheet: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: Colors.backgroundLight,
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    paddingTop: 12,
-    maxHeight: '60%',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: -4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 16,
-    elevation: 20,
+  sheet: {
+    position: 'absolute', bottom: 0, left: 0, right: 0,
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 26, borderTopRightRadius: 26,
+    paddingTop: 12, maxHeight: '60%',
+    shadowColor: '#000', shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.1, shadowRadius: 16, elevation: 20,
   },
   sheetHandle: {
-    width: 40,
-    height: 4,
-    backgroundColor: Colors.borderLight,
-    borderRadius: 2,
-    alignSelf: 'center',
-    marginBottom: 16,
+    width: 40, height: 4, borderRadius: 2, backgroundColor: '#e5e7eb',
+    alignSelf: 'center', marginBottom: 16,
   },
   sheetHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    marginBottom: 12,
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    paddingHorizontal: 20, marginBottom: 12,
   },
-  sheetTitle: {
-    fontSize: 17,
-    fontWeight: '700',
-    color: Colors.textPrimary,
+  sheetTitle:     { fontSize: 17, fontWeight: '800', fontFamily: Fonts.extrabold, color: '#111' },
+  sheetCountPill: {
+    backgroundColor: `${Colors.primary}15`,
+    paddingHorizontal: 10, paddingVertical: 4, borderRadius: 20,
   },
-  sheetSubtitle: {
-    fontSize: 13,
-    color: Colors.textLight,
-  },
-  emptyHistory: {
-    alignItems: 'center',
-    paddingVertical: 40,
-    gap: 12,
-  },
-  emptyHistoryText: {
-    fontSize: 15,
-    color: Colors.textLight,
-  },
-  sessionCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 14,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.borderLight,
-    gap: 12,
+  sheetCountText: { fontSize: 12, fontWeight: '700', fontFamily: Fonts.bold, color: Colors.primary },
+  emptyHistory:   { alignItems: 'center', paddingVertical: 40, gap: 10 },
+  emptyHistoryText:{ fontSize: 15, color: Colors.textLight, fontFamily: Fonts.regular },
+
+  sessionRow: {
+    flexDirection: 'row', alignItems: 'center',
+    paddingHorizontal: 20, paddingVertical: 14,
+    borderBottomWidth: 1, borderBottomColor: '#f3f4f6', gap: 12,
   },
   sessionIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 38, height: 38, borderRadius: 12,
     backgroundColor: `${Colors.primary}12`,
-    justifyContent: 'center',
-    alignItems: 'center',
+    alignItems: 'center', justifyContent: 'center',
   },
-  sessionInfo: {
-    flex: 1,
-  },
-  sessionTitle: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: Colors.textPrimary,
-    marginBottom: 3,
-  },
-  sessionMeta: {
-    fontSize: 12,
-    color: Colors.textLight,
-  },
-  deleteButton: {
-    padding: 4,
-  },
+  sessionInfo:   { flex: 1 },
+  sessionTitle:  { fontSize: 14, fontWeight: '600', color: '#111', marginBottom: 3 },
+  sessionMeta:   { fontSize: 12, color: Colors.textLight, fontFamily: Fonts.regular },
+  sessionDelete: { padding: 4 },
 });

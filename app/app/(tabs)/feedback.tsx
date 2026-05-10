@@ -11,7 +11,9 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
 
+import { Fonts } from '../../constants/fonts';
 import { feedbackAPI } from '../../services/feedback.api';
 import { FeedbackSection, FeedbackSubmissionPayload } from '../../types/feedback.types';
 
@@ -157,6 +159,7 @@ const buildSections = (): FeedbackSection[] => [
 ];
 
 export default function FeedbackScreen() {
+  const router = useRouter();
   const [sections, setSections] = useState<FeedbackSection[]>(() => buildSections());
   const [comment, setComment] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -241,7 +244,16 @@ export default function FeedbackScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <SafeAreaView style={styles.safe} edges={['top']}>
+      {/* ── Header ── */}
+      <View style={styles.navHeader}>
+        <TouchableOpacity onPress={() => router.push('/(tabs)/profile')} style={styles.backBtn} activeOpacity={0.7}>
+          <Ionicons name="chevron-back" size={22} color="#111" />
+        </TouchableOpacity>
+        <Text style={styles.navTitle}>Send Feedback</Text>
+        <View style={styles.backBtn} />
+      </View>
+
       <ScrollView style={styles.scroll} contentContainerStyle={styles.container}>
         <View style={styles.heroCard}>
           <Text style={styles.heroTitle}>Help Us Improve SehatGuru</Text>
@@ -366,8 +378,15 @@ export default function FeedbackScreen() {
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: '#F3F6FA' },
+  navHeader: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    paddingHorizontal: 12, paddingVertical: 10,
+    backgroundColor: '#F3F6FA',
+  },
+  backBtn: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
+  navTitle: { fontSize: 17, fontWeight: '700', fontFamily: Fonts.bold, color: '#111' },
   scroll: { flex: 1, backgroundColor: '#F3F6FA' },
-  container: { paddingHorizontal: 18, paddingTop: 20, paddingBottom: 32 },
+  container: { paddingHorizontal: 18, paddingTop: 8, paddingBottom: 32 },
   heroCard: {
     backgroundColor: '#ecfdf5',
     borderRadius: 24,
@@ -376,8 +395,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#bbf7d0',
   },
-  heroTitle: { fontSize: 24, fontWeight: '800', color: '#14532d', marginBottom: 8 },
-  heroSubtitle: { fontSize: 14, lineHeight: 21, color: '#166534' },
+  heroTitle: { fontSize: 24, fontWeight: '800', fontFamily: Fonts.extrabold, color: '#14532d', marginBottom: 8 },
+  heroSubtitle: { fontSize: 14, fontFamily: Fonts.regular, lineHeight: 21, color: '#166534' },
   progressRow: {
     marginTop: 18,
     flexDirection: 'row',
@@ -389,11 +408,12 @@ const styles = StyleSheet.create({
   progressLabel: {
     fontSize: 11,
     fontWeight: '700',
+    fontFamily: Fonts.bold,
     textTransform: 'uppercase',
     letterSpacing: 1,
     color: '#16a34a',
   },
-  progressValue: { marginTop: 4, fontSize: 16, fontWeight: '700', color: '#14532d' },
+  progressValue: { marginTop: 4, fontSize: 16, fontWeight: '700', fontFamily: Fonts.bold, color: '#14532d' },
   progressPill: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -403,7 +423,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 999,
   },
-  progressPillText: { fontSize: 12, fontWeight: '700', color: '#166534' },
+  progressPillText: { fontSize: 12, fontWeight: '700', fontFamily: Fonts.bold, color: '#166534' },
   sectionCard: {
     backgroundColor: '#fff',
     borderRadius: 20,
@@ -417,15 +437,15 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 2,
   },
-  sectionTitle: { fontSize: 18, fontWeight: '800', color: '#111827' },
-  sectionDescription: { fontSize: 13, color: '#64748b', marginTop: 4, lineHeight: 19 },
+  sectionTitle: { fontSize: 18, fontWeight: '800', fontFamily: Fonts.extrabold, color: '#111827' },
+  sectionDescription: { fontSize: 13, fontFamily: Fonts.regular, color: '#64748b', marginTop: 4, lineHeight: 19 },
   questionBlock: {
     marginTop: 16,
     paddingTop: 16,
     borderTopWidth: 1,
     borderTopColor: '#f1f5f9',
   },
-  questionText: { fontSize: 15, lineHeight: 22, fontWeight: '600', color: '#1f2937' },
+  questionText: { fontSize: 15, lineHeight: 22, fontWeight: '600', fontFamily: Fonts.semibold, color: '#1f2937' },
   ratingRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -446,9 +466,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#16a34a',
     borderColor: '#16a34a',
   },
-  ratingChipNumber: { fontSize: 16, fontWeight: '800', color: '#0f172a' },
+  ratingChipNumber: { fontSize: 16, fontWeight: '800', fontFamily: Fonts.extrabold, color: '#0f172a' },
   ratingChipNumberSelected: { color: '#fff' },
-  ratingChipLabel: { marginTop: 2, fontSize: 10, fontWeight: '700', color: '#64748b' },
+  ratingChipLabel: { marginTop: 2, fontSize: 10, fontWeight: '700', fontFamily: Fonts.bold, color: '#64748b' },
   ratingChipLabelSelected: { color: '#dcfce7' },
   commentInput: {
     marginTop: 14,
@@ -460,6 +480,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 14,
     fontSize: 14,
+    fontFamily: Fonts.regular,
     color: '#0f172a',
   },
   improvementBlock: {
@@ -472,6 +493,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 20,
     fontWeight: '700',
+    fontFamily: Fonts.bold,
     color: '#1f2937',
   },
   improvementInput: {
@@ -484,6 +506,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 14,
     fontSize: 14,
+    fontFamily: Fonts.regular,
     color: '#0f172a',
   },
   submitButton: {
@@ -504,6 +527,6 @@ const styles = StyleSheet.create({
   submitButtonDisabled: {
     opacity: 0.7,
   },
-  submitButtonText: { fontSize: 16, fontWeight: '800', color: '#fff' },
+  submitButtonText: { fontSize: 16, fontWeight: '800', fontFamily: Fonts.extrabold, color: '#fff' },
   bottomSpacer: { height: 18 },
 });

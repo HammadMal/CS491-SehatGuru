@@ -13,6 +13,7 @@ import {
 } from "react-native";
 import React, { useState, useEffect } from "react";
 import { Ionicons } from "@expo/vector-icons";
+import { Fonts } from '../constants/fonts';
 
 const MEAL_TYPES = ["Breakfast", "Lunch", "Dinner", "Snack"];
 
@@ -293,7 +294,7 @@ const styles = StyleSheet.create({
     alignSelf: "flex-start",
   },
 
-  mealTypeText: { fontSize: 14, color: "#444", marginRight: 6 },
+  mealTypeText: { fontSize: 14, color: "#444", marginRight: 6, fontFamily: Fonts.regular },
 
   dropdown: {
     position: 'absolute',
@@ -313,7 +314,7 @@ const styles = StyleSheet.create({
 
   dropdownItem: { paddingVertical: 10, paddingHorizontal: 12 },
 
-  dropdownItemText: { fontSize: 14, color: "#333" },
+  dropdownItemText: { fontSize: 14, color: "#333", fontFamily: Fonts.regular },
 
   foodNameRow: {
     flexDirection: "row",
@@ -322,7 +323,7 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
 
-  foodName: { fontSize: 20, fontWeight: "700" },
+  foodName: { fontSize: 20, fontWeight: "700", fontFamily: Fonts.bold },
 
   gramsRow: {
     flexDirection: "row",
@@ -335,6 +336,7 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     marginRight: 10,
     color: "#444",
+    fontFamily: Fonts.semibold,
   },
 
   gramsInput: {
@@ -346,6 +348,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: "600",
     textAlign: "center",
+    fontFamily: Fonts.semibold,
   },
 
   calorieContainer: {
@@ -354,9 +357,9 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
 
-  calories: { fontSize: 34, fontWeight: "700", marginLeft: 8, marginRight: 4 },
+  calories: { fontSize: 34, fontWeight: "700", marginLeft: 8, marginRight: 4, fontFamily: Fonts.bold },
 
-  calText: { fontSize: 16, fontWeight: "500", marginTop: 6 },
+  calText: { fontSize: 16, fontWeight: "500", marginTop: 6, fontFamily: Fonts.medium },
 
   macrosRow: {
     flexDirection: "row",
@@ -374,9 +377,9 @@ const styles = StyleSheet.create({
     width: "23%",
   },
 
-  macroLabel: { fontSize: 13, color: "#555" },
+  macroLabel: { fontSize: 13, color: "#555", fontFamily: Fonts.regular },
 
-  macroValue: { fontSize: 15, fontWeight: "600", marginTop: 2 },
+  macroValue: { fontSize: 15, fontWeight: "600", marginTop: 2, fontFamily: Fonts.semibold },
 
   btnColumn: { width: "100%", marginTop: 12, gap: 12 },
 
@@ -394,6 +397,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
     marginLeft: 6,
+    fontFamily: Fonts.semibold,
   },
 
   manualBtn: {
@@ -410,6 +414,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
     marginLeft: 6,
+    fontFamily: Fonts.semibold,
   },
 
   doneBtn: {
@@ -429,12 +434,14 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     marginTop: 14,
     color: "#1f2937",
+    fontFamily: Fonts.bold,
   },
 
   loadingSubtitle: {
     fontSize: 14,
     color: "#6b7280",
     marginTop: 6,
+    fontFamily: Fonts.regular,
   },
 
   errorState: {
@@ -449,6 +456,7 @@ errorTitle: {
   fontWeight: "700",
   color: "#1f2937",
   marginTop: 10,
+  fontFamily: Fonts.bold,
 },
 
 errorSubtitle: {
@@ -456,9 +464,10 @@ errorSubtitle: {
   color: "#6b7280",
   textAlign: "center",
   marginBottom: 20,
+  fontFamily: Fonts.regular,
 },
 
 
 
-  doneText: { color: "white", fontSize: 17, fontWeight: "700" },
+  doneText: { color: "white", fontSize: 17, fontWeight: "700", fontFamily: Fonts.bold },
 });
