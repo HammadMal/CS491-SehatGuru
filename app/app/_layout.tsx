@@ -4,6 +4,16 @@ import { AuthProvider } from '../context/AuthContext';
 import { OnboardingProvider } from '../context/OnboardingContext';
 import { useAuth } from '../hooks/useAuth';
 import { useEffect } from 'react';
+import { LogBox } from 'react-native';
+import { notificationService } from '../services/notification.service';
+import { useNotificationStore } from '../store/useNotificationStore';
+
+// Suppress Expo Go push notification warnings — local notifications still work fine.
+// These warnings are only relevant for remote (FCM) push, removed from Expo Go in SDK 53.
+LogBox.ignoreLogs([
+  'expo-notifications: Android Push notifications',
+  '`expo-notifications` functionality is not fully supported in Expo Go',
+]);
 import { useFonts } from 'expo-font';
 import {
   Outfit_400Regular,
@@ -27,6 +37,19 @@ if (!Text.defaultProps) (Text as any).defaultProps = {};
 function RootLayoutNav() {
   const { isAuthenticated, isLoading, hasCompletedOnboarding, hasAcceptedConsent } = useAuth();
   const segments = useSegments();
+  const router = useRouter();
+  const loadNotificationPrefs = useNotificationStore((s) => s.loadPreferences);
+
+  // Initialize notifications on app start
+  useEffect(() => {
+    notificationService.initialize();
+  }, []);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      loadNotificationPrefs();
+    }
+  }, [isAuthenticated]);
   const router   = useRouter();
 
   useEffect(() => {
@@ -53,6 +76,30 @@ function RootLayoutNav() {
       if (!isOnboarding) router.replace('/(onboarding)/basic-info');
       return;
     }
+
+    // ===== 4. User finished onboarding =====
+    const allowedScreens = ['(tabs)', 'manual', 'analytics', 'edit-profile', 'custom-dish', 'notification-settings'];
+    if (!allowedScreens.includes(segment)) {
+      router.replace('/(tabs)');
+    }
+  }, [
+    isAuthenticated,
+    isLoading,
+    hasCompletedOnboarding,
+    hasAcceptedConsent,
+    segments,
+    router
+  ]);
+
+  return (
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="(auth)" />
+      <Stack.Screen name="(onboarding)" />
+      <Stack.Screen name="(tabs)" />
+      <Stack.Screen name="manual" />
+      <Stack.Screen name="analytics" />
+      <Stack.Screen name="custom-dish" />
+      <Stack.Screen name="notification-settings" />
     const allowed = ['(tabs)', 'manual', 'analytics', 'edit-profile', 'custom-dish'];
     if (!allowed.includes(segment)) router.replace('/(tabs)');
   }, [isAuthenticated, isLoading, hasCompletedOnboarding, hasAcceptedConsent, segments, router]);

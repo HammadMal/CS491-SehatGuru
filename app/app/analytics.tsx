@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   Dimensions,
 } from "react-native";
+import { useRef } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useMealStore } from "../store/useMealStore";
@@ -17,11 +18,12 @@ const { width } = Dimensions.get("window");
 
 export default function Analytics() {
   const meals = useMealStore((s) => s.meals);
+  const chartScrollRef = useRef<ScrollView>(null);
 
-  // Get last 7 days of data
-  const last7Days = useMemo(() => {
+  // Get last 30 days of data
+  const last30Days = useMemo(() => {
     const days = [];
-    for (let i = 6; i >= 0; i--) {
+    for (let i = 29; i >= 0; i--) {
       const date = new Date();
       date.setDate(date.getDate() - i);
       days.push(date);
@@ -36,9 +38,9 @@ export default function Analytics() {
     return d1.getTime() === d2.getTime();
   };
 
-  // Calculate daily totals for the last 7 days
+  // Calculate daily totals for the last 30 days
   const dailyData = useMemo(() => {
-    return last7Days.map((date) => {
+    return last30Days.map((date) => {
       const dayMeals = meals.filter((meal) => {
         const mealDate = new Date(meal.createdAt);
         return isSameDay(mealDate, date);
@@ -53,21 +55,22 @@ export default function Analytics() {
         mealCount: dayMeals.length,
       };
     });
-  }, [meals, last7Days]);
+  }, [meals, last30Days]);
 
   // Overall statistics
   const totalMeals = meals.length;
+  const daysWithData = dailyData.filter((d) => d.mealCount > 0).length || 1;
   const avgCalories = Math.round(
-    dailyData.reduce((sum, day) => sum + day.calories, 0) / 7
+    dailyData.reduce((sum, day) => sum + day.calories, 0) / daysWithData
   );
   const avgProtein = (
-    dailyData.reduce((sum, day) => sum + day.protein, 0) / 7
+    dailyData.reduce((sum, day) => sum + day.protein, 0) / daysWithData
   ).toFixed(1);
   const avgCarbs = (
-    dailyData.reduce((sum, day) => sum + day.carbs, 0) / 7
+    dailyData.reduce((sum, day) => sum + day.carbs, 0) / daysWithData
   ).toFixed(1);
   const avgFat = (
-    dailyData.reduce((sum, day) => sum + day.fat, 0) / 7
+    dailyData.reduce((sum, day) => sum + day.fat, 0) / daysWithData
   ).toFixed(1);
 
   // Meal type distribution
@@ -108,7 +111,7 @@ export default function Analytics() {
       <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false}>
         {/* Weekly Overview */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>7-Day Average</Text>
+          <Text style={styles.sectionTitle}>30-Day Average</Text>
           <View style={styles.statsGrid}>
             <StatCard
               label="Avg Calories"
@@ -139,8 +142,16 @@ export default function Analytics() {
 
         {/* Calorie Chart */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Daily Calories (Last 7 Days)</Text>
-          <View style={styles.chartContainer}>
+          <Text style={styles.sectionTitle}>Daily Calories (Last 30 Days)</Text>
+          <ScrollView
+            ref={chartScrollRef}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.chartContainer}
+            onContentSizeChange={() =>
+              chartScrollRef.current?.scrollToEnd({ animated: false })
+            }
+          >
             {dailyData.map((day, index) => {
               const barHeight = (day.calories / maxCalories) * 150;
               return (
@@ -157,12 +168,12 @@ export default function Analytics() {
                     />
                   </View>
                   <Text style={styles.barLabel}>
-                    {day.date.toLocaleDateString("en-US", { weekday: "short" })}
+                    {day.date.toLocaleDateString("en-US", { day: "numeric", month: "short" })}
                   </Text>
                 </View>
               );
             })}
-          </View>
+          </ScrollView>
         </View>
 
         {/* Meal Distribution */}
@@ -314,19 +325,20 @@ const styles = StyleSheet.create({
   chartContainer: {
     backgroundColor: "#fff",
     borderRadius: 16,
-    padding: 20,
+    paddingVertical: 20,
+    paddingHorizontal: 10,
     flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "flex-end",
+    gap: 4,
   },
 
   barContainer: {
-    flex: 1,
+    width: 36,
     alignItems: "center",
   },
 
   barValue: {
-    fontSize: 11,
+    fontSize: 8,
     fontWeight: "600",
     color: "#111",
     marginBottom: 4,
@@ -341,13 +353,13 @@ const styles = StyleSheet.create({
   },
 
   bar: {
-    width: 28,
+    width: 20,
     backgroundColor: "#22c55e",
     borderRadius: 4,
   },
 
   barLabel: {
-    fontSize: 11,
+    fontSize: 8,
     color: "#666",
     marginTop: 8,
     fontFamily: Fonts.regular,

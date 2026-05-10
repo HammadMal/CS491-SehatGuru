@@ -116,10 +116,10 @@ export default function Dashboard() {
   }, {} as Record<MealType, Meal[]>);
 
   const MEAL_META: Record<string, { icon: any; color: string; bg: string }> = {
-    Breakfast: { icon: "sunny-outline", color: "#f59e0b", bg: "#fffbeb" },
-    Lunch: { icon: "restaurant-outline", color: "#22c55e", bg: "#f0fdf4" },
-    Dinner: { icon: "moon-outline", color: "#6366f1", bg: "#eef2ff" },
-    Snack: { icon: "cafe-outline", color: "#ec4899", bg: "#fdf2f8" },
+    Breakfast: { icon: "sunny-outline",      color: "#22c55e", bg: "#f0fdf4" },
+    Lunch:     { icon: "restaurant-outline", color: "#22c55e", bg: "#f0fdf4" },
+    Dinner:    { icon: "moon-outline",       color: "#22c55e", bg: "#f0fdf4" },
+    Snack:     { icon: "cafe-outline",       color: "#22c55e", bg: "#f0fdf4" },
   };
 
   return (

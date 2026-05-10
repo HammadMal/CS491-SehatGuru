@@ -40,7 +40,15 @@
           }
         }
       ],
-      "expo-web-browser"
+      "expo-web-browser",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/images/android-icon-monochrome.png",
+          "color": "#22c55e",
+          "defaultChannel": "meal-reminders"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,
