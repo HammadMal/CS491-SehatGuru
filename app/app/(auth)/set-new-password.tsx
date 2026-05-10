@@ -8,6 +8,7 @@ import { CustomButton } from '../../components/auth/CustomButton';
 import { useAuth } from '../../hooks/useAuth';
 import { validatePassword, validateConfirmPassword, getPasswordRequirements } from '../../utils/validation';
 import { Colors } from '../../constants/colors';
+import { Fonts } from '../../constants/fonts';
 
 export default function SetNewPasswordScreen() {
   const router = useRouter();
@@ -162,11 +163,13 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: '700',
+    fontFamily: Fonts.bold,
     color: Colors.textPrimary,
     marginBottom: 12,
   },
   subtitle: {
     fontSize: 15,
+    fontFamily: Fonts.regular,
     color: Colors.textSecondary,
     marginBottom: 32,
     lineHeight: 22,
@@ -183,6 +186,7 @@ const styles = StyleSheet.create({
   requirementsTitle: {
     fontSize: 14,
     fontWeight: '600',
+    fontFamily: Fonts.semibold,
     color: Colors.textPrimary,
     marginBottom: 12,
   },
@@ -193,6 +197,7 @@ const styles = StyleSheet.create({
   },
   requirementText: {
     fontSize: 14,
+    fontFamily: Fonts.regular,
     color: Colors.textSecondary,
     marginLeft: 8,
   },

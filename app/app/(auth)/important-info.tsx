@@ -6,6 +6,7 @@ import { Checkbox } from '../../components/auth/Checkbox';
 import { CustomButton } from '../../components/auth/CustomButton';
 import { useAuth } from '../../hooks/useAuth';
 import { Colors } from '../../constants/colors';
+import { Fonts } from '../../constants/fonts';
 
 export default function ImportantInfoScreen() {
   const router = useRouter();
@@ -90,11 +91,13 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: '700',
+    fontFamily: Fonts.bold,
     color: Colors.textPrimary,
     marginBottom: 12,
   },
   subtitle: {
     fontSize: 15,
+    fontFamily: Fonts.regular,
     color: Colors.textSecondary,
     marginBottom: 32,
     lineHeight: 22,
@@ -108,11 +111,13 @@ const styles = StyleSheet.create({
   infoTitle: {
     fontSize: 18,
     fontWeight: '700',
+    fontFamily: Fonts.bold,
     color: Colors.textPrimary,
     marginBottom: 12,
   },
   infoText: {
     fontSize: 14,
+    fontFamily: Fonts.regular,
     color: Colors.textSecondary,
     lineHeight: 20,
     marginBottom: 12,
@@ -122,12 +127,14 @@ const styles = StyleSheet.create({
   },
   checkboxLabel: {
     fontSize: 14,
+    fontFamily: Fonts.regular,
     color: Colors.textSecondary,
     lineHeight: 20,
   },
   link: {
-    color: Colors.primary,
     fontWeight: '600',
+    fontFamily: Fonts.semibold,
+    color: Colors.primary,
   },
   continueButton: {
     marginBottom: 20,

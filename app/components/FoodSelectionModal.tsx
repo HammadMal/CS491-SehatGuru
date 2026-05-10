@@ -7,6 +7,7 @@ import {
 } from "react-native";
 import React from "react";
 import { Ionicons } from "@expo/vector-icons";
+import { Fonts } from '../constants/fonts';
 
 interface Nutrients {
   calories: number;
@@ -189,12 +190,14 @@ const styles = StyleSheet.create({
     marginTop: 12,
     marginBottom: 8,
     textAlign: "center",
+    fontFamily: Fonts.bold,
   },
   subtitle: {
     fontSize: 14,
     color: "#6b7280",
     textAlign: "center",
     lineHeight: 20,
+    fontFamily: Fonts.regular,
   },
   optionsRow: {
     flexDirection: "row",
@@ -221,11 +224,13 @@ const styles = StyleSheet.create({
     color: "#1f2937",
     textAlign: "center",
     marginBottom: 6,
+    fontFamily: Fonts.bold,
   },
   optionConfidence: {
     fontSize: 13,
     color: "#22c55e",
     fontWeight: "600",
+    fontFamily: Fonts.semibold,
   },
   nutrientColumn: {
     width: "100%",
@@ -241,12 +246,14 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "600",
     color: "#1f2937",
+    fontFamily: Fonts.semibold,
   },
   nutrientLabel: {
     fontSize: 11,
     color: "#6b7280",
     textTransform: "uppercase",
     fontWeight: "500",
+    fontFamily: Fonts.medium,
   },
   buttonContainer: {
     gap: 12,
@@ -269,6 +276,7 @@ const styles = StyleSheet.create({
     color: "#666",
     fontSize: 15,
     fontWeight: "500",
+    fontFamily: Fonts.medium,
   },
   manualBtn: {
     flex: 1,
@@ -284,5 +292,6 @@ const styles = StyleSheet.create({
     color: "#666",
     fontSize: 15,
     fontWeight: "500",
+    fontFamily: Fonts.medium,
   },
 });

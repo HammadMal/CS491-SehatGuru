@@ -10,6 +10,7 @@ import { CustomInput } from '../../components/auth/CustomInput';
 import { useOnboarding } from '../../hooks/useOnboarding';
 import { useAuth } from '../../hooks/useAuth';
 import { Colors } from '../../constants/colors';
+import { Fonts } from '../../constants/fonts';
 
 export default function DailyIntakeScreen() {
   const router = useRouter();
@@ -160,12 +161,14 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: '700',
+    fontFamily: Fonts.bold,
     color: Colors.textPrimary,
     marginTop: 16,
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 15,
+    fontFamily: Fonts.regular,
     color: Colors.textSecondary,
     marginBottom: 24,
   },
@@ -175,6 +178,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: '700',
+    fontFamily: Fonts.bold,
     color: Colors.textPrimary,
     marginBottom: 16,
   },

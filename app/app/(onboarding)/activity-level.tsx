@@ -9,6 +9,7 @@ import { ActivityLevelCard } from '../../components/auth/ActivityLevelCard';
 import { useOnboarding } from '../../hooks/useOnboarding';
 import { ActivityLevel } from '../../types/onboarding.types';
 import { Colors } from '../../constants/colors';
+import { Fonts } from '../../constants/fonts';
 
 const activityLevels = [
   {
@@ -108,12 +109,14 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: '700',
+    fontFamily: Fonts.bold,
     color: Colors.textPrimary,
     marginTop: 16,
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 15,
+    fontFamily: Fonts.regular,
     color: Colors.textSecondary,
     marginBottom: 24,
   },

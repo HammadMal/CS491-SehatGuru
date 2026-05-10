@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { useState } from 'react';
+import { Fonts } from '../../constants/fonts';
 import {
   StyleSheet,
   Text,
@@ -19,6 +20,8 @@ import { Meal } from '../../types/meal.types';
 import * as Crypto from 'expo-crypto';
 import { useAuth } from '../../hooks/useAuth';
 import { saveMealToFirestore } from '../../services/meals.firestore';
+import { updateStreakAndXP } from '../../services/gamification.firestore';
+import { useGamificationStore } from '../../store/useGamificationStore';
 
 interface Nutrition {
   calories: number;
@@ -60,6 +63,7 @@ export default function CameraScreen() {
   const [foodOptions, setFoodOptions] = useState<FoodOption[]>([]);
   const { addMeal } = useMealStore();
   const { user } = useAuth();
+  const setGamificationData = useGamificationStore((s) => s.setData);
 
   const currentMealType = urlMealType || 'Dinner';
   const meta = MEAL_META[currentMealType] || MEAL_META.Dinner;
@@ -139,8 +143,9 @@ export default function CameraScreen() {
     };
     await saveMealToFirestore(meal);
     addMeal(meal);
+    updateStreakAndXP(user.id).then(setGamificationData).catch(console.error);
     handleModalClose();
-    setTimeout(() => router.push('/(tabs)/'), 150);
+    setTimeout(() => router.replace('/(tabs)/'), 150);
   };
 
   const detectFood = async (imageUri: string) => {
@@ -325,8 +330,8 @@ const styles = StyleSheet.create({
 
   /* Header */
   header: { marginBottom: 20 },
-  heading: { fontSize: 26, fontWeight: '800', color: '#111' },
-  subheading: { fontSize: 14, color: '#888', marginTop: 4 },
+  heading: { fontSize: 26, fontWeight: '800', fontFamily: Fonts.extrabold, color: '#111' },
+  subheading: { fontSize: 14, fontFamily: Fonts.regular, color: '#888', marginTop: 4 },
 
   /* Meal type pill */
   mealPill: {
@@ -339,7 +344,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     marginBottom: 20,
   },
-  mealPillText: { fontSize: 13, fontWeight: '700' },
+  mealPillText: { fontSize: 13, fontWeight: '700', fontFamily: Fonts.bold },
 
   /* Camera card */
   cameraCard: {
@@ -366,8 +371,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  cameraCardTitle: { fontSize: 16, fontWeight: '700', color: '#111' },
-  cameraCardSub: { fontSize: 12, color: '#888', marginTop: 3 },
+  cameraCardTitle: { fontSize: 16, fontWeight: '700', fontFamily: Fonts.bold, color: '#111' },
+  cameraCardSub: { fontSize: 12, fontFamily: Fonts.regular, color: '#888', marginTop: 3 },
   cameraArrow: {
     width: 32,
     height: 32,
@@ -380,7 +385,7 @@ const styles = StyleSheet.create({
   /* OR divider */
   orRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 20 },
   orLine: { flex: 1, height: 1, backgroundColor: '#E5E7EB' },
-  orText: { fontSize: 12, color: '#aaa', fontWeight: '600' },
+  orText: { fontSize: 12, color: '#aaa', fontWeight: '600', fontFamily: Fonts.semibold },
 
   /* Manual card */
   manualCard: {
@@ -407,8 +412,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  manualCardTitle: { fontSize: 15, fontWeight: '700', color: '#111' },
-  manualCardSub: { fontSize: 12, color: '#888', marginTop: 3 },
+  manualCardTitle: { fontSize: 15, fontWeight: '700', fontFamily: Fonts.bold, color: '#111' },
+  manualCardSub: { fontSize: 12, fontFamily: Fonts.regular, color: '#888', marginTop: 3 },
 
   /* Tips card */
   tipsCard: {
@@ -420,10 +425,10 @@ const styles = StyleSheet.create({
     gap: 8,
     marginBottom: 20,
   },
-  tipsHeading: { fontSize: 13, fontWeight: '700', color: '#92400e', marginBottom: 4 },
+  tipsHeading: { fontSize: 13, fontWeight: '700', fontFamily: Fonts.bold, color: '#92400e', marginBottom: 4 },
   tipRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   tipDot: { width: 5, height: 5, borderRadius: 3, backgroundColor: '#f59e0b' },
-  tipText: { fontSize: 13, color: '#78350f' },
+  tipText: { fontSize: 13, fontFamily: Fonts.regular, color: '#78350f' },
 
   /* Error */
   errorCard: {
@@ -434,7 +439,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 14,
   },
-  errorText: { flex: 1, color: '#b91c1c', fontSize: 14, fontWeight: '500' },
+  errorText: { flex: 1, color: '#b91c1c', fontSize: 14, fontWeight: '500', fontFamily: Fonts.medium },
 
   /* Loading overlay */
   loadingOverlay: {
@@ -462,11 +467,13 @@ const styles = StyleSheet.create({
   loadingTitle: {
     fontSize: 20,
     fontWeight: '700',
+    fontFamily: Fonts.bold,
     marginTop: 14,
     color: '#1f2937',
   },
   loadingSub: {
     fontSize: 14,
+    fontFamily: Fonts.regular,
     color: '#6b7280',
     marginTop: 6,
   },

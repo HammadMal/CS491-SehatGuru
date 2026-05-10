@@ -4,6 +4,7 @@ import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useMealStore } from '../../store/useMealStore';
+import { Fonts } from '../../constants/fonts';
 
 export default function MealDetailScreen() {
   const { mealId, mealType } = useLocalSearchParams<{ mealId?: string; mealType?: string }>();
@@ -131,6 +132,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#111',
     fontWeight: '700',
+    fontFamily: Fonts.bold,
   },
   headerCard: {
     backgroundColor: '#fff',
@@ -149,16 +151,19 @@ const styles = StyleSheet.create({
     color: '#22c55e',
     marginBottom: 8,
     letterSpacing: 1,
+    fontFamily: Fonts.bold,
   },
   mealTitle: {
     fontSize: 24,
     fontWeight: '800',
     color: '#111',
     marginBottom: 8,
+    fontFamily: Fonts.extrabold,
   },
   timestamp: {
     fontSize: 13,
     color: '#6b7280',
+    fontFamily: Fonts.regular,
   },
   summaryCard: {
     backgroundColor: '#fff',
@@ -177,17 +182,20 @@ const styles = StyleSheet.create({
   summaryLabel: {
     fontSize: 13,
     color: '#6b7280',
+    fontFamily: Fonts.regular,
   },
   summaryValue: {
     fontSize: 15,
     fontWeight: '700',
     color: '#111',
+    fontFamily: Fonts.bold,
   },
   sectionHeading: {
     fontSize: 16,
     fontWeight: '800',
     color: '#111',
     marginBottom: 12,
+    fontFamily: Fonts.extrabold,
   },
   macroGrid: {
     flexDirection: 'row',
@@ -209,11 +217,13 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#6b7280',
     marginBottom: 8,
+    fontFamily: Fonts.regular,
   },
   macroAmount: {
     fontSize: 22,
     fontWeight: '800',
     color: '#111',
+    fontFamily: Fonts.extrabold,
   },
   detailCard: {
     backgroundColor: '#fff',
@@ -227,6 +237,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#111',
     marginBottom: 14,
+    fontFamily: Fonts.bold,
   },
   detailRow: {
     flexDirection: 'row',
@@ -237,11 +248,13 @@ const styles = StyleSheet.create({
   detailKey: {
     fontSize: 13,
     color: '#6b7280',
+    fontFamily: Fonts.regular,
   },
   detailValue: {
     fontSize: 14,
     fontWeight: '700',
     color: '#111',
+    fontFamily: Fonts.bold,
   },
   emptyContainer: {
     flex: 1,
@@ -254,12 +267,14 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: '#111',
     marginBottom: 12,
+    fontFamily: Fonts.extrabold,
   },
   emptySubtitle: {
     fontSize: 14,
     color: '#666',
     textAlign: 'center',
     marginBottom: 20,
+    fontFamily: Fonts.regular,
   },
   backButton: {
     flexDirection: 'row',
@@ -273,5 +288,6 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: '700',
     marginLeft: 8,
+    fontFamily: Fonts.bold,
   },
 });

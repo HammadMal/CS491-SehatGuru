@@ -1,6 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import { View, TextInput, StyleSheet, NativeSyntheticEvent, TextInputKeyPressEventData } from 'react-native';
 import { Colors } from '../../constants/colors';
+import { Fonts } from '../../constants/fonts';
 
 interface VerificationCodeInputProps {
   code: string[];
@@ -81,6 +82,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.backgroundLight,
     fontSize: 24,
     fontWeight: '600',
+    fontFamily: Fonts.semibold,
     textAlign: 'center',
     color: Colors.textPrimary,
   },

@@ -9,6 +9,7 @@ export const STORAGE_KEYS = {
   ONBOARDING_COMPLETE: 'onboarding_complete', // Onboarding completion flag
   CONSENT_ACCEPTED: 'consent_accepted', // Privacy policy and terms acceptance
   TEMP_EMAIL: 'temp_email',             // Temporary email for password reset flow
+  CHAT_SESSIONS: 'chat_sessions',       // Saved chat sessions (max 5)
 };
 
 // Get item from storage

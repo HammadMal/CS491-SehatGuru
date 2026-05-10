@@ -31,6 +31,16 @@ export default function Layout() {
       />
 
       <Tabs.Screen
+        name="meal-plans"
+        options={{
+          title: 'Meal Plans',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="calendar-outline" size={size} color={color} />
+          ),
+        }}
+      />
+
+      <Tabs.Screen
         name="chatbot"
         options={{
           title: 'SehatGuru',
@@ -51,13 +61,13 @@ export default function Layout() {
       />
 
       <Tabs.Screen
+        name="gamification"
+        options={{ href: null }}
+      />
+
+      <Tabs.Screen
         name="feedback"
-        options={{
-          title: 'Feedback',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="clipboard-outline" size={size} color={color} />
-          ),
-        }}
+        options={{ href: null }}
       />
     </Tabs>
   );

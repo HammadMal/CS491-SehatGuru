@@ -8,6 +8,7 @@ import { VerificationCodeInput } from '../../components/auth/VerificationCodeInp
 import { useAuth } from '../../hooks/useAuth';
 import { validateVerificationCode } from '../../utils/validation';
 import { Colors } from '../../constants/colors';
+import { Fonts } from '../../constants/fonts';
 
 export default function CheckEmailScreen() {
   const router = useRouter();
@@ -152,12 +153,14 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: '700',
+    fontFamily: Fonts.bold,
     color: Colors.textPrimary,
     textAlign: 'center',
     marginBottom: 12,
   },
   subtitle: {
     fontSize: 15,
+    fontFamily: Fonts.regular,
     color: Colors.textSecondary,
     textAlign: 'center',
     marginBottom: 16,
@@ -165,10 +168,12 @@ const styles = StyleSheet.create({
   },
   email: {
     fontWeight: '600',
+    fontFamily: Fonts.semibold,
     color: Colors.textPrimary,
   },
   noteText: {
     fontSize: 13,
+    fontFamily: Fonts.regular,
     color: Colors.textLight,
     textAlign: 'center',
     marginBottom: 24,
@@ -186,15 +191,18 @@ const styles = StyleSheet.create({
   },
   resendText: {
     fontSize: 14,
+    fontFamily: Fonts.regular,
     color: Colors.textSecondary,
   },
   resendLink: {
     fontSize: 14,
-    color: Colors.primary,
     fontWeight: '600',
+    fontFamily: Fonts.semibold,
+    color: Colors.primary,
   },
   countdown: {
     fontSize: 14,
+    fontFamily: Fonts.regular,
     color: Colors.textLight,
   },
   backToLogin: {
@@ -203,7 +211,8 @@ const styles = StyleSheet.create({
   },
   backToLoginText: {
     fontSize: 14,
-    color: Colors.primary,
     fontWeight: '600',
+    fontFamily: Fonts.semibold,
+    color: Colors.primary,
   },
 });

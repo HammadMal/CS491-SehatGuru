@@ -2,6 +2,7 @@ import React from 'react';
 import { TouchableOpacity, View, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../constants/colors';
+import { Fonts } from '../../constants/fonts';
 
 interface HealthGoalCardProps {
   title: string;
@@ -70,6 +71,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 16,
     fontWeight: '600',
+    fontFamily: Fonts.semibold,
     color: Colors.textPrimary,
     marginBottom: 2,
   },
@@ -78,6 +80,7 @@ const styles = StyleSheet.create({
   },
   description: {
     fontSize: 14,
+    fontFamily: Fonts.regular,
     color: Colors.textSecondary,
     lineHeight: 18,
   },
