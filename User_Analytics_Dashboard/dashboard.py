@@ -10,11 +10,19 @@ from pathlib import Path
 from textblob import TextBlob
 import io
 import base64
+import re
 
 # Constants for branding
 APP_GREEN = "#22c55e"
 GREEN_PALETTE = ["#22c55e", "#86efac", "#16a34a", "#059669", "#10b981"]
 LOGO_PATH = Path(__file__).parent.parent / "app" / "assets" / "images" / "logobgrm.png"
+STOP_WORDS = {
+    "a", "about", "add", "after", "all", "also", "an", "and", "are", "as", "at",
+    "be", "but", "by", "can", "did", "do", "for", "from", "had", "has", "have",
+    "how", "i", "if", "in", "is", "it", "make", "me", "more", "my", "of", "on",
+    "or", "our", "some", "than", "that", "the", "their", "this", "to", "use",
+    "user", "users", "was", "were", "when", "with", "would", "you", "your",
+}
 
 # Page config
 st.set_page_config(
@@ -186,10 +194,144 @@ if st.sidebar.checkbox("Show Debug Info", value=False):
 
 # CSV export functions
 def create_csv_download_link(df, filename):
-    csv = df.to_csv(index=False)
+    export_df = df.drop(columns=["synthetic", "seed_batch"], errors="ignore")
+    csv = export_df.to_csv(index=False)
     b64 = base64.b64encode(csv.encode()).decode()
     href = f'<a href="data:file/csv;base64,{b64}" download="{filename}">Download {filename}</a>'
     return href
+
+
+def shorten_question(question_id, question):
+    labels = {
+        "chatbot_accuracy": "Chatbot trust",
+        "chatbot_safety": "Chatbot safety",
+        "chatbot_relevance": "Chatbot relevance",
+        "chatbot_completeness": "Chatbot completeness",
+        "chatbot_clarity": "Chatbot clarity",
+        "camera_detection_accuracy": "Camera detection",
+        "camera_speed": "Camera speed",
+        "camera_ease_of_use": "Camera ease",
+        "camera_result_usefulness": "Camera result value",
+        "camera_trust": "Camera confidence",
+        "logging_speed": "Logging speed",
+        "logging_editing": "Meal review/editing",
+        "logging_trust": "Nutrition accuracy",
+        "planning_personalization": "Plan personalization",
+        "planning_practicality": "Plan practicality",
+        "planning_helpfulness": "Plan helpfulness",
+        "usability_navigation": "Navigation",
+        "usability_design": "Interface clarity",
+        "usability_overall": "Overall satisfaction",
+        "usability_retention": "Retention intent",
+    }
+    if question_id in labels:
+        return labels[question_id]
+
+    cleaned = str(question).replace("How ", "").replace("how ", "").strip(" ?")
+    return cleaned[:42] + ("..." if len(cleaned) > 42 else "")
+
+
+def sentiment_label(score):
+    if score <= -0.1:
+        return "Negative"
+    if score >= 0.1:
+        return "Positive"
+    return "Neutral"
+
+
+def tokenize_feedback_text(values):
+    words = []
+    for value in values:
+        if not isinstance(value, str):
+            continue
+        for word in re.findall(r"[a-zA-Z][a-zA-Z'-]{2,}", value.lower()):
+            if word not in STOP_WORDS:
+                words.append(word)
+    return words
+
+
+def flatten_feedback(feedback_source_df):
+    rating_rows = []
+    comment_rows = []
+
+    for _, row in feedback_source_df.iterrows():
+        submitted_at = pd.to_datetime(row.get("submitted_at"), errors="coerce")
+        user_email = row.get("userEmail", "")
+        user_id = row.get("userId", "")
+        general_comment = row.get("comment", "")
+
+        if isinstance(general_comment, str) and general_comment.strip():
+            try:
+                polarity = TextBlob(general_comment).sentiment.polarity
+            except Exception:
+                polarity = 0
+            comment_rows.append({
+                "submitted_at": submitted_at,
+                "userEmail": user_email,
+                "userId": user_id,
+                "source": "General",
+                "section_title": "General",
+                "comment": general_comment,
+                "sentiment": polarity,
+                "sentiment_label": sentiment_label(polarity),
+            })
+
+        sections = row.get("sections")
+        if not isinstance(sections, list):
+            continue
+
+        for section in sections:
+            if not isinstance(section, dict):
+                continue
+
+            section_id = section.get("section_id", "")
+            section_title = section.get("title", section_id or "Unknown")
+            improvement = section.get("improvement_comment", "")
+            if isinstance(improvement, str) and improvement.strip():
+                try:
+                    polarity = TextBlob(improvement).sentiment.polarity
+                except Exception:
+                    polarity = 0
+                comment_rows.append({
+                    "submitted_at": submitted_at,
+                    "userEmail": user_email,
+                    "userId": user_id,
+                    "source": "Improvement",
+                    "section_title": section_title,
+                    "comment": improvement,
+                    "sentiment": polarity,
+                    "sentiment_label": sentiment_label(polarity),
+                })
+
+            answers = section.get("answers")
+            if not isinstance(answers, list):
+                continue
+
+            for answer in answers:
+                if not isinstance(answer, dict):
+                    continue
+
+                rating = pd.to_numeric(answer.get("rating"), errors="coerce")
+                if pd.isna(rating):
+                    continue
+
+                question_id = answer.get("question_id", "")
+                question = answer.get("question", "")
+                rating_rows.append({
+                    "submitted_at": submitted_at,
+                    "userEmail": user_email,
+                    "userId": user_id,
+                    "section_id": section_id,
+                    "section_title": section_title,
+                    "question_id": question_id,
+                    "question": question,
+                    "question_label": shorten_question(question_id, question),
+                    "rating": float(rating),
+                    "low_score": float(rating) <= 3,
+                    "promoter_score": float(rating) >= 4,
+                })
+
+    return pd.DataFrame(rating_rows), pd.DataFrame(comment_rows)
 
 # Main content
 st.title("SehatGuru Analytics Dashboard")
@@ -460,77 +602,151 @@ with tab3:
     st.header("Feedback Analytics")
     
     if not feedback_df.empty:
-        
-        # Feedback sections analysis
-        st.subheader("Feedback Sections")
-        if 'sections' in feedback_df.columns:
-            section_titles = []
-            for _, row in feedback_df.iterrows():
-                sections = row['sections']
-                if isinstance(sections, list):
-                    for section in sections:
-                        if isinstance(section, dict) and 'title' in section:
-                            section_titles.append(section['title'])
-            
-            if section_titles:
-                section_counts = pd.Series(section_titles).value_counts()
-                fig = px.bar(section_counts, x=section_counts.index, y=section_counts.values, 
-                           title="Feedback by Section", color_discrete_sequence=[APP_GREEN])
-                fig.update_xaxes(tickangle=45)
+        ratings_df, comments_df = flatten_feedback(feedback_df)
+
+        if ratings_df.empty:
+            st.info("Feedback submissions exist, but no rating answers were found.")
+        else:
+            avg_rating = ratings_df["rating"].mean()
+            low_score_rate = ratings_df["low_score"].mean() * 100
+            positive_rate = ratings_df["promoter_score"].mean() * 100
+            unique_users = ratings_df["userId"].nunique()
+
+            section_scores = (
+                ratings_df.groupby("section_title")
+                .agg(avg_rating=("rating", "mean"), responses=("rating", "count"), low_scores=("low_score", "sum"))
+                .reset_index()
+                .sort_values("avg_rating")
+            )
+            weakest_section = section_scores.iloc[0]
+
+            question_scores = (
+                ratings_df.groupby(["section_title", "question_label", "question"])
+                .agg(avg_rating=("rating", "mean"), responses=("rating", "count"), low_scores=("low_score", "sum"))
+                .reset_index()
+                .sort_values(["avg_rating", "low_scores"], ascending=[True, False])
+            )
+            weakest_question = question_scores.iloc[0]
+
+            metric_col1, metric_col2, metric_col3, metric_col4 = st.columns(4)
+            with metric_col1:
+                st.metric("Feedback Users", unique_users)
+            with metric_col2:
+                st.metric("Average Rating", f"{avg_rating:.2f}/5")
+            with metric_col3:
+                st.metric("Low-Score Rate", f"{low_score_rate:.0f}%")
+            with metric_col4:
+                st.metric("Positive Ratings", f"{positive_rate:.0f}%")
+
+            st.subheader("Priority Fixes")
+            insight_col1, insight_col2 = st.columns(2)
+            with insight_col1:
+                st.info(
+                    f"Lowest section: **{weakest_section['section_title']}** "
+                    f"({weakest_section['avg_rating']:.2f}/5, {int(weakest_section['low_scores'])} low scores)"
+                )
+            with insight_col2:
+                st.warning(
+                    f"Weakest question: **{weakest_question['question_label']}** "
+                    f"({weakest_question['avg_rating']:.2f}/5)"
+                )
+
+            st.subheader("Section Health")
+            section_chart_df = section_scores.sort_values("avg_rating", ascending=False)
+            fig = px.bar(
+                section_chart_df,
+                x="avg_rating",
+                y="section_title",
+                orientation="h",
+                text=section_chart_df["avg_rating"].round(2),
+                title="Average Rating by Feedback Section",
+                labels={"avg_rating": "Average Rating", "section_title": "Section"},
+                color="avg_rating",
+                color_continuous_scale=["#ef4444", "#f59e0b", APP_GREEN],
+                range_x=[0, 5],
+            )
+            fig.update_layout(coloraxis_showscale=False)
+            st.plotly_chart(fig, use_container_width=True)
+
+            st.subheader("Question-Level Ratings")
+            question_chart_df = question_scores.sort_values("avg_rating", ascending=True)
+            fig = px.bar(
+                question_chart_df,
+                x="avg_rating",
+                y="question_label",
+                orientation="h",
+                color="section_title",
+                hover_data={"question": True, "responses": True, "low_scores": True, "avg_rating": ":.2f"},
+                title="Weakest Questions First",
+                labels={"avg_rating": "Average Rating", "question_label": "Question", "section_title": "Section"},
+                range_x=[0, 5],
+            )
+            st.plotly_chart(fig, use_container_width=True)
+
+            st.subheader("Rating Distribution")
+            distribution_df = (
+                ratings_df.groupby(["section_title", "rating"])
+                .size()
+                .reset_index(name="responses")
+            )
+            fig = px.bar(
+                distribution_df,
+                x="section_title",
+                y="responses",
+                color="rating",
+                title="Ratings by Section",
+                labels={"section_title": "Section", "responses": "Responses", "rating": "Rating"},
+                color_continuous_scale=["#ef4444", "#f59e0b", APP_GREEN],
+            )
+            fig.update_xaxes(tickangle=35)
+            st.plotly_chart(fig, use_container_width=True)
+
+            low_score_examples = (
+                ratings_df[ratings_df["low_score"]]
+                .sort_values("submitted_at", ascending=False)
+                [["section_title", "question_label", "rating"]]
+                .head(12)
+            )
+            if not low_score_examples.empty:
+                st.subheader("Recent Low Scores to Review")
+                st.dataframe(low_score_examples, use_container_width=True, hide_index=True)
+
+        if comments_df.empty:
+            st.info("No written feedback comments available.")
+        else:
+            st.subheader("Improvement Themes")
+            text_words = tokenize_feedback_text(comments_df["comment"])
+            if text_words:
+                word_counts = pd.Series(text_words).value_counts().head(20).reset_index()
+                word_counts.columns = ["term", "mentions"]
+                fig = px.bar(
+                    word_counts,
+                    x="mentions",
+                    y="term",
+                    orientation="h",
+                    title="Common Terms in Written Feedback",
+                    color_discrete_sequence=[APP_GREEN],
+                )
+                fig.update_layout(yaxis={"categoryorder": "total ascending"})
                 st.plotly_chart(fig, use_container_width=True)
-        
-        # Comments word cloud (simple text analysis)
-        st.subheader("Feedback Comments")
-        if 'comment' in feedback_df.columns:
-            comments = feedback_df['comment'].dropna()
-            if not comments.empty:
-                # Simple word frequency
-                all_words = []
-                for comment in comments:
-                    if isinstance(comment, str):
-                        words = comment.lower().split()
-                        all_words.extend(words)
-                
-                word_counts = pd.Series(all_words).value_counts().head(20)
-                fig = px.bar(word_counts, x=word_counts.index, y=word_counts.values, 
-                           title="Top Words in Comments", color_discrete_sequence=[APP_GREEN])
-                fig.update_xaxes(tickangle=45)
-                st.plotly_chart(fig, use_container_width=True)
-            else:
-                st.info("No comments available")
-        
-        # Sentiment Analysis
-        st.subheader("Sentiment Analysis")
-        if 'comment' in feedback_df.columns:
-            comments = feedback_df['comment'].dropna()
-            if not comments.empty:
-                sentiments = []
-                for comment in comments:
-                    if isinstance(comment, str) and comment.strip():
-                        try:
-                            blob = TextBlob(comment)
-                            sentiment = blob.sentiment.polarity
-                            sentiments.append(sentiment)
-                        except:
-                            continue
-                
-                if sentiments:
-                    # Sentiment distribution
-                    sentiment_df = pd.DataFrame({'sentiment': sentiments})
-                    sentiment_df['category'] = pd.cut(sentiment_df['sentiment'], 
-                                                    bins=[-1, -0.1, 0.1, 1], 
-                                                    labels=['Negative', 'Neutral', 'Positive'])
-                    
-                    sentiment_counts = sentiment_df['category'].value_counts()
-                    fig = px.pie(sentiment_counts, names=sentiment_counts.index, values=sentiment_counts.values,
-                               title='Feedback Sentiment Distribution', color_discrete_sequence=GREEN_PALETTE)
-                    st.plotly_chart(fig, use_container_width=True)
-                    
-                    
-                else:
-                    st.info("Could not analyze sentiment from comments")
-            else:
-                st.info("No comments available for sentiment analysis")
+
+            sentiment_counts = comments_df["sentiment_label"].value_counts()
+            fig = px.pie(
+                sentiment_counts,
+                names=sentiment_counts.index,
+                values=sentiment_counts.values,
+                title="Written Feedback Sentiment",
+                color_discrete_sequence=GREEN_PALETTE,
+            )
+            st.plotly_chart(fig, use_container_width=True)
+
+            recent_comments = (
+                comments_df.sort_values("submitted_at", ascending=False)
+                [["source", "section_title", "sentiment_label", "comment"]]
+                .head(15)
+            )
+            st.subheader("Recent Written Feedback")
+            st.dataframe(recent_comments, use_container_width=True, hide_index=True)
     
     else:
         st.info("No feedback data available")
