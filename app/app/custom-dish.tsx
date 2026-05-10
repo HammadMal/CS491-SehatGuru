@@ -11,7 +11,6 @@ import {
     KeyboardAvoidingView,
     Platform,
     ScrollView,
-    Alert,
 } from 'react-native';
 import { Stack, router, useLocalSearchParams } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -28,6 +27,7 @@ import {
 } from '../services/custom-dish.api';
 import type { MealType } from '../types/meal.types';
 import { Fonts } from '../constants/fonts';
+import { ConfirmModal } from '../components/ConfirmModal';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 interface BasketItem {
@@ -61,6 +61,7 @@ export default function CustomDishScreen() {
     const [searching, setSearching] = useState(false);
     const [basket, setBasket] = useState<BasketItem[]>([]);
     const [saving, setSaving] = useState(false);
+    const [infoModal, setInfoModal] = useState<{ title: string; message: string; variant: 'info' | 'danger'; onConfirm?: () => void } | null>(null);
 
     // Gram-picker modal
     const [pendingIngredient, setPendingIngredient] = useState<IngredientResult | null>(null);
@@ -130,11 +131,11 @@ export default function CustomDishScreen() {
     // Save & Log
     const handleSaveAndLog = async () => {
         if (!dishName.trim()) {
-            Alert.alert('Name your dish', 'Please enter a name for your custom dish.');
+            setInfoModal({ title: 'Name Your Dish', message: 'Please enter a name for your custom dish before saving.', variant: 'info' });
             return;
         }
         if (basket.length === 0) {
-            Alert.alert('Add ingredients', 'Please add at least one ingredient.');
+            setInfoModal({ title: 'Add Ingredients', message: 'Please add at least one ingredient to your dish.', variant: 'info' });
             return;
         }
         if (!user) return;
@@ -165,13 +166,14 @@ export default function CustomDishScreen() {
             await saveMealToFirestore(meal);
             addMeal(meal);
 
-            Alert.alert(
-                '✅ Dish saved!',
-                `"${dishName.trim()}" has been logged as ${currentMealType}.`,
-                [{ text: 'OK', onPress: () => router.replace('/(tabs)/' as any) }]
-            );
+            setInfoModal({
+                title: '✅ Dish Saved!',
+                message: `"${dishName.trim()}" has been logged as ${currentMealType}.`,
+                variant: 'info',
+                onConfirm: () => { setInfoModal(null); router.replace('/(tabs)/' as any); },
+            });
         } catch (err: any) {
-            Alert.alert('Error', err?.message ?? 'Something went wrong. Please try again.');
+            setInfoModal({ title: 'Save Failed', message: err?.message ?? 'Something went wrong. Please try again.', variant: 'danger' });
         } finally {
             setSaving(false);
         }
@@ -354,6 +356,18 @@ export default function CustomDishScreen() {
                     </View>
                 </View>
             </Modal>
+
+            <ConfirmModal
+                visible={!!infoModal}
+                title={infoModal?.title ?? ''}
+                message={infoModal?.message ?? ''}
+                variant={infoModal?.variant ?? 'info'}
+                confirmLabel="OK"
+                cancelLabel={null}
+                icon={infoModal?.variant === 'danger' ? 'alert-circle-outline' : 'checkmark-circle-outline'}
+                onConfirm={infoModal?.onConfirm ?? (() => setInfoModal(null))}
+                onCancel={() => setInfoModal(null)}
+            />
         </SafeAreaView>
     );
 }

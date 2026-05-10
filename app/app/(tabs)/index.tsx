@@ -5,7 +5,6 @@ import {
   StyleSheet,
   TouchableOpacity,
   ScrollView,
-  Alert,
   Modal,
   Pressable,
 } from "react-native";
@@ -18,6 +17,7 @@ import { Meal, MealType } from "../../types/meal.types";
 import React, { useEffect, useState, useMemo } from "react";
 import { fetchMealsForUser, deleteMealFromFirestore } from "../../services/meals.firestore";
 import { useAuth } from "../../hooks/useAuth";
+import { ConfirmModal } from "../../components/ConfirmModal";
 
 export default function Dashboard() {
   const meals = useMealStore((s) => s.meals);
@@ -29,6 +29,7 @@ export default function Dashboard() {
 
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [pendingDeleteMeal, setPendingDeleteMeal] = useState<Meal | null>(null);
 
   useEffect(() => {
     if (!user?.id || hydrated) return;
@@ -72,26 +73,20 @@ export default function Dashboard() {
     return meals.filter((meal) => isSameDay(new Date(meal.createdAt), selectedDate));
   }, [meals, selectedDate]);
 
-  const handleDeleteMeal = async (meal: Meal) => {
-    Alert.alert(
-      "Delete Meal",
-      `Are you sure you want to delete "${meal.foodName}"?`,
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Delete",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              await deleteMealFromFirestore(meal.id);
-              deleteMeal(meal.id);
-            } catch {
-              Alert.alert("Error", "Failed to delete meal. Please try again.");
-            }
-          },
-        },
-      ]
-    );
+  const handleDeleteMeal = (meal: Meal) => {
+    setPendingDeleteMeal(meal);
+  };
+
+  const confirmDeleteMeal = async () => {
+    if (!pendingDeleteMeal) return;
+    const meal = pendingDeleteMeal;
+    setPendingDeleteMeal(null);
+    try {
+      await deleteMealFromFirestore(meal.id);
+      deleteMeal(meal.id);
+    } catch {
+      // silently fail
+    }
   };
 
   /* ===== TOTALS ===== */
@@ -284,6 +279,18 @@ export default function Dashboard() {
 
       <View style={{ height: 40 }} />
     </ScrollView>
+
+    <ConfirmModal
+      visible={!!pendingDeleteMeal}
+      title="Delete Meal"
+      message={`Remove "${pendingDeleteMeal?.foodName}" from your log? This cannot be undone.`}
+      confirmLabel="Delete"
+      cancelLabel="Cancel"
+      variant="danger"
+      icon="trash-outline"
+      onConfirm={confirmDeleteMeal}
+      onCancel={() => setPendingDeleteMeal(null)}
+    />
     </LinearGradient>
   );
 }

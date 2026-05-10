@@ -9,6 +9,7 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
   ActivityIndicator,
+  Alert,
 } from 'react-native';
 import { Stack, router, useLocalSearchParams } from 'expo-router';
 import { useMealStore } from '../store/useMealStore';
@@ -21,8 +22,9 @@ import apiClient from '../services/api';
 import AddMealModal from '../components/AddMealModal';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { getCustomDishes, type CustomDish } from '../services/custom-dish.api';
+import { getCustomDishes, deleteCustomDish, type CustomDish } from '../services/custom-dish.api';
 import { Fonts } from '../constants/fonts';
+import { ConfirmModal } from '../components/ConfirmModal';
 
 const MEAL_META: Record<string, { icon: any; color: string; bg: string }> = {
   Breakfast: { icon: 'sunny-outline', color: '#f59e0b', bg: '#fffbeb' },
@@ -39,6 +41,8 @@ export default function ManualMealScreen() {
   const [selectedFood, setSelectedFood] = useState<any>(null);
   const [loadingData, setLoadingData] = useState(true);
   const [customDishes, setCustomDishes] = useState<CustomDish[]>([]);
+  const [deletingDishId, setDeletingDishId] = useState<string | null>(null);
+  const [pendingDeleteDish, setPendingDeleteDish] = useState<CustomDish | null>(null);
   const { addMeal } = useMealStore();
   const { user } = useAuth();
   const setGamificationData = useGamificationStore((s) => s.setData);
@@ -81,6 +85,25 @@ export default function ManualMealScreen() {
     fetchNutrients();
     fetchCustomDishes();
   }, []);
+
+  const handleDeleteDish = (dish: CustomDish) => {
+    setPendingDeleteDish(dish);
+  };
+
+  const confirmDeleteDish = async () => {
+    if (!pendingDeleteDish?.id) return;
+    const dish = pendingDeleteDish;
+    setPendingDeleteDish(null);
+    setDeletingDishId(dish.id!);
+    try {
+      await deleteCustomDish(dish.id!);
+      setCustomDishes((prev) => prev.filter((d) => d.id !== dish.id));
+    } catch {
+      // show nothing — silently refresh or user can try again
+    } finally {
+      setDeletingDishId(null);
+    }
+  };
 
   useEffect(() => {
     if (!search.trim()) { setFiltered([]); return; }
@@ -192,31 +215,47 @@ export default function ManualMealScreen() {
             My Custom Dishes
           </Text>
           {customDishes.map((dish) => (
-            <TouchableOpacity
-              key={dish.id}
-              style={styles.foodItem}
-              onPress={() => setSelectedFood({
-                food_name: dish.food_name,
-                calories: dish.energy_kcal,
-                carbs: dish.carb_g,
-                protein: dish.protein_g,
-                fat: dish.fat_g,
-              })}
-              activeOpacity={0.8}
-            >
-              <View style={styles.foodLeft}>
-                <Text style={styles.foodName} numberOfLines={1}>{dish.food_name}</Text>
-                <View style={styles.macroRow}>
-                  <MacroBadge label="C" value={dish.carb_g ?? 0} color="#f59e0b" />
-                  <MacroBadge label="P" value={dish.protein_g ?? 0} color="#3b82f6" />
-                  <MacroBadge label="F" value={dish.fat_g ?? 0} color="#8b5cf6" />
+            <View key={dish.id} style={[styles.foodItem, { flexDirection: 'row', alignItems: 'center' }]}>
+              {/* Tappable food info area */}
+              <TouchableOpacity
+                style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}
+                onPress={() => setSelectedFood({
+                  food_name: dish.food_name,
+                  calories: dish.energy_kcal,
+                  carbs: dish.carb_g,
+                  protein: dish.protein_g,
+                  fat: dish.fat_g,
+                })}
+                activeOpacity={0.8}
+              >
+                <View style={styles.foodLeft}>
+                  <Text style={styles.foodName} numberOfLines={1}>{dish.food_name}</Text>
+                  <View style={styles.macroRow}>
+                    <MacroBadge label="C" value={dish.carb_g ?? 0} color="#f59e0b" />
+                    <MacroBadge label="P" value={dish.protein_g ?? 0} color="#3b82f6" />
+                    <MacroBadge label="F" value={dish.fat_g ?? 0} color="#8b5cf6" />
+                  </View>
                 </View>
-              </View>
-              <View style={styles.calBadge}>
-                <Text style={styles.calValue}>{Math.round(dish.energy_kcal ?? 0)}</Text>
-                <Text style={styles.calUnit}>kcal</Text>
-              </View>
-            </TouchableOpacity>
+                <View style={styles.calBadge}>
+                  <Text style={styles.calValue}>{Math.round(dish.energy_kcal ?? 0)}</Text>
+                  <Text style={styles.calUnit}>kcal</Text>
+                </View>
+              </TouchableOpacity>
+
+              {/* Delete button */}
+              <TouchableOpacity
+                onPress={() => handleDeleteDish(dish)}
+                disabled={deletingDishId === dish.id}
+                style={styles.dishDeleteBtn}
+                activeOpacity={0.7}
+              >
+                <Ionicons
+                  name={deletingDishId === dish.id ? 'hourglass-outline' : 'trash-outline'}
+                  size={16}
+                  color="#ef4444"
+                />
+              </TouchableOpacity>
+            </View>
           ))}
         </View>
       )}
@@ -264,6 +303,17 @@ export default function ManualMealScreen() {
         image={null}
         isManual={true}
         defaultMealType={currentMealType}
+      />
+
+      <ConfirmModal
+        visible={!!pendingDeleteDish}
+        title="Delete Custom Dish"
+        message={`Remove "${pendingDeleteDish?.food_name}" from your custom dishes? This cannot be undone.`}
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
+        variant="danger"
+        onConfirm={confirmDeleteDish}
+        onCancel={() => setPendingDeleteDish(null)}
       />
     </SafeAreaView>
     </TouchableWithoutFeedback>
@@ -385,4 +435,12 @@ const styles = StyleSheet.create({
     borderRadius: 14,
   },
   customDishBtnText: { color: '#fff', fontSize: 14, fontWeight: '700' as const, fontFamily: Fonts.bold },
+
+  /* Delete button on custom dish rows */
+  dishDeleteBtn: {
+    marginLeft: 10,
+    padding: 8,
+    borderRadius: 8,
+    backgroundColor: '#FEE2E2',
+  },
 });

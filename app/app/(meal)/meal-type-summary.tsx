@@ -1,5 +1,5 @@
-import React, { useMemo } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert } from 'react-native';
+import React, { useMemo, useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -7,6 +7,7 @@ import { useMealStore } from '../../store/useMealStore';
 import { deleteMealFromFirestore } from '../../services/meals.firestore';
 import type { MealType } from '../../types/meal.types';
 import { Fonts } from '../../constants/fonts';
+import { ConfirmModal } from '../../components/ConfirmModal';
 
 const MEAL_META: Record<string, { icon: any; color: string; bg: string }> = {
   Breakfast: { icon: 'sunny-outline', color: '#f59e0b', bg: '#fffbeb' },
@@ -20,6 +21,8 @@ export default function MealTypeSummaryScreen() {
   const router = useRouter();
   const meals = useMealStore((state) => state.meals);
   const deleteMeal = useMealStore((s) => s.deleteMeal);
+
+  const [pendingDelete, setPendingDelete] = useState<{ id: string; name: string } | null>(null);
 
   const typedMealType = (mealType as MealType) || 'Lunch';
   const meta = MEAL_META[typedMealType];
@@ -37,26 +40,20 @@ export default function MealTypeSummaryScreen() {
     };
   }, [typeMeals]);
 
-  const handleDeleteMeal = async (mealId: string, foodName: string) => {
-    Alert.alert(
-      'Delete Meal',
-      `Are you sure you want to delete "${foodName}"?`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await deleteMealFromFirestore(mealId);
-              deleteMeal(mealId);
-            } catch {
-              Alert.alert('Error', 'Failed to delete meal. Please try again.');
-            }
-          },
-        },
-      ]
-    );
+  const handleDeleteMeal = (mealId: string, foodName: string) => {
+    setPendingDelete({ id: mealId, name: foodName });
+  };
+
+  const confirmDelete = async () => {
+    if (!pendingDelete) return;
+    const { id } = pendingDelete;
+    setPendingDelete(null);
+    try {
+      await deleteMealFromFirestore(id);
+      deleteMeal(id);
+    } catch {
+      // silently fail
+    }
   };
 
   return (
@@ -157,6 +154,18 @@ export default function MealTypeSummaryScreen() {
 
         <View style={{ height: 40 }} />
       </ScrollView>
+
+      <ConfirmModal
+        visible={!!pendingDelete}
+        title="Delete Meal"
+        message={`Remove "${pendingDelete?.name}" from your log? This cannot be undone.`}
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
+        variant="danger"
+        icon="trash-outline"
+        onConfirm={confirmDelete}
+        onCancel={() => setPendingDelete(null)}
+      />
     </SafeAreaView>
   );
 }

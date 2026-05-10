@@ -292,6 +292,26 @@ async def get_custom_dishes(
     return results
 
 
+@app.delete("/api/custom-dishes/{dish_id}")
+async def delete_custom_dish(
+    dish_id: str,
+    current_user: dict = Depends(get_current_active_user)
+):
+    """Delete a custom dish by ID. Only the owner can delete their dish."""
+    uid = current_user["uid"]
+    db = firebase_client.db
+    ref = db.collection("custom_dishes").document(dish_id)
+    doc = ref.get()
+
+    if not doc.exists:
+        return JSONResponse(status_code=404, content={"error": "Dish not found"})
+
+    if doc.to_dict().get("userId") != uid:
+        return JSONResponse(status_code=403, content={"error": "Not authorized"})
+
+    ref.delete()
+    return {"success": True, "id": dish_id}
+
 
 # Root endpoint
 @app.get("/")

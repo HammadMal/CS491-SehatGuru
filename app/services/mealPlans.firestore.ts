@@ -13,9 +13,11 @@ import type { MealPlanItem } from "../types/meal.types";
 
 const COLLECTION = "meal_plans";
 
-export async function saveMealPlanToFirestore(items: MealPlanItem[]): Promise<void> {
+export async function saveMealPlanToFirestore(items: MealPlanItem[]): Promise<MealPlanItem[]> {
   const saves = items.map((item) => addDoc(collection(db, COLLECTION), item));
-  await Promise.all(saves);
+  const refs = await Promise.all(saves);
+  // Return items with their real Firestore doc IDs
+  return items.map((item, i) => ({ ...item, id: refs[i].id }));
 }
 
 export async function fetchTodaysMealPlan(userId: string): Promise<MealPlanItem[]> {

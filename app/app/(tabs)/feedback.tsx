@@ -2,7 +2,6 @@ import { Ionicons } from '@expo/vector-icons';
 import React, { useMemo, useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
   ScrollView,
   StyleSheet,
   Text,
@@ -14,6 +13,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 
 import { Fonts } from '../../constants/fonts';
+import { ConfirmModal } from '../../components/ConfirmModal';
 import { feedbackAPI } from '../../services/feedback.api';
 import { FeedbackSection, FeedbackSubmissionPayload } from '../../types/feedback.types';
 
@@ -173,6 +173,7 @@ export default function FeedbackScreen() {
   const [sections, setSections] = useState<FeedbackSection[]>(() => buildSections());
   const [comment, setComment] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [infoModal, setInfoModal] = useState<{ title: string; message: string; variant: 'info' | 'danger' } | null>(null);
 
   const totalQuestions = useMemo(
     () => sections.reduce((count, section) => count + section.answers.length, 0),
@@ -216,10 +217,7 @@ export default function FeedbackScreen() {
     );
 
     if (unanswered.length > 0) {
-      Alert.alert(
-        'Complete all ratings',
-        'Please rate every question before submitting your feedback.'
-      );
+      setInfoModal({ title: 'Incomplete Ratings', message: 'Please rate every question before submitting your feedback.', variant: 'info' });
       return;
     }
 
@@ -240,14 +238,11 @@ export default function FeedbackScreen() {
     try {
       setSubmitting(true);
       await feedbackAPI.submitFeedback(payload);
-      Alert.alert('Thank you', 'Your feedback has been submitted successfully.');
+      setInfoModal({ title: 'Thank You! 🎉', message: 'Your feedback has been submitted successfully. It helps us make SehatGuru better.', variant: 'info' });
       setSections(buildSections());
       setComment('');
     } catch (error: any) {
-      Alert.alert(
-        'Submission failed',
-        error?.response?.data?.detail || 'We could not save your feedback. Please try again.'
-      );
+      setInfoModal({ title: 'Submission Failed', message: error?.response?.data?.detail || 'We could not save your feedback. Please try again.', variant: 'danger' });
     } finally {
       setSubmitting(false);
     }
@@ -382,6 +377,18 @@ export default function FeedbackScreen() {
 
         <View style={styles.bottomSpacer} />
       </ScrollView>
+
+      <ConfirmModal
+        visible={!!infoModal}
+        title={infoModal?.title ?? ''}
+        message={infoModal?.message ?? ''}
+        variant={infoModal?.variant ?? 'info'}
+        confirmLabel="OK"
+        cancelLabel={null}
+        icon={infoModal?.variant === 'danger' ? 'alert-circle-outline' : 'checkmark-circle-outline'}
+        onConfirm={() => setInfoModal(null)}
+        onCancel={() => setInfoModal(null)}
+      />
     </SafeAreaView>
   );
 }

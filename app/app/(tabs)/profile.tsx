@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import {
-  StyleSheet, Text, TouchableOpacity, View, Alert, ScrollView,
+  StyleSheet, Text, TouchableOpacity, View, ScrollView,
   Modal, ActivityIndicator, Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -17,6 +17,7 @@ import {
   type AvatarData,
 } from '../../services/avatar.firestore';
 import { Fonts } from '../../constants/fonts';
+import { ConfirmModal } from '../../components/ConfirmModal';
 
 /* ── Level colors (index = level - 1) ── */
 const LEVEL_COLORS = ['#9ca3af', '#22c55e', '#3b82f6', '#f59e0b', '#8b5cf6', '#ef4444'];
@@ -44,6 +45,9 @@ export default function ProfileScreen() {
   const [avatar, setAvatar] = useState<AvatarData | null>(null);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [confirmLogout, setConfirmLogout] = useState(false);
+  const [confirmDeleteAccount, setConfirmDeleteAccount] = useState(false);
+  const [infoModal, setInfoModal] = useState<{ title: string; message: string; variant: 'info' | 'danger' } | null>(null);
 
   const loadAvatar = useCallback(async () => {
     if (!user?.id) return;
@@ -56,34 +60,22 @@ export default function ProfileScreen() {
 
   useEffect(() => { loadAvatar(); }, [loadAvatar]);
 
-  const handleLogout = () => {
-    Alert.alert('Logout', 'Are you sure you want to logout?', [
-      { text: 'Cancel', style: 'cancel' },
-      { text: 'Logout', style: 'destructive', onPress: async () => { await logout(); } },
-    ]);
-  };
+  const handleLogout = () => setConfirmLogout(true);
 
-  const handleDeleteAccount = () => {
-    Alert.alert(
-      'Delete Account',
-      'This will permanently delete your account and all data. This cannot be undone.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              if (!user?.email) { Alert.alert('Error', 'User email not found'); return; }
-              await authAPI.deleteUserByEmail(user.email);
-              await logout();
-            } catch (error: any) {
-              Alert.alert('Error', error.response?.data?.detail || 'Failed to delete account. Please try again.');
-            }
-          },
-        },
-      ]
-    );
+  const handleDeleteAccount = () => setConfirmDeleteAccount(true);
+
+  const doDeleteAccount = async () => {
+    setConfirmDeleteAccount(false);
+    try {
+      if (!user?.email) {
+        setInfoModal({ title: 'Error', message: 'User email not found.', variant: 'danger' });
+        return;
+      }
+      await authAPI.deleteUserByEmail(user.email);
+      await logout();
+    } catch (error: any) {
+      setInfoModal({ title: 'Delete Failed', message: error.response?.data?.detail || 'Failed to delete account. Please try again.', variant: 'danger' });
+    }
   };
 
   const pickPreset = async (preset: Preset) => {
@@ -101,7 +93,7 @@ export default function ProfileScreen() {
   const pickPhoto = async () => {
     const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!perm.granted) {
-      Alert.alert('Permission required', 'Allow photo library access to set a profile picture.');
+      setInfoModal({ title: 'Permission Required', message: 'Please allow photo library access in your device settings to set a profile picture.', variant: 'info' });
       return;
     }
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -302,6 +294,45 @@ export default function ProfileScreen() {
           <View style={{ height: 24 }} />
         </View>
       </Modal>
+
+      {/* Logout confirmation */}
+      <ConfirmModal
+        visible={confirmLogout}
+        title="Logout"
+        message="Are you sure you want to logout of SehatGuru?"
+        confirmLabel="Logout"
+        cancelLabel="Cancel"
+        variant="danger"
+        icon="log-out-outline"
+        onConfirm={async () => { setConfirmLogout(false); await logout(); }}
+        onCancel={() => setConfirmLogout(false)}
+      />
+
+      {/* Delete account confirmation */}
+      <ConfirmModal
+        visible={confirmDeleteAccount}
+        title="Delete Account"
+        message="This will permanently delete your account and all your data. This cannot be undone."
+        confirmLabel="Delete Forever"
+        cancelLabel="Cancel"
+        variant="danger"
+        icon="trash-outline"
+        onConfirm={doDeleteAccount}
+        onCancel={() => setConfirmDeleteAccount(false)}
+      />
+
+      {/* Info / error feedback */}
+      <ConfirmModal
+        visible={!!infoModal}
+        title={infoModal?.title ?? ''}
+        message={infoModal?.message ?? ''}
+        variant={infoModal?.variant ?? 'info'}
+        confirmLabel="OK"
+        cancelLabel={null}
+        icon={infoModal?.variant === 'danger' ? 'alert-circle-outline' : 'information-circle-outline'}
+        onConfirm={() => setInfoModal(null)}
+        onCancel={() => setInfoModal(null)}
+      />
     </SafeAreaView>
   );
 }
