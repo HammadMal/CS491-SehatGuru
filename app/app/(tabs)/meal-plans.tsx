@@ -5,7 +5,6 @@ import {
   ScrollView,
   TouchableOpacity,
   StyleSheet,
-  Alert,
   ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -19,6 +18,7 @@ import { useMealStore } from "../../store/useMealStore";
 import { fetchTodaysMealPlan, markMealPlanItemLogged, deleteMealPlanFromFirestore } from "../../services/mealPlans.firestore";
 import { saveMealToFirestore } from "../../services/meals.firestore";
 import AddMealModal from "../../components/AddMealModal";
+import { ConfirmModal } from "../../components/ConfirmModal";
 import { Colors } from "../../constants/colors";
 import type { MealPlanItem, Meal, MealType } from "../../types/meal.types";
 
@@ -49,6 +49,8 @@ export default function MealPlansScreen() {
   const [selectedItem, setSelectedItem] = useState<MealPlanItem | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [loggingId, setLoggingId] = useState<string | null>(null);
+  const [pendingDeleteGroup, setPendingDeleteGroup] = useState<MealPlanGroup | null>(null);
+  const [infoModal, setInfoModal] = useState<{ title: string; message: string; variant: 'info' | 'danger' } | null>(null);
 
   useEffect(() => {
     const userId = authContext?.user?.id;
@@ -123,9 +125,9 @@ export default function MealPlansScreen() {
       addMeal(meal);
       await markMealPlanItemLogged(selectedItem.id);
       markLogged(selectedItem.id);
-      Alert.alert("Logged!", `${data.foodName} added to your daily log.`);
+      setInfoModal({ title: 'Meal Logged! ✅', message: `${data.foodName} has been added to your daily log.`, variant: 'info' });
     } catch {
-      Alert.alert("Error", "Failed to log meal. Please try again.");
+      setInfoModal({ title: 'Log Failed', message: 'Failed to log meal. Please try again.', variant: 'danger' });
     } finally {
       setLoggingId(null);
       setSelectedItem(null);
@@ -133,26 +135,20 @@ export default function MealPlansScreen() {
   };
 
   const handleDeletePlan = (group: MealPlanGroup) => {
-    Alert.alert(
-      "Remove Meal Plan",
-      `Remove Meal Plan ${group.planNumber}? This cannot be undone.`,
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Remove",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              await deleteMealPlanFromFirestore(group.planId, authContext!.user!.id);
-              removePlan(group.planId);
-              if (expandedPlanId === group.planId) setExpandedPlanId(null);
-            } catch {
-              Alert.alert("Error", "Failed to remove meal plan.");
-            }
-          },
-        },
-      ]
-    );
+    setPendingDeleteGroup(group);
+  };
+
+  const confirmDeletePlan = async () => {
+    if (!pendingDeleteGroup) return;
+    const group = pendingDeleteGroup;
+    setPendingDeleteGroup(null);
+    try {
+      await deleteMealPlanFromFirestore(group.planId, authContext!.user!.id);
+      removePlan(group.planId);
+      if (expandedPlanId === group.planId) setExpandedPlanId(null);
+    } catch {
+      // silently fail — list will still show until next refresh
+    }
   };
 
   return (
@@ -302,6 +298,31 @@ export default function MealPlansScreen() {
         }}
         defaultMealType={selectedItem?.mealType ?? "Dinner"}
         isManual
+      />
+
+      <ConfirmModal
+        visible={!!pendingDeleteGroup}
+        title="Remove Meal Plan"
+        message={`Remove Meal Plan ${pendingDeleteGroup?.planNumber}? All ${pendingDeleteGroup?.items.length} items will be deleted. This cannot be undone.`}
+        confirmLabel="Remove"
+        cancelLabel="Cancel"
+        variant="danger"
+        icon="calendar-outline"
+        onConfirm={confirmDeletePlan}
+        onCancel={() => setPendingDeleteGroup(null)}
+      />
+
+      {/* Log meal success / error feedback */}
+      <ConfirmModal
+        visible={!!infoModal}
+        title={infoModal?.title ?? ''}
+        message={infoModal?.message ?? ''}
+        variant={infoModal?.variant ?? 'info'}
+        confirmLabel="OK"
+        cancelLabel={null}
+        icon={infoModal?.variant === 'danger' ? 'alert-circle-outline' : 'checkmark-circle-outline'}
+        onConfirm={() => setInfoModal(null)}
+        onCancel={() => setInfoModal(null)}
       />
     </SafeAreaView>
   );

@@ -6,8 +6,8 @@ import { Fonts } from '../constants/fonts';
 
 interface MealPlanActionsProps {
   onApprove: () => void;
-  onReject:  () => void;
-  loading?:  boolean;
+  onReject: () => void;
+  loading?: boolean;
 }
 
 export function MealPlanActions({ onApprove, onReject, loading = false }: MealPlanActionsProps) {

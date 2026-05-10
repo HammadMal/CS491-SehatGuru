@@ -15,6 +15,7 @@ import { useMealPlanStore } from '../../store/useMealPlanStore';
 import { chatAPI } from '../../services/chat.api';
 import { ChatMessage } from '../../components/ChatMessage';
 import { MealPlanActions } from '../../components/MealPlanActions';
+import { ConfirmModal } from '../../components/ConfirmModal';
 import { Colors } from '../../constants/colors';
 import { Fonts } from '../../constants/fonts';
 import { OnboardingContext } from '../../context/OnboardingContext';
@@ -43,6 +44,9 @@ export default function ChatbotScreen() {
   const [pendingMealPlanMessageId, setPendingMealPlanMessageId] = useState<string | null>(null);
   const [pendingMealPlanMarkdown, setPendingMealPlanMarkdown]   = useState<string | null>(null);
   const [mealPlanSaving, setMealPlanSaving] = useState(false);
+  const [confirmNewChat, setConfirmNewChat] = useState(false);
+  const [pendingDeleteSessionId, setPendingDeleteSessionId] = useState<string | null>(null);
+  const [infoModal, setInfoModal] = useState<{ title: string; message: string; variant: 'info' | 'danger' } | null>(null);
 
   const recordingRef  = useRef<Audio.Recording | null>(null);
   const scrollViewRef = useRef<ScrollView>(null);
@@ -110,10 +114,7 @@ export default function ChatbotScreen() {
   /* ── Handlers (unchanged logic) ── */
   const handleNewChat = () => {
     if (messages.length === 0) return;
-    Alert.alert('New Chat', 'Start a new conversation? Your current chat will be saved.', [
-      { text: 'Cancel', style: 'cancel' },
-      { text: 'New Chat', onPress: () => createNewSession() },
-    ]);
+    setConfirmNewChat(true);
   };
 
   const handleLoadSession = (session: ChatSession) => {
@@ -122,10 +123,7 @@ export default function ChatbotScreen() {
   };
 
   const handleDeleteSession = (id: string) => {
-    Alert.alert('Delete Chat', 'Delete this conversation?', [
-      { text: 'Cancel', style: 'cancel' },
-      { text: 'Delete', style: 'destructive', onPress: () => deleteSession(id) },
-    ]);
+    setPendingDeleteSessionId(id);
   };
 
   const formatDate = (iso: string) => {
@@ -225,7 +223,7 @@ export default function ChatbotScreen() {
     if (!pendingMealPlanMarkdown || !authContext?.user?.id) return;
     const parsed = parseMealPlan(pendingMealPlanMarkdown);
     if (!parsed.length) {
-      Alert.alert('Error', 'Could not read the meal plan. Please try again.');
+      setInfoModal({ title: 'Could Not Read Plan', message: 'The meal plan format was not recognised. Please try generating it again.', variant: 'danger' });
       return;
     }
     setMealPlanSaving(true);
@@ -236,13 +234,13 @@ export default function ChatbotScreen() {
         id: Crypto.randomUUID(), userId: authContext.user!.id,
         ...p, planId, logged: false, createdAt: now,
       }));
-      await saveMealPlanToFirestore(items);
-      useMealPlanStore.getState().addPlanItems(items);
+      const savedItems = await saveMealPlanToFirestore(items);
+      useMealPlanStore.getState().addPlanItems(savedItems);
       setPendingMealPlanMessageId(null);
       setPendingMealPlanMarkdown(null);
-      Alert.alert('Saved!', 'Meal plan saved. View it in the Meal Plans tab.');
+      setInfoModal({ title: 'Meal Plan Saved! 🎉', message: 'Your meal plan has been saved. Head to the Meal Plans tab to log your meals.', variant: 'info' });
     } catch {
-      Alert.alert('Error', 'Failed to save meal plan. Please try again.');
+      setInfoModal({ title: 'Save Failed', message: 'Failed to save meal plan. Please try again.', variant: 'danger' });
     } finally {
       setMealPlanSaving(false);
     }
@@ -476,6 +474,45 @@ export default function ChatbotScreen() {
           )}
         </View>
       </Modal>
+
+      {/* New Chat confirmation */}
+      <ConfirmModal
+        visible={confirmNewChat}
+        title="Start New Chat?"
+        message="Your current conversation will be saved to history. You can come back to it anytime."
+        confirmLabel="New Chat"
+        cancelLabel="Cancel"
+        variant="info"
+        icon="chatbubble-outline"
+        onConfirm={() => { setConfirmNewChat(false); createNewSession(); }}
+        onCancel={() => setConfirmNewChat(false)}
+      />
+
+      {/* Delete session confirmation */}
+      <ConfirmModal
+        visible={!!pendingDeleteSessionId}
+        title="Delete Chat"
+        message="This conversation will be permanently deleted."
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
+        variant="danger"
+        icon="trash-outline"
+        onConfirm={() => { deleteSession(pendingDeleteSessionId!); setPendingDeleteSessionId(null); }}
+        onCancel={() => setPendingDeleteSessionId(null)}
+      />
+
+      {/* Meal plan save / info feedback */}
+      <ConfirmModal
+        visible={!!infoModal}
+        title={infoModal?.title ?? ''}
+        message={infoModal?.message ?? ''}
+        variant={infoModal?.variant ?? 'info'}
+        confirmLabel="OK"
+        cancelLabel={null}
+        icon={infoModal?.variant === 'danger' ? 'alert-circle-outline' : 'checkmark-circle-outline'}
+        onConfirm={() => setInfoModal(null)}
+        onCancel={() => setInfoModal(null)}
+      />
     </SafeAreaView>
   );
 }

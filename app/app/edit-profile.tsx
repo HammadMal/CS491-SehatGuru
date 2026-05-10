@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
     View, Text, StyleSheet, ScrollView, TouchableOpacity,
-    Alert, ActivityIndicator, KeyboardAvoidingView, Platform,
+    ActivityIndicator, KeyboardAvoidingView, Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Stack, router } from 'expo-router';
@@ -13,6 +13,7 @@ import { OnboardingContext } from '../context/OnboardingContext';
 import { validateName, validateHeight, validateWeight, validateAge } from '../utils/validation';
 import type { ActivityLevel, HealthGoal } from '../types/onboarding.types';
 import { Fonts } from '../constants/fonts';
+import { ConfirmModal } from '../components/ConfirmModal';
 
 /* ── Static data (mirrors onboarding screens) ── */
 const ACTIVITY_LEVELS: { value: ActivityLevel; label: string; desc: string; icon: any }[] = [
@@ -50,6 +51,7 @@ export default function EditProfileScreen() {
     const [errors, setErrors] = useState({ fullName: null as string | null, height: null as string | null, weight: null as string | null, age: null as string | null });
     const [loading, setLoading] = useState(false);
     const [fetching, setFetching] = useState(true);
+    const [infoModal, setInfoModal] = useState<{ title: string; message: string; variant: 'info' | 'danger'; onConfirm?: () => void } | null>(null);
 
     /* load current profile on mount */
     useEffect(() => {
@@ -90,8 +92,14 @@ export default function EditProfileScreen() {
         };
         setErrors(newErrors);
         if (Object.values(newErrors).some(Boolean)) return;
-        if (!activityLevel) { Alert.alert('Please select an activity level'); return; }
-        if (healthGoals.length === 0) { Alert.alert('Please select at least one health goal'); return; }
+        if (!activityLevel) {
+            setInfoModal({ title: 'Activity Level Required', message: 'Please select an activity level before saving.', variant: 'info' });
+            return;
+        }
+        if (healthGoals.length === 0) {
+            setInfoModal({ title: 'Health Goal Required', message: 'Please select at least one health goal before saving.', variant: 'info' });
+            return;
+        }
 
         setLoading(true);
         try {
@@ -107,11 +115,18 @@ export default function EditProfileScreen() {
             /* refresh onboarding data in context + AsyncStorage so chatbot picks up new preferences immediately */
             await onboardingContext?.refreshOnboardingData();
 
-            Alert.alert('Profile Updated! 🎉', 'Your calorie and macro goals have been recalculated.', [
-                { text: 'OK', onPress: () => router.back() },
-            ]);
+            setInfoModal({
+                title: 'Profile Updated! 🎉',
+                message: 'Your calorie and macro goals have been recalculated based on your new profile.',
+                variant: 'info',
+                onConfirm: () => { setInfoModal(null); router.back(); },
+            });
         } catch (err: any) {
-            Alert.alert('Error', err?.response?.data?.detail || 'Failed to update profile. Please try again.');
+            setInfoModal({
+                title: 'Update Failed',
+                message: err?.response?.data?.detail || 'Failed to update profile. Please try again.',
+                variant: 'danger',
+            });
         } finally {
             setLoading(false);
         }
@@ -290,6 +305,18 @@ export default function EditProfileScreen() {
                     <View style={{ height: 40 }} />
                 </ScrollView>
             </KeyboardAvoidingView>
+
+            <ConfirmModal
+                visible={!!infoModal}
+                title={infoModal?.title ?? ''}
+                message={infoModal?.message ?? ''}
+                variant={infoModal?.variant ?? 'info'}
+                confirmLabel="OK"
+                cancelLabel={null}
+                icon={infoModal?.variant === 'danger' ? 'alert-circle-outline' : 'checkmark-circle-outline'}
+                onConfirm={infoModal?.onConfirm ?? (() => setInfoModal(null))}
+                onCancel={() => setInfoModal(null)}
+            />
         </SafeAreaView>
     );
 }

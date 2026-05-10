@@ -159,7 +159,7 @@ export default function CameraScreen() {
       formData.append('file', { uri: imageUri, name: filename, type } as any);
 
       const response = await apiClient.post(
-        '/api/food/detect/detailed?top_k=3',
+        '/api/food/detect/detailed?top_k=5',
         formData,
         { headers: { 'Content-Type': 'multipart/form-data' } }
       );

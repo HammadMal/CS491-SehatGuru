@@ -55,3 +55,8 @@ export async function getCustomDishes(): Promise<CustomDish[]> {
     const res = await apiClient.get('/api/custom-dishes');
     return res.data;
 }
+
+/** Delete a custom dish by its Firestore document ID */
+export async function deleteCustomDish(dishId: string): Promise<void> {
+    await apiClient.delete(`/api/custom-dishes/${dishId}`);
+}
