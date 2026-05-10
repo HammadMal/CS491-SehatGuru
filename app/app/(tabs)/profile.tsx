@@ -219,6 +219,12 @@ export default function ProfileScreen() {
             label="Send Feedback" sub="Help us improve SehatGuru"
             onPress={() => router.push('/(tabs)/feedback')} showChevron
           />
+          <Divider />
+          <SettingRow
+            icon="notifications-outline" iconBg="#f0fdf4" iconColor="#22c55e"
+            label="Notification Settings" sub="Reminders and motivational messages"
+            onPress={() => router.push('/notification-settings')} showChevron
+          />
         </Section>
 
         {/* ── Danger zone ── */}
