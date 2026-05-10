@@ -32,7 +32,7 @@ const buildSections = (): FeedbackSection[] => [
     answers: [
       {
         questionId: 'chatbot_accuracy',
-        question: 'How accurate was the nutrition advice provided by the chatbot?',
+        question: 'How trustworthy did the nutrition advice provided by the chatbot feel to you?',
         rating: 0,
       },
       {
@@ -47,7 +47,7 @@ const buildSections = (): FeedbackSection[] => [
       },
       {
         questionId: 'chatbot_completeness',
-        question: 'How completely did the chatbot answer all parts of your question?',
+        question: 'How completely did the chatbot address all aspects of your query?',
         rating: 0,
       },
       {
@@ -83,6 +83,11 @@ const buildSections = (): FeedbackSection[] => [
         question: 'How useful were the details shown after the camera detected your meal?',
         rating: 0,
       },
+      {
+        questionId: 'camera_trust',
+        question: 'How confident are you that the detected meal matches what you actually ate?',
+        rating: 0,
+      },
     ],
   },
   {
@@ -103,7 +108,7 @@ const buildSections = (): FeedbackSection[] => [
       },
       {
         questionId: 'logging_trust',
-        question: 'How confident are you in the nutrition values saved with your meals?',
+        question: 'How accurate do you believe the nutrition values of your logged meals are?',
         rating: 0,
       },
     ],
@@ -121,7 +126,7 @@ const buildSections = (): FeedbackSection[] => [
       },
       {
         questionId: 'planning_practicality',
-        question: 'How practical and realistic were the meal plan suggestions for daily use?',
+        question: 'How practical and feasible in your daily routine were the meal plan suggestions?',
         rating: 0,
       },
       {
@@ -150,6 +155,11 @@ const buildSections = (): FeedbackSection[] => [
       {
         questionId: 'usability_overall',
         question: 'Overall, how satisfied are you with SehatGuru?',
+        rating: 0,
+      },
+      {
+        questionId: 'usability_retention',
+        question: 'How likely are you to continue using SehatGuru regularly?',
         rating: 0,
       },
     ],

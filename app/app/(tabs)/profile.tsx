@@ -96,6 +96,16 @@ export default function ProfileScreen() {
               onPress={() => router.push('/edit-profile')}
               showChevron
             />
+            <View style={styles.divider} />
+            <SettingRow
+              icon="notifications-outline"
+              iconBg="#eff6ff"
+              iconColor="#3b82f6"
+              label="Notification Settings"
+              sub="Meal reminders, motivational messages"
+              onPress={() => router.push('/notification-settings')}
+              showChevron
+            />
           </View>
         </View>
 
