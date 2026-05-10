@@ -21,15 +21,51 @@ nutrition_df["food_name"] = (
     .str.strip()
 )
 
-def get_macros(dish_name: str):
-    dish = (
-        dish_name.lower()
+FOOD_NAME_ALIASES = {
+    # Model label -> closest nutrition CSV label
+    "aloo gobi": "potato cauliflower",
+    "aloo sabzi": "potato curry",
+    "bhindi masala": "okra/lady's fingers fry",
+    "boiled eggs": "boiled egg",
+    "bun kabab": "vegetable burger",
+    "burger": "vegetable burger",
+    "chai": "hot tea",
+    "chana masala": "chickpeas curry",
+    "chicken pulao": "white chicken pulao",
+    "chicken roll": "paneer kaathi roll",
+    "daal chawal": "mixed dal",
+    "falooda": "sweet lassi",
+    "fried chicken": "fried chicken with tomato sauce",
+    "fries": "fried fish and chips",
+    "ice cream": "vanilla ice cream without egg",
+    "kheer": "rice kheer",
+    "pakistani omelette": "plain omelette/omlet",
+    "palak paneer": "spinach paneer",
+    "pani puri": "chana chaat",
+    "pasta": "classic italian pasta",
+    "sandwich": "chicken sandwich",
+    "shami kabab": "shammi kabab",
+    "sheer khurma": "vermicelli kheer",
+    "steak": "roasted cauliflower steak",
+}
+
+
+def _normalize_food_name(name: str) -> str:
+    return (
+        str(name)
+        .lower()
         .strip()
-        .replace('kebab', 'kabab')
+        .replace("kebab", "kabab")
         .strip()
     )
+
+
+def get_macros(dish_name: str):
+    dish = _normalize_food_name(dish_name)
     
     row = nutrition_df[nutrition_df["food_name"] == dish]
+    if row.empty and dish in FOOD_NAME_ALIASES:
+        row = nutrition_df[nutrition_df["food_name"] == FOOD_NAME_ALIASES[dish]]
 
     if row.empty:
         return None

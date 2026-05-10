@@ -80,6 +80,10 @@ class Settings(BaseSettings):
     MEM0_COLLECTION_NAME: str = "sehatguru_user_memories"
     MEM0_CHROMA_DIR: str = "./chroma_db_mem0"
 
+    # Food vision model
+    FOOD_MODEL_PATH: str = "model/SehatGuru_ConvNeXt_50_best_macroF1.pth"
+    FOOD_MODEL_LOW_CONFIDENCE_THRESHOLD: float = 0.60
+
     # Self-Validation Settings
     ENABLE_RESPONSE_VALIDATION: bool = True
     VALIDATION_MAX_RETRIES: int = 1

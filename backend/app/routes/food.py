@@ -1,11 +1,14 @@
-"""Food detection API endpoints"""
-from fastapi import APIRouter, UploadFile, File, HTTPException
-from pydantic import BaseModel
-from app.utils.nutrition import get_macros
-from typing import Optional, List
-import logging
+"""Food vision API endpoints."""
+from __future__ import annotations
 
-from app.ml.food_detector import get_detector
+import logging
+from typing import Any, Optional
+
+from fastapi import APIRouter, File, HTTPException, UploadFile
+from pydantic import BaseModel
+
+from app.ml.food_detector import get_detector, is_initialized
+from app.utils.nutrition import get_macros
 
 logger = logging.getLogger(__name__)
 
@@ -13,383 +16,180 @@ router = APIRouter(prefix="/api/food", tags=["food"])
 
 
 class Nutrition(BaseModel):
-    "Nutrients information model"
     calories: float
     carbs: float
     protein: float
     fat: float
 
-class FoodDetectionResponse(BaseModel):
-    """Response model for food detection"""
+
+class TopPrediction(BaseModel):
     food_name: str
     confidence: float
     is_low_confidence: bool
-    nutrients: Optional[Nutrition]
+    nutrients: Optional[Nutrition] = None
+    class_name: Optional[str] = None
+
+
+class FoodDetectionResponse(BaseModel):
+    success: bool
+    predicted_class: str
+    confidence: float
+    top5: list[dict[str, Any]]
+    low_confidence: bool
+    food_name: str
+    is_low_confidence: bool
+    nutrients: Optional[Nutrition] = None
+    model: Optional[dict[str, Any]] = None
 
 
 class FoodDetectionDetailedResponse(BaseModel):
-    """Detailed response with top predictions"""
-    predictions: list[dict]
-    top_prediction: dict
+    success: bool
+    predicted_class: str
+    confidence: float
+    top5: list[dict[str, Any]]
+    low_confidence: bool
+    predictions: list[TopPrediction]
+    top_prediction: TopPrediction
+    model: Optional[dict[str, Any]] = None
+
+
+def _validate_image_file(file: UploadFile) -> None:
+    if not file.content_type or not file.content_type.startswith("image/"):
+        raise HTTPException(
+            status_code=400,
+            detail="File must be an image (JPEG, PNG, etc.)",
+        )
+
+
+def _prediction_option(prediction: dict[str, Any], low_confidence: bool) -> dict[str, Any]:
+    class_name = str(prediction["class"])
+    nutrients = get_macros(class_name)
+    return {
+        "food_name": class_name,
+        "class_name": class_name,
+        "confidence": float(prediction["confidence"]),
+        "is_low_confidence": low_confidence,
+        "nutrients": nutrients,
+    }
+
+
+def _format_detection(result: dict[str, Any]) -> dict[str, Any]:
+    predicted_class = str(result["predicted_class"])
+    low_confidence = bool(result["low_confidence"])
+    nutrients = get_macros(predicted_class)
+    predictions = [
+        _prediction_option(prediction, low_confidence)
+        for prediction in result["top5"]
+    ]
+
+    return {
+        "success": True,
+        "predicted_class": predicted_class,
+        "confidence": float(result["confidence"]),
+        "top5": result["top5"],
+        "low_confidence": low_confidence,
+        "food_name": predicted_class,
+        "is_low_confidence": low_confidence,
+        "nutrients": nutrients,
+        "predictions": predictions,
+        "top_prediction": predictions[0],
+        "model": result.get("model"),
+    }
 
 
 @router.post("/detect", response_model=FoodDetectionResponse)
 async def detect_food(
-    file: UploadFile = File(..., description="Image file of the food item")
+    file: UploadFile = File(..., description="Image file of the food item"),
 ) -> FoodDetectionResponse:
-    """
-    Detect food item from uploaded image
-
-    Args:
-        file: Uploaded image file (JPG, PNG, etc.)
-
-    Returns:
-        FoodDetectionResponse with food name, confidence, and low confidence flag
-
-    Raises:
-        HTTPException: If detection fails or file is invalid
-    """
-    # Validate file type
-    if not file.content_type or not file.content_type.startswith('image/'):
-        raise HTTPException(
-            status_code=400,
-            detail="File must be an image (JPEG, PNG, etc.)"
-        )
+    """Detect the most likely food class from an uploaded image."""
+    _validate_image_file(file)
 
     try:
-        # Read image bytes
         image_bytes = await file.read()
+        result = get_detector().predict_from_bytes(image_bytes, top_k=5)
+        formatted = _format_detection(result)
 
-        # Get detector
-        detector = get_detector()
-
-        # Run prediction (detector may return new safety-dict or legacy list)
-        predictions = detector.predict_from_bytes(image_bytes, top_k=3)
-
-        if not predictions:
-            raise HTTPException(
-                status_code=500,
-                detail="Model failed to generate predictions"
-            )
-
-        # Normalize outputs from new SafeFoodPredictor (dict) or legacy list
-        if isinstance(predictions, dict):
-            # New safety format
-            status = predictions.get("status")
-            if status == "CONFIRMED":
-                food_name = predictions.get("dish")
-                confidence = float(predictions.get("confidence", 0.0))
-                # predictor returns percentage (0-100); normalize to 0-1
-                if confidence > 1.0:
-                    confidence = confidence / 100.0
-                is_low_confidence = confidence < 0.7
-            else:
-                # ASK_USER: pick first prediction and show its confidence
-                preds = predictions.get("predictions", [])
-                if preds:
-                    food_name = preds[0].get("dish", "")
-                    confidence = float(preds[0].get("confidence", 0.0))
-                else:
-                    # Fallback to old format if predictions not available
-                    options = predictions.get("options", [])
-                    food_name = options[0] if options else ""
-                    confidence = float(predictions.get("confidence", 0.0))
-                # predictor returns percentage (0-100); normalize to 0-1
-                if confidence > 1.0:
-                    confidence = confidence / 100.0
-                is_low_confidence = True
-
-            logger.info(
-                f"Detected food (safe API): {food_name} "
-                f"(confidence: {confidence:.2%}, low: {is_low_confidence})"
-            )
-
-        else:
-            # Legacy list format [(name, confidence), ...]
-            food_name, confidence = predictions[0]
-            # Ensure confidence in 0-1 range
-            if confidence > 1.0:
-                confidence = float(confidence) / 100.0
-            is_low_confidence = confidence < 0.7
-
-            logger.info(
-                f"Detected food: {food_name} "
-                f"(confidence: {confidence:.2%}, low: {is_low_confidence})"
-            )
-
-        # Look up nutrients from CSV
-        nutrients = get_macros(food_name) if food_name else None
-
-        return FoodDetectionResponse(
-            food_name=food_name,
-            confidence=confidence,
-            is_low_confidence=is_low_confidence,
-            nutrients=nutrients
+        logger.info(
+            "Detected food: %s (confidence: %.2f, low_confidence=%s)",
+            formatted["predicted_class"],
+            formatted["confidence"],
+            formatted["low_confidence"],
         )
-
+        return FoodDetectionResponse(**formatted)
     except HTTPException:
         raise
-    except Exception as e:
-        logger.error(f"Error during food detection: {str(e)}")
-        raise HTTPException(
-            status_code=500,
-            detail=f"Food detection failed: {str(e)}"
-        )
+    except Exception as exc:
+        logger.exception("Error during food detection")
+        raise HTTPException(status_code=500, detail=f"Food detection failed: {exc}") from exc
 
 
 @router.post("/detect/detailed", response_model=FoodDetectionDetailedResponse)
 async def detect_food_detailed(
     file: UploadFile = File(..., description="Image file of the food item"),
-    top_k: int = 3
+    top_k: int = 5,
 ) -> FoodDetectionDetailedResponse:
-    """
-    Detect food item from uploaded image with top K predictions
-
-    Args:
-        file: Uploaded image file (JPG, PNG, etc.)
-        top_k: Number of top predictions to return (default: 3)
-
-    Returns:
-        FoodDetectionDetailedResponse with multiple predictions
-
-    Raises:
-        HTTPException: If detection fails or file is invalid
-    """
-    # Validate file type
-    if not file.content_type or not file.content_type.startswith('image/'):
-        raise HTTPException(
-            status_code=400,
-            detail="File must be an image (JPEG, PNG, etc.)"
-        )
+    """Detect a food item and return top-k predictions for uncertain cases."""
+    _validate_image_file(file)
 
     try:
-        # Read image bytes
         image_bytes = await file.read()
-
-        # Get detector
-        detector = get_detector()
-
-        # Run prediction (may return safety-dict or legacy list)
-        predictions = detector.predict_from_bytes(image_bytes, top_k=top_k)
-
-        if not predictions:
-            raise HTTPException(
-                status_code=500,
-                detail="Model failed to generate predictions"
-            )
-
-        formatted_predictions = []
-
-        if isinstance(predictions, dict):
-            # New SafeFoodPredictor returned a dict
-            status = predictions.get("status")
-            
-            # Extract predictions list (available for both CONFIRMED and ASK_USER)
-            preds = predictions.get("predictions", [])
-            
-            if status == "UNKNOWN_OBJECT":
-                # Object not in our dataset - return with unknown flag
-                for pred in preds:
-                    dish = pred.get("dish", "")
-                    conf = float(pred.get("confidence", 0.0))
-                    if conf > 1.0:
-                        conf = conf / 100.0
-                    nutrients = get_macros(dish) if dish else None
-                    formatted_predictions.append({
-                        "food_name": dish,
-                        "confidence": conf,
-                        "is_low_confidence": True,
-                        "is_unknown": True,
-                        "nutrients": nutrients
-                    })
-                if not formatted_predictions:
-                    formatted_predictions.append({
-                        "food_name": "Unknown",
-                        "confidence": 0.0,
-                        "is_low_confidence": True,
-                        "is_unknown": True,
-                        "nutrients": None
-                    })
-                return FoodDetectionDetailedResponse(
-                    predictions=formatted_predictions,
-                    top_prediction=formatted_predictions[0]
-                )
-
-            if preds:
-                # Use the predictions list with individual confidence scores
-                for pred in preds:
-                    dish = pred.get("dish", "")
-                    conf = float(pred.get("confidence", 0.0))
-                    if conf > 1.0:
-                        conf = conf / 100.0
-                    # Look up nutrients for this food item
-                    nutrients = get_macros(dish) if dish else None
-                    formatted_predictions.append({
-                        "food_name": dish,
-                        "confidence": conf,
-                        "is_low_confidence": (status == "ASK_USER") or (conf < 0.7),
-                        "nutrients": nutrients
-                    })
-            elif status == "CONFIRMED":
-                # Fallback for old format (single dish)
-                dish = predictions.get("dish")
-                conf = float(predictions.get("confidence", 0.0))
-                if conf > 1.0:
-                    conf = conf / 100.0
-                # Look up nutrients for this food item
-                nutrients = get_macros(dish) if dish else None
-                formatted_predictions.append({
-                    "food_name": dish,
-                    "confidence": conf,
-                    "is_low_confidence": conf < 0.7,
-                    "nutrients": nutrients
-                })
-            else:
-                # Fallback: ASK_USER with old options format
-                options = predictions.get("options", [])
-                conf = float(predictions.get("confidence", 0.0))
-                if conf > 1.0:
-                    conf = conf / 100.0
-                for opt in options:
-                    # Look up nutrients for this food item
-                    nutrients = get_macros(opt) if opt else None
-                    formatted_predictions.append({
-                        "food_name": opt,
-                        "confidence": conf,
-                        "is_low_confidence": True,
-                        "nutrients": nutrients
-                    })
-
-            # Ensure we have at least one top_prediction
-            if not formatted_predictions:
-                raise HTTPException(status_code=500, detail="Model returned no usable predictions")
-
-        else:
-            # Legacy list format
-            for name, conf in predictions:
-                if conf > 1.0:
-                    conf = float(conf) / 100.0
-                # Look up nutrients for this food item
-                nutrients = get_macros(name) if name else None
-                formatted_predictions.append({
-                    "food_name": name,
-                    "confidence": conf,
-                    "is_low_confidence": conf < 0.7,
-                    "nutrients": nutrients
-                })
-
-        return FoodDetectionDetailedResponse(
-            predictions=formatted_predictions,
-            top_prediction=formatted_predictions[0]
-        )
-
+        result = get_detector().predict_from_bytes(image_bytes, top_k=top_k)
+        formatted = _format_detection(result)
+        return FoodDetectionDetailedResponse(**formatted)
     except HTTPException:
         raise
-    except Exception as e:
-        logger.error(f"Error during food detection: {str(e)}")
-        raise HTTPException(
-            status_code=500,
-            detail=f"Food detection failed: {str(e)}"
-        )
+    except Exception as exc:
+        logger.exception("Error during detailed food detection")
+        raise HTTPException(status_code=500, detail=f"Food detection failed: {exc}") from exc
 
 
 @router.get("/health")
 async def health_check():
-    """Check if the food detection service is ready"""
-    from app.ml.food_detector import is_initialized
-
+    """Check if the food detection service is ready."""
     if not is_initialized():
-        raise HTTPException(
-            status_code=503,
-            detail="Food detection model not initialized"
-        )
+        raise HTTPException(status_code=503, detail="Food detection model not initialized")
 
+    detector = get_detector()
     return {
         "status": "healthy",
         "service": "food_detection",
-        "model_loaded": True
+        "model_loaded": True,
+        "num_classes": len(detector.class_names),
+        "img_size": detector.img_size,
+        "model": detector.metadata,
     }
 
 
-@router.post("/detect/batch", response_model=List[dict])
+@router.post("/detect/batch", response_model=list[dict[str, Any]])
 async def detect_food_batch(
-    files: List[UploadFile] = File(..., description="Multiple image files"),
-    top_k: int = 5
-) -> List[dict]:
-    """
-    Detect food items from multiple uploaded images with top K predictions
-    Perfect for confidence testing on multiple images
-
-    Args:
-        files: List of uploaded image files (JPG, PNG, etc.)
-        top_k: Number of top predictions to return per image (default: 5)
-
-    Returns:
-        List of detection results, one per image
-
-    Raises:
-        HTTPException: If detection fails
-    """
+    files: list[UploadFile] = File(..., description="Multiple image files"),
+    top_k: int = 5,
+) -> list[dict[str, Any]]:
+    """Detect food items from multiple uploaded images."""
     results = []
-    
-    for idx, file in enumerate(files):
+
+    for file in files:
         try:
-            # Validate file type
-            if not file.content_type or not file.content_type.startswith('image/'):
-                results.append({
-                    "filename": file.filename,
-                    "error": "File must be an image",
-                    "success": False
-                })
-                continue
-
-            # Read image bytes
+            _validate_image_file(file)
             image_bytes = await file.read()
-
-            # Get detector
-            detector = get_detector()
-
-            # Run prediction
-            predictions = detector.predict_from_bytes(image_bytes, top_k=top_k)
-
-            if not predictions:
-                results.append({
-                    "filename": file.filename,
-                    "error": "Model failed to generate predictions",
-                    "success": False
-                })
-                continue
-
-            # Format predictions
-            formatted_predictions = [
-                {
-                    "rank": i + 1,
-                    "food_name": name,
-                    "confidence": round(conf * 100, 2),  # Convert to percentage
-                    "is_low_confidence": conf < 0.7
-                }
-                for i, (name, conf) in enumerate(predictions)
-            ]
-
+            result = get_detector().predict_from_bytes(image_bytes, top_k=top_k)
+            formatted = _format_detection(result)
             results.append({
                 "filename": file.filename,
                 "success": True,
-                "top_prediction": formatted_predictions[0],
-                "all_predictions": formatted_predictions
+                "predicted_class": formatted["predicted_class"],
+                "confidence": formatted["confidence"],
+                "low_confidence": formatted["low_confidence"],
+                "top5": formatted["top5"],
+                "top_prediction": formatted["top_prediction"],
+                "all_predictions": formatted["predictions"],
             })
-
-            logger.info(
-                f"[{idx + 1}/{len(files)}] {file.filename}: "
-                f"{formatted_predictions[0]['food_name']} "
-                f"({formatted_predictions[0]['confidence']}%)"
-            )
-
-        except Exception as e:
-            logger.error(f"Error processing {file.filename}: {str(e)}")
+        except Exception as exc:
+            logger.exception("Error processing %s", file.filename)
             results.append({
                 "filename": file.filename,
-                "error": str(e),
-                "success": False
+                "success": False,
+                "error": str(exc),
             })
 
     return results

@@ -20,6 +20,33 @@ ml_logger = logging.getLogger('app.ml.food_detector')
 ml_logger.setLevel(logging.DEBUG)
 
 
+def resolve_food_model_path() -> str:
+    """Resolve configured model path relative to the project root when needed."""
+    configured_path = settings.FOOD_MODEL_PATH
+    if os.path.isabs(configured_path):
+        model_path = configured_path
+    else:
+        project_root = os.path.dirname(os.path.dirname(__file__))
+        model_path = os.path.join(project_root, configured_path)
+
+    if os.path.exists(model_path):
+        return model_path
+
+    fallback_path = os.path.join(
+        os.path.dirname(os.path.dirname(__file__)),
+        "model",
+        "SehatGuru_ConvNeXt_Final.pth",
+    )
+    if configured_path == "model/SehatGuru_ConvNeXt_50_best_macroF1.pth" and os.path.exists(fallback_path):
+        print(
+            "Warning: 50-class food model checkpoint not found at "
+            f"{model_path}. Falling back to existing checkpoint: {fallback_path}"
+        )
+        return fallback_path
+
+    return model_path
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """
@@ -38,13 +65,12 @@ async def lifespan(app: FastAPI):
 
     # Initialize Food Detection Model
     try:
-        model_path = os.path.join(
-            os.path.dirname(os.path.dirname(__file__)),
-            "model",
-            "SehatGuru_ConvNeXt_Final.pth"
-        )
+        model_path = resolve_food_model_path()
         print(f"Loading food detection model from: {model_path}")
-        initialize_detector(model_path)
+        initialize_detector(
+            model_path,
+            low_confidence_threshold=settings.FOOD_MODEL_LOW_CONFIDENCE_THRESHOLD,
+        )
         print("Food detection model initialized successfully")
     except Exception as e:
         print(f"Warning: Food detection model initialization failed: {str(e)}")
