@@ -3,6 +3,14 @@ import { db } from "./firebase";
 import type { GamificationData } from "../types/gamification.types";
 import { XP_PER_MEAL } from "../types/gamification.types";
 
+export type GamificationMutationResult = {
+  kind: "meal" | "daily_task";
+  previous: GamificationData;
+  updated: GamificationData;
+  xpGained: number;
+  taskLabel?: string;
+};
+
 function todayStr(): string {
   return new Date().toISOString().split("T")[0];
 }
@@ -26,24 +34,28 @@ export async function getGamificationData(userId: string): Promise<GamificationD
   };
 }
 
-export async function updateStreakAndXP(userId: string): Promise<GamificationData> {
+export async function applyMealGamification(userId: string): Promise<GamificationMutationResult> {
   const current = await getGamificationData(userId);
   const today = todayStr();
   const yesterday = yesterdayStr();
 
-  // Already completed base task today — no changes
-  if (current.lastLoggedDate === today) return current;
+  if (current.lastLoggedDate === today) {
+    return {
+      kind: "meal",
+      previous: current,
+      updated: current,
+      xpGained: 0,
+    };
+  }
 
   let { currentStreak, longestStreak, totalXP } = current;
   let xpEarned = XP_PER_MEAL;
 
   if (current.lastLoggedDate === yesterday) {
-    // Streak continues — award meal XP + streak bonus
     currentStreak += 1;
     longestStreak = Math.max(longestStreak, currentStreak);
     xpEarned += Math.min(currentStreak * 2, 20);
   } else {
-    // New or broken streak — meal XP only
     currentStreak = 1;
     longestStreak = Math.max(longestStreak, 1);
   }
@@ -59,15 +71,37 @@ export async function updateStreakAndXP(userId: string): Promise<GamificationDat
   };
 
   await setDoc(doc(db, "gamification", userId), updated);
-  return updated;
+
+  return {
+    kind: "meal",
+    previous: current,
+    updated,
+    xpGained: xpEarned,
+  };
 }
 
-export async function awardBonusTaskXP(userId: string, bonusXP: number): Promise<GamificationData> {
+export async function updateStreakAndXP(userId: string): Promise<GamificationData> {
+  const result = await applyMealGamification(userId);
+  return result.updated;
+}
+
+export async function applyDailyTaskGamification(
+  userId: string,
+  bonusXP: number,
+  taskLabel: string
+): Promise<GamificationMutationResult> {
   const current = await getGamificationData(userId);
   const today = todayStr();
 
-  // Already awarded bonus task XP today
-  if (current.lastBonusTaskDate === today) return current;
+  if (current.lastBonusTaskDate === today) {
+    return {
+      kind: "daily_task",
+      previous: current,
+      updated: current,
+      xpGained: 0,
+      taskLabel,
+    };
+  }
 
   const updated: GamificationData = {
     ...current,
@@ -76,5 +110,17 @@ export async function awardBonusTaskXP(userId: string, bonusXP: number): Promise
   };
 
   await setDoc(doc(db, "gamification", userId), updated);
-  return updated;
+
+  return {
+    kind: "daily_task",
+    previous: current,
+    updated,
+    xpGained: bonusXP,
+    taskLabel,
+  };
+}
+
+export async function awardBonusTaskXP(userId: string, bonusXP: number): Promise<GamificationData> {
+  const result = await applyDailyTaskGamification(userId, bonusXP, "Daily Task");
+  return result.updated;
 }
