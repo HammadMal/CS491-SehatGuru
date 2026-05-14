@@ -19,6 +19,7 @@ interface Nutrients {
 interface FoodOption {
   food_name: string;
   confidence: number;
+  is_low_confidence?: boolean;
   nutrients?: Nutrients;
 }
 

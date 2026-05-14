@@ -15,6 +15,7 @@ import { Fonts } from "../../constants/fonts";
 import { AuthContext } from "../../context/AuthContext";
 import { useMealPlanStore } from "../../store/useMealPlanStore";
 import { useMealStore } from "../../store/useMealStore";
+import { syncMealGamification } from "../../services/gamification.sync";
 import { fetchTodaysMealPlan, markMealPlanItemLogged, deleteMealPlanFromFirestore } from "../../services/mealPlans.firestore";
 import { saveMealToFirestore } from "../../services/meals.firestore";
 import AddMealModal from "../../components/AddMealModal";
@@ -123,9 +124,9 @@ export default function MealPlansScreen() {
     try {
       await saveMealToFirestore(meal);
       addMeal(meal);
+      await syncMealGamification(authContext.user.id).catch(console.error);
       await markMealPlanItemLogged(selectedItem.id);
       markLogged(selectedItem.id);
-      setInfoModal({ title: 'Meal Logged! ✅', message: `${data.foodName} has been added to your daily log.`, variant: 'info' });
     } catch {
       setInfoModal({ title: 'Log Failed', message: 'Failed to log meal. Please try again.', variant: 'danger' });
     } finally {

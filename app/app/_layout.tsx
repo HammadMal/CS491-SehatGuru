@@ -14,7 +14,9 @@ import {
 } from '@expo-google-fonts/outfit';
 import * as SplashScreen from 'expo-splash-screen';
 import { Asset } from 'expo-asset';
+import { InAppNotificationHost } from '../components/InAppNotificationHost';
 import { notificationService } from '../services/notification.service';
+import { hydrateGamificationState, resetGamificationState } from '../services/gamification.sync';
 import { useNotificationStore } from '../store/useNotificationStore';
 
 LogBox.ignoreLogs([
@@ -28,7 +30,7 @@ Asset.fromModule(require('../assets/images/foodhero.png')).downloadAsync();
 
 
 function RootLayoutNav() {
-  const { isAuthenticated, isLoading, hasCompletedOnboarding, hasAcceptedConsent } = useAuth();
+  const { isAuthenticated, isLoading, hasCompletedOnboarding, hasAcceptedConsent, user } = useAuth();
   const segments = useSegments();
   const router = useRouter();
   const loadNotificationPrefs = useNotificationStore((s) => s.loadPreferences);
@@ -42,6 +44,15 @@ function RootLayoutNav() {
       loadNotificationPrefs();
     }
   }, [isAuthenticated]);
+
+  useEffect(() => {
+    if (!isAuthenticated || !user?.id) {
+      resetGamificationState();
+      return;
+    }
+
+    hydrateGamificationState(user.id).catch(console.error);
+  }, [isAuthenticated, user?.id]);
 
   useEffect(() => {
     if (isLoading) return;
@@ -104,7 +115,10 @@ export default function RootLayout() {
   return (
     <AuthProvider>
       <OnboardingProvider>
-        <RootLayoutNav />
+        <>
+          <RootLayoutNav />
+          <InAppNotificationHost />
+        </>
       </OnboardingProvider>
     </AuthProvider>
   );

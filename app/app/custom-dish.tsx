@@ -18,6 +18,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useMealStore } from '../store/useMealStore';
 import { useAuth } from '../hooks/useAuth';
 import * as Crypto from 'expo-crypto';
+import { syncMealGamification } from '../services/gamification.sync';
 import { saveMealToFirestore } from '../services/meals.firestore';
 import {
     searchIngredients,
@@ -165,13 +166,11 @@ export default function CustomDishScreen() {
 
             await saveMealToFirestore(meal);
             addMeal(meal);
+            await syncMealGamification(user.id).catch(console.error);
 
-            setInfoModal({
-                title: '✅ Dish Saved!',
-                message: `"${dishName.trim()}" has been logged as ${currentMealType}.`,
-                variant: 'info',
-                onConfirm: () => { setInfoModal(null); router.replace('/(tabs)/' as any); },
-            });
+            setTimeout(() => {
+                router.replace('/(tabs)/' as any);
+            }, 150);
         } catch (err: any) {
             setInfoModal({ title: 'Save Failed', message: err?.message ?? 'Something went wrong. Please try again.', variant: 'danger' });
         } finally {

@@ -20,8 +20,7 @@ import { Meal } from '../../types/meal.types';
 import * as Crypto from 'expo-crypto';
 import { useAuth } from '../../hooks/useAuth';
 import { saveMealToFirestore } from '../../services/meals.firestore';
-import { updateStreakAndXP } from '../../services/gamification.firestore';
-import { useGamificationStore } from '../../store/useGamificationStore';
+import { syncMealGamification } from '../../services/gamification.sync';
 
 interface Nutrition {
   calories: number;
@@ -40,7 +39,7 @@ interface FoodDetectionResult {
 interface FoodOption {
   food_name: string;
   confidence: number;
-  is_low_confidence: boolean;
+  is_low_confidence?: boolean;
   nutrients?: Nutrition;
 }
 
@@ -63,7 +62,6 @@ export default function CameraScreen() {
   const [foodOptions, setFoodOptions] = useState<FoodOption[]>([]);
   const { addMeal } = useMealStore();
   const { user } = useAuth();
-  const setGamificationData = useGamificationStore((s) => s.setData);
 
   const currentMealType = urlMealType || 'Dinner';
   const meta = MEAL_META[currentMealType] || MEAL_META.Dinner;
@@ -143,9 +141,9 @@ export default function CameraScreen() {
     };
     await saveMealToFirestore(meal);
     addMeal(meal);
-    updateStreakAndXP(user.id).then(setGamificationData).catch(console.error);
+    await syncMealGamification(user.id).catch(console.error);
     handleModalClose();
-    setTimeout(() => router.replace('/(tabs)/'), 150);
+    setTimeout(() => router.replace('/(tabs)/' as any), 150);
   };
 
   const detectFood = async (imageUri: string) => {

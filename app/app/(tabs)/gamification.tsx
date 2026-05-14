@@ -14,7 +14,7 @@ import { useRouter } from 'expo-router';
 import { useAuth } from '../../hooks/useAuth';
 import { useGamificationStore } from '../../store/useGamificationStore';
 import { useMealStore } from '../../store/useMealStore';
-import { getGamificationData, awardBonusTaskXP } from '../../services/gamification.firestore';
+import { syncDailyTaskGamification } from '../../services/gamification.sync';
 import { getLevelInfo } from '../../types/gamification.types';
 import { Fonts } from '../../constants/fonts';
 import type { Meal } from '../../types/meal.types';
@@ -122,14 +122,9 @@ const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Frid
 export default function GamificationScreen() {
   const { user } = useAuth();
   const router = useRouter();
-  const { data, hydrated, setData } = useGamificationStore();
+  const { data, hydrated } = useGamificationStore();
   const allMeals = useMealStore((s) => s.meals);
   const bonusAwardedRef = useRef(false);
-
-  useEffect(() => {
-    if (!user?.id || hydrated) return;
-    getGamificationData(user.id).then(setData).catch(console.error);
-  }, [user?.id, hydrated]);
 
   const todayMeals = useMemo(() => getTodayMeals(allMeals), [allMeals]);
 
@@ -144,8 +139,8 @@ export default function GamificationScreen() {
     if (data.lastBonusTaskDate === todayStr()) { bonusAwardedRef.current = true; return; }
     if (!isDayTaskComplete) return;
     bonusAwardedRef.current = true;
-    awardBonusTaskXP(user.id, dayTask.xp).then(setData).catch(console.error);
-  }, [data, isDayTaskComplete, user?.id]);
+    syncDailyTaskGamification(user.id, dayTask.xp, dayTask.label).catch(console.error);
+  }, [data, dayTask.label, dayTask.xp, isDayTaskComplete, user?.id]);
 
   if (!hydrated) {
     return (
