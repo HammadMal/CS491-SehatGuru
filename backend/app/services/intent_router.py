@@ -73,9 +73,11 @@ If no target is given, aim for a balanced 1800-2200 kcal day.
 
 PRACTICALITY RULES (strictly follow these):
 - Prioritize simple, everyday Pakistani home meals that a person can realistically cook and eat on a weekday — e.g., anda (eggs), daal, sabzi (vegetable curry), roti, paratha, dahi (yogurt), chawal, khichdi, aloo dishes.
-- Elaborate restaurant-style dishes (Nihari, Chicken Karahi, Biryani, Haleem, Paya, etc.) are time-consuming to prepare and should appear AT MOST ONCE in the entire day plan, only at dinner if needed. Never suggest more than one such dish per day.
+- If the user's health goal is muscle building or high protein AND they have no vegetarian/vegan restriction, you MUST include at least one meat or poultry dish per day (e.g., murgh/chicken curry, aloo gosht, keema, fish curry) at lunch or dinner. Simple home-cooked meat dishes are NOT elaborate — they are everyday Pakistani meals and are not subject to the one-elaborate-dish limit.
+- If the user is vegetarian or vegan, NEVER include meat, poultry, or fish regardless of their fitness goals. Use high-protein vegetarian options instead (e.g., chana, daal, paneer, eggs if ovo-vegetarian, dahi).
+- Elaborate restaurant-style dishes (Nihari, Biryani, Haleem, Paya, etc.) are time-consuming to prepare and should appear AT MOST ONCE in the entire day plan, only at dinner if needed. Never suggest more than one such dish per day.
 - Breakfast must be a quick-prep meal: e.g., anda (boiled/fried/omelette), paratha, bread with dahi or chutney, dalia (porridge), fruits.
-- Lunch should be a simple home-cooked meal: e.g., roti with daal, sabzi, aloo, chawal with a simple curry.
+- Lunch should be a simple home-cooked meal: e.g., roti with daal, sabzi, aloo, chawal with a simple curry. For muscle-building goals, include a meat or chicken dish here.
 - Snacks must be light: e.g., fruits, dahi, nuts, lassi, roasted chana.
 - The overall plan should feel like something a real Pakistani household would eat in one day — not a restaurant menu.
 
@@ -310,6 +312,28 @@ async def retrieve_meal_plan_context(state: RouterState) -> dict:
         user_memory = state.get("user_memory", "")
         preference_suffix = f" user preferences: {user_memory[:300]}" if user_memory else ""
 
+        # Use protein-rich queries when health goal is muscle building, but not if vegetarian/vegan
+        health_goals = (user_ctx or {}).get("health_goals", [])
+        if isinstance(health_goals, str):
+            health_goals = [health_goals]
+        dietary_restrictions = (user_ctx or {}).get("dietary_restrictions", [])
+        if isinstance(dietary_restrictions, str):
+            dietary_restrictions = [dietary_restrictions]
+        is_muscle_goal = any("muscle" in g.lower() or "protein" in g.lower() for g in health_goals)
+        is_vegetarian = any("vegetarian" in r.lower() or "vegan" in r.lower() for r in dietary_restrictions)
+        use_meat_queries = is_muscle_goal and not is_vegetarian
+
+        lunch_query = (
+            f"chicken murgh meat gosht keema high protein lunch curry roti {base_query}{preference_suffix}"
+            if use_meat_queries else
+            f"simple everyday home cooked lunch daal sabzi roti chawal {base_query}{preference_suffix}"
+        )
+        dinner_query = (
+            f"chicken murgh meat gosht fish high protein dinner curry {base_query}{preference_suffix}"
+            if use_meat_queries else
+            f"simple home dinner curry roti daal sabzi {base_query}{preference_suffix}"
+        )
+
         # Four concurrent queries — one per meal slot for appropriate dish variety
         breakfast_r, lunch_r, dinner_r, snacks_r = await asyncio.gather(
             rag_service.hybrid_search_async(
@@ -317,11 +341,11 @@ async def retrieve_meal_plan_context(state: RouterState) -> dict:
                 user_context=user_ctx, guidelines_top_k=0, dishes_top_k=3,
             ),
             rag_service.hybrid_search_async(
-                query=f"simple everyday home cooked lunch daal sabzi roti chawal {base_query}{preference_suffix}",
+                query=lunch_query,
                 user_context=user_ctx, guidelines_top_k=0, dishes_top_k=4,
             ),
             rag_service.hybrid_search_async(
-                query=f"simple home dinner curry roti daal sabzi {base_query}{preference_suffix}",
+                query=dinner_query,
                 user_context=user_ctx, guidelines_top_k=0, dishes_top_k=4,
             ),
             rag_service.hybrid_search_async(

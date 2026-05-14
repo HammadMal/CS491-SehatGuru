@@ -208,6 +208,8 @@ async def delete_account(current_user: TokenData = Depends(get_current_user)):
     Requires valid access token in Authorization header.
     Permanently deletes user account and all associated data.
     """
+    from app.services.mem0_service import mem0_service
+    await mem0_service.delete_all(current_user.uid)
     await AuthService.delete_user_account(current_user.uid)
     return MessageResponse(
         message="Account has been deleted successfully.",
@@ -241,8 +243,12 @@ async def admin_delete_user_by_email(email: str):
             users_ref = firebase_client.db.collection(settings.FIRESTORE_COLLECTION_USERS)
             users_ref.document(uid).delete()
 
+            # Delete Mem0 memories
+            from app.services.mem0_service import mem0_service
+            await mem0_service.delete_all(uid)
+
             return MessageResponse(
-                message=f"User {email} deleted from Firebase Auth and Firestore",
+                message=f"User {email} deleted from Firebase Auth, Firestore, and Mem0",
                 success=True
             )
         except Exception as e:

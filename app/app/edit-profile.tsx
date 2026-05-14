@@ -7,6 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Stack, router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { CustomInput } from '../components/auth/CustomInput';
+import { Checkbox } from '../components/auth/Checkbox';
 import { useAuth } from '../hooks/useAuth';
 import { userAPI } from '../services/user.api';
 import { OnboardingContext } from '../context/OnboardingContext';
@@ -47,6 +48,8 @@ export default function EditProfileScreen() {
     const [gender, setGender] = useState<'male' | 'female' | 'other' | 'prefer-not-to-say' | ''>('');
     const [activityLevel, setActivityLevel] = useState<ActivityLevel | ''>('');
     const [healthGoals, setHealthGoals] = useState<HealthGoal[]>([]);
+    const [mealPreferences, setMealPreferences] = useState({ breakfast: true, lunch: true, dinner: true, snacks: false });
+    const [dietaryPreferences, setDietaryPreferences] = useState({ vegetarian: false, vegan: false, glutenFree: false, other: '' });
 
     const [errors, setErrors] = useState({ fullName: null as string | null, height: null as string | null, weight: null as string | null, age: null as string | null });
     const [loading, setLoading] = useState(false);
@@ -68,6 +71,8 @@ export default function EditProfileScreen() {
                     setGender(profile.basicInfo.gender as any);
                     setActivityLevel(profile.activityLevel as any);
                     setHealthGoals(profile.healthGoals as any);
+                    if (profile.mealPreferences) setMealPreferences(profile.mealPreferences);
+                    if (profile.dietaryPreferences) setDietaryPreferences(profile.dietaryPreferences);
                 }
             } catch (err) {
                 console.error('Failed to load profile:', err);
@@ -107,6 +112,8 @@ export default function EditProfileScreen() {
                 basicInfo: { fullName, height, heightUnit, weight, weightUnit, age, gender },
                 activityLevel: activityLevel as ActivityLevel,
                 healthGoals,
+                mealPreferences,
+                dietaryPreferences,
             });
 
             /* refresh calorie/macro goals in auth context */
@@ -289,6 +296,50 @@ export default function EditProfileScreen() {
                                 );
                             })}
                         </View>
+                    </SectionCard>
+
+                    {/* ── Section: Meal Preferences ── */}
+                    <SectionCard title="Meal Preferences" icon="restaurant-outline">
+                        <Text style={styles.multiSelectHint}>Which meals do you typically eat?</Text>
+                        {([
+                            { key: 'breakfast', label: 'Breakfast', icon: 'sunny-outline' },
+                            { key: 'lunch',     label: 'Lunch',     icon: 'partly-sunny-outline' },
+                            { key: 'dinner',    label: 'Dinner',    icon: 'moon-outline' },
+                            { key: 'snacks',    label: 'Snacks',    icon: 'cafe-outline' },
+                        ] as const).map((meal) => (
+                            <Checkbox
+                                key={meal.key}
+                                label={meal.label}
+                                checked={mealPreferences[meal.key]}
+                                onToggle={() => setMealPreferences({ ...mealPreferences, [meal.key]: !mealPreferences[meal.key] })}
+                            />
+                        ))}
+                    </SectionCard>
+
+                    {/* ── Section: Dietary Preferences ── */}
+                    <SectionCard title="Dietary Preferences" icon="leaf-outline">
+                        <Text style={styles.multiSelectHint}>Select any that apply</Text>
+                        <Checkbox
+                            label="Vegetarian"
+                            checked={dietaryPreferences.vegetarian}
+                            onToggle={() => setDietaryPreferences({ ...dietaryPreferences, vegetarian: !dietaryPreferences.vegetarian })}
+                        />
+                        <Checkbox
+                            label="Vegan"
+                            checked={dietaryPreferences.vegan}
+                            onToggle={() => setDietaryPreferences({ ...dietaryPreferences, vegan: !dietaryPreferences.vegan })}
+                        />
+                        <Checkbox
+                            label="Gluten Free"
+                            checked={dietaryPreferences.glutenFree}
+                            onToggle={() => setDietaryPreferences({ ...dietaryPreferences, glutenFree: !dietaryPreferences.glutenFree })}
+                        />
+                        <CustomInput
+                            label="Other restrictions"
+                            placeholder="e.g. dairy-free, nut allergy…"
+                            value={dietaryPreferences.other}
+                            onChangeText={(t) => setDietaryPreferences({ ...dietaryPreferences, other: t })}
+                        />
                     </SectionCard>
 
                     {/* ── Save button ── */}
