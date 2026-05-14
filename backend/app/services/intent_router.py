@@ -84,7 +84,9 @@ PRACTICALITY RULES (strictly follow these):
 Use Urdu food names alongside English where helpful (e.g., "Dal Chawal (Lentils & Rice)").
 Only use dishes listed in the retrieved context. If no suitable option exists for a slot, use a simple staple (e.g., plain roti with daal).
 Each dish must appear AT MOST ONCE across the entire meal plan — do not repeat the same dish in multiple meal slots.
-If the User Memory section lists any food dislikes, those foods are FORBIDDEN from the meal plan."""
+If the User Memory section lists any food dislikes, those foods are FORBIDDEN from the meal plan.
+
+MEAL SLOT RULE: The user profile includes a "Meals Eaten" field listing which meals they actually eat. ONLY generate meal slots for those meals. If "lunch" is not in the list, do NOT include a Lunch section. If "snacks" is not in the list, do NOT include a Snacks section. Adjust calorie distribution across only the listed meal slots."""
 
 
 # --- Guard Rail Prompt ---
@@ -414,6 +416,9 @@ def generate_response(state: RouterState) -> dict:
 
         if user_ctx:
             user_info_parts = []
+            if user_ctx.get("name"):
+                user_info_parts.append(f"Name: {user_ctx['name']}")
+
             if user_ctx.get("health_goals"):
                 goals = user_ctx["health_goals"]
                 if isinstance(goals, list):
@@ -445,6 +450,12 @@ def generate_response(state: RouterState) -> dict:
 
             if user_ctx.get("activity_level"):
                 user_info_parts.append(f"Activity Level: {user_ctx['activity_level']}")
+
+            if user_ctx.get("meal_preferences"):
+                meals = user_ctx["meal_preferences"]
+                if isinstance(meals, list):
+                    meals = ", ".join(meals)
+                user_info_parts.append(f"Meals Eaten: {meals}")
 
             if user_info_parts:
                 print(f"[DEBUG] user profile being sent to LLM: {user_info_parts}")

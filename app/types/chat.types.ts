@@ -14,8 +14,10 @@ export interface ChatSession {
 }
 
 export interface UserContext {
+  name?: string;
   health_goals?: string[];
   dietary_restrictions?: string[];
+  meal_preferences?: string[];
   daily_calorie_target?: number;
   age?: number;
   gender?: string;
