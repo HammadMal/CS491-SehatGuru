@@ -1,6 +1,6 @@
 import type { MealPlanItem, MealType } from "../types/meal.types";
 
-type ParsedDish = Omit<MealPlanItem, "id" | "userId" | "logged" | "createdAt">;
+type ParsedDish = Omit<MealPlanItem, "id" | "userId" | "planId" | "logged" | "createdAt">;
 
 /**
  * Parses the meal plan markdown produced by the backend.
