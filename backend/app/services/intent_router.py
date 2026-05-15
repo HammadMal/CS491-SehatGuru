@@ -404,6 +404,18 @@ async def retrieve_meal_plan_context(state: RouterState) -> dict:
         ])
         slot_results = dict(zip(slot_keys, slot_results_list))
 
+        # Build dish-name blocklist from dietary restrictions so forbidden dishes
+        # never appear in the retrieved context at all — not just in the prompt rule.
+        dish_blocklist_terms: list[str] = []
+        if is_vegetarian:
+            dish_blocklist_terms += ["chicken", "murgh", "gosht", "keema", "beef", "mutton", "fish", "prawn"]
+        if any("gluten" in r.lower() for r in dietary_restrictions):
+            dish_blocklist_terms += ["paratha", "roti", "naan", "chapati", "nihari", "haleem", "paya"]
+
+        def is_blocked(dish_name: str) -> bool:
+            name_lower = dish_name.lower()
+            return any(term in name_lower for term in dish_blocklist_terms)
+
         context_parts = []
         seen_dishes = set()
 
@@ -413,6 +425,7 @@ async def retrieve_meal_plan_context(state: RouterState) -> dict:
             unique_dishes = [
                 d for d in dishes
                 if d["name"].lower().strip() not in seen_dishes
+                and not is_blocked(d["name"])
             ]
             seen_dishes.update(d["name"].lower().strip() for d in unique_dishes)
 
