@@ -36,6 +36,27 @@ class RouterState(TypedDict):
 
 # --- System Prompts ---
 
+GREETING_PROMPT = """You are SehatGuru, a friendly AI nutritionist specializing in Pakistani cuisine and healthy eating.
+
+The user has sent a casual message — either a greeting or a thank you. Handle each case:
+
+If it is a GREETING (hi, hello, hey, good morning, etc.):
+- Greet them back warmly, using their name if available in the profile
+- Briefly mention what you can help with:
+  * Building a personalized meal plan based on their health goals
+  * Answering nutrition and diet questions
+  * Suggesting healthy Pakistani dishes suited to their preferences
+  * Calorie and macro guidance
+- End with an open invitation to ask their first question
+
+If it is a THANK YOU (thanks, thank you, appreciate it, that was helpful, etc.):
+- Acknowledge warmly and briefly (e.g., "You're welcome!")
+- Remind them you're always here if they have more nutrition or meal questions
+- Keep it to 2-3 sentences max — do not repeat a full introduction
+
+In both cases: be warm and conversational, not robotic. Do NOT use bullet points in your reply."""
+
+
 NUTRITION_ADVICE_PROMPT = """You are SehatGuru, an AI nutritionist specializing in Pakistani cuisine and dietary guidelines.
 
 You are answering a NUTRITION or HEALTH question. Focus on:
@@ -51,11 +72,7 @@ If the context doesn't contain relevant information, use your general knowledge 
 
 MEAL_PLAN_PROMPT = """You are SehatGuru, an AI nutritionist specializing in Pakistani cuisine and meal planning.
 
-You are creating a ONE-DAY MEAL PLAN. Structure it as:
-- **Breakfast** (~25% of daily calories)
-- **Lunch** (~35% of daily calories)
-- **Dinner** (~30% of daily calories)
-- **Snacks** (~10% of daily calories)
+You are creating a ONE-DAY MEAL PLAN. Structure it using only the meal slots listed in the user's "Meals Eaten" field. Default calorie distribution if no target is given: Breakfast ~25%, Lunch ~35%, Dinner ~30%, Snacks ~10%. If a "Per-Meal Calorie Targets" section is provided, use those exact numbers instead.
 
 For each meal, list 1-2 dishes. Each dish MUST be on its own line in EXACTLY this format (no variations):
   - DISH_NAME | PORTION | CAL kcal | PRO g protein | CARB g carbs | FAT g fat
@@ -75,6 +92,7 @@ PRACTICALITY RULES (strictly follow these):
 - Prioritize simple, everyday Pakistani home meals that a person can realistically cook and eat on a weekday — e.g., anda (eggs), daal, sabzi (vegetable curry), roti, paratha, dahi (yogurt), chawal, khichdi, aloo dishes.
 - If the user's health goal is muscle building or high protein AND they have no vegetarian/vegan restriction, you MUST include at least one meat or poultry dish per day (e.g., murgh/chicken curry, aloo gosht, keema, fish curry) at lunch or dinner. Simple home-cooked meat dishes are NOT elaborate — they are everyday Pakistani meals and are not subject to the one-elaborate-dish limit.
 - If the user is vegetarian or vegan, NEVER include meat, poultry, or fish regardless of their fitness goals. Use high-protein vegetarian options instead (e.g., chana, daal, paneer, eggs if ovo-vegetarian, dahi).
+- If the user has a "gluten_free" restriction, NEVER include wheat-based dishes: no paratha, roti, naan, chapati, keema paratha, dal paratha, or any wheat bread. Also AVOID dishes that are traditionally only eaten with roti/naan and do not work well with rice — specifically nihari, haleem, and paya (these are bread-dependent dishes). Any curry dish (karahi, daal, sabzi, aloo) MUST be explicitly paired with chawal/rice or khichdi as the carb base, not served alone. Use rice-based options as the staple carbohydrate throughout the plan.
 - Elaborate restaurant-style dishes (Nihari, Biryani, Haleem, Paya, etc.) are time-consuming to prepare and should appear AT MOST ONCE in the entire day plan, only at dinner if needed. Never suggest more than one such dish per day.
 - Breakfast must be a quick-prep meal: e.g., anda (boiled/fried/omelette), paratha, bread with dahi or chutney, dalia (porridge), fruits.
 - Lunch should be a simple home-cooked meal: e.g., roti with daal, sabzi, aloo, chawal with a simple curry. For muscle-building goals, include a meat or chicken dish here.
@@ -86,7 +104,18 @@ Only use dishes listed in the retrieved context. If no suitable option exists fo
 Each dish must appear AT MOST ONCE across the entire meal plan — do not repeat the same dish in multiple meal slots.
 If the User Memory section lists any food dislikes, those foods are FORBIDDEN from the meal plan.
 
-MEAL SLOT RULE: The user profile includes a "Meals Eaten" field listing which meals they actually eat. ONLY generate meal slots for those meals. If "lunch" is not in the list, do NOT include a Lunch section. If "snacks" is not in the list, do NOT include a Snacks section. Adjust calorie distribution across only the listed meal slots."""
+MEDICAL CONDITION RULES (apply strictly if the condition appears in Dietary Restrictions):
+- diabetes / diabetic: Avoid high-sugar foods entirely — no meethi lassi, kheer, gulab jamun, halwa, or large portions of white rice. Prefer low-GI options: daal, sabzi, eggs, whole-grain roti, dahi, lean protein.
+- hypertension / high blood pressure: Minimise sodium. No extra salt, pickles/achaar, papad, or highly processed foods. Prefer fresh vegetables, fruits, dahi, and low-fat dishes.
+- high cholesterol / cholesterol: Limit saturated fat. Avoid ghee-heavy dishes, deep-fried foods (samosa, pakora), and organ meats. Use minimal oil; prefer boiled, baked, or steamed preparations.
+- pcos: Anti-inflammatory focus. Avoid high-sugar, high-GI foods. Prefer whole grains, vegetables, lean protein, dahi, and healthy fats.
+- thyroid: Balanced macros. Avoid excessive raw cruciferous vegetables (large amounts of raw gobi/phool gobhi). Prefer iodine-friendly foods and well-cooked meals.
+- ibs / irritable bowel syndrome: Avoid high-FODMAP triggers — large amounts of raw onion, garlic, lentils, or dairy. Prefer plain rice, dahi (in moderation), boiled eggs, banana, and easily digestible dishes.
+- any other condition listed: Note the condition at the top of the meal plan and advise the user to consult a registered dietitian for personalised guidance. Generate a generally healthy, balanced plan.
+
+MEAL SLOT RULE: The user profile includes a "Meals Eaten" field listing which meals they actually eat. ONLY generate meal slots for those meals. If "lunch" is not in the list, do NOT include a Lunch section. If "snacks" is not in the list, do NOT include a Snacks section. Adjust calorie distribution across only the listed meal slots.
+
+HIGH CALORIE + FEW MEALS RULE: If the user's daily calorie target is ≥ 2200 kcal but they have selected only 1 or 2 meal slots, do NOT try to cram all calories into those slots with unrealistically large portions. Instead, begin your response with a brief advisory note (1-2 sentences) telling the user that their calorie goal is high for so few meals and they may want to add more meal slots (e.g., add a snack or lunch) to reach it comfortably. Then generate the plan using only their selected slots, distributing calories as evenly and realistically as possible across them."""
 
 
 # --- Guard Rail Prompt ---
@@ -137,6 +166,7 @@ GUARD_RAIL_RESPONSES = {
 CLASSIFICATION_PROMPT = """Classify the following user message into exactly one intent.
 
 Intents:
+- greeting: The user is greeting the assistant, making casual small talk, or expressing thanks (e.g., "hi", "hello", "hey", "how are you", "what can you do", "who are you", "good morning", "thank you", "thanks", "appreciate it", "great job", "that was helpful").
 - nutritional_advice: Questions about nutrition, health, calories, diet tips, food information, or general dietary guidance.
 - meal_plan_generation: Requests to create, generate, or suggest a meal plan, diet plan, weekly menu, or daily eating schedule.
 
@@ -255,7 +285,7 @@ def classify_intent(state: RouterState) -> dict:
         response = model.generate_content(prompt)
         raw = response.text.strip().lower().replace(" ", "_")
 
-        if raw in ("nutritional_advice", "meal_plan_generation"):
+        if raw in ("nutritional_advice", "meal_plan_generation", "greeting"):
             return {"intent": raw}
 
         # Default fallback
@@ -336,36 +366,47 @@ async def retrieve_meal_plan_context(state: RouterState) -> dict:
             f"simple home dinner curry roti daal sabzi {base_query}{preference_suffix}"
         )
 
-        # Four concurrent queries — one per meal slot for appropriate dish variety
-        breakfast_r, lunch_r, dinner_r, snacks_r = await asyncio.gather(
+        # Only fetch RAG context for meal slots the user actually eats
+        meal_prefs = list((user_ctx or {}).get("meal_preferences") or [])
+        if not meal_prefs:
+            meal_prefs = ["breakfast", "lunch", "dinner", "snacks"]
+
+        slot_definitions = {}
+        if "breakfast" in meal_prefs:
+            slot_definitions["breakfast"] = (
+                "Breakfast Options",
+                f"quick easy breakfast morning home dishes eggs paratha dahi {base_query}",
+                0, 3,
+            )
+        if "lunch" in meal_prefs:
+            slot_definitions["lunch"] = ("Lunch Options", lunch_query, 0, 4)
+        if "dinner" in meal_prefs:
+            slot_definitions["dinner"] = ("Dinner Options", dinner_query, 0, 4)
+        if "snacks" in meal_prefs:
+            slot_definitions["snacks"] = (
+                "Snack Options",
+                f"light snacks fruits dahi lassi roasted chana {base_query}",
+                1, 2,
+            )
+
+        slot_keys = list(slot_definitions.keys())
+        slot_results_list = await asyncio.gather(*[
             rag_service.hybrid_search_async(
-                query=f"quick easy breakfast morning home dishes eggs paratha dahi {base_query}",
-                user_context=user_ctx, guidelines_top_k=0, dishes_top_k=3,
-            ),
-            rag_service.hybrid_search_async(
-                query=lunch_query,
-                user_context=user_ctx, guidelines_top_k=0, dishes_top_k=4,
-            ),
-            rag_service.hybrid_search_async(
-                query=dinner_query,
-                user_context=user_ctx, guidelines_top_k=0, dishes_top_k=4,
-            ),
-            rag_service.hybrid_search_async(
-                query=f"light snacks fruits dahi lassi roasted chana {base_query}",
-                user_context=user_ctx, guidelines_top_k=1, dishes_top_k=2,
-            ),
-        )
+                query=slot_definitions[k][1],
+                user_context=user_ctx,
+                guidelines_top_k=slot_definitions[k][2],
+                dishes_top_k=slot_definitions[k][3],
+            )
+            for k in slot_keys
+        ])
+        slot_results = dict(zip(slot_keys, slot_results_list))
 
         context_parts = []
-        seen_dishes = set()  # track names across slots to prevent duplicates
+        seen_dishes = set()
 
-        for slot, results in [
-            ("Breakfast Options", breakfast_r),
-            ("Lunch Options", lunch_r),
-            ("Dinner Options", dinner_r),
-            ("Snack Options", snacks_r),
-        ]:
-            dishes = results.get("dishes", [])
+        for key in slot_keys:
+            label = slot_definitions[key][0]
+            dishes = slot_results[key].get("dishes", [])
             unique_dishes = [
                 d for d in dishes
                 if d["name"].lower().strip() not in seen_dishes
@@ -373,7 +414,7 @@ async def retrieve_meal_plan_context(state: RouterState) -> dict:
             seen_dishes.update(d["name"].lower().strip() for d in unique_dishes)
 
             if unique_dishes:
-                context_parts.append(f"\n## {slot}:\n")
+                context_parts.append(f"\n## {label}:\n")
                 for d in unique_dishes:
                     context_parts.append(
                         f"- **{d['name']}**: {d['calories']:.0f} kcal | "
@@ -382,11 +423,14 @@ async def retrieve_meal_plan_context(state: RouterState) -> dict:
                         f"F: {d['fat_g']:.1f}g\n"
                     )
 
-        guidelines = snacks_r.get("guidelines", [])
-        if guidelines:
-            context_parts.append("\n## Key Dietary Guidelines:\n")
-            for g in guidelines:
-                context_parts.append(f"- {g['content']}\n")
+        # Guidelines from last slot's query (snacks if selected, otherwise last chosen slot)
+        last_key = slot_keys[-1] if slot_keys else None
+        if last_key:
+            guidelines = slot_results[last_key].get("guidelines", [])
+            if guidelines:
+                context_parts.append("\n## Key Dietary Guidelines:\n")
+                for g in guidelines:
+                    context_parts.append(f"- {g['content']}\n")
 
         return {"rag_context": "".join(context_parts)}
 
@@ -403,6 +447,8 @@ def generate_response(state: RouterState) -> dict:
         # Pick system prompt based on intent
         if state["intent"] == "meal_plan_generation":
             system_prompt = MEAL_PLAN_PROMPT
+        elif state["intent"] == "greeting":
+            system_prompt = GREETING_PROMPT
         else:
             system_prompt = NUTRITION_ADVICE_PROMPT
 
@@ -462,6 +508,25 @@ def generate_response(state: RouterState) -> dict:
                 prompt_parts.append(f"\n## User Profile:\n" + "\n".join(user_info_parts))
             else:
                 print("[DEBUG] user_context was present but all fields were empty/missing")
+
+            # For meal plans: inject explicit per-meal kcal targets so LLM doesn't guess
+            if state["intent"] == "meal_plan_generation" and user_ctx.get("daily_calorie_target"):
+                calorie_target = user_ctx["daily_calorie_target"]
+                meal_prefs = list(user_ctx.get("meal_preferences") or ["breakfast", "lunch", "dinner", "snacks"])
+                base_splits = {"breakfast": 0.25, "lunch": 0.35, "dinner": 0.30, "snacks": 0.10}
+                total_weight = sum(base_splits[m] for m in meal_prefs if m in base_splits)
+                meal_targets = []
+                for meal in meal_prefs:
+                    if meal in base_splits and total_weight > 0:
+                        kcal = round((base_splits[meal] / total_weight) * calorie_target)
+                        meal_targets.append(f"- {meal.capitalize()}: ~{kcal} kcal")
+                if meal_targets:
+                    print(f"[DEBUG] injecting per-meal calorie targets: {meal_targets}")
+                    prompt_parts.append(
+                        f"\n## Per-Meal Calorie Targets (MUST hit these — do not deviate by more than 10%):\n"
+                        f"Total daily target: {calorie_target} kcal\n"
+                        + "\n".join(meal_targets)
+                    )
         else:
             print("[DEBUG] no user_context — LLM will respond without personalization")
 
@@ -634,6 +699,8 @@ def route_by_intent(state: RouterState) -> str:
     """Route to the correct retrieval node based on classified intent."""
     if state["intent"] == "meal_plan_generation":
         return "retrieve_meal_plan_context"
+    if state["intent"] == "greeting":
+        return "generate_response"  # skip RAG for greetings
     return "retrieve_nutrition_context"
 
 
@@ -665,13 +732,14 @@ def build_intent_router() -> StateGraph:
         },
     )
 
-    # Conditional edge: classify_intent -> retrieval node
+    # Conditional edge: classify_intent -> retrieval node (or direct to generate for greetings)
     graph.add_conditional_edges(
         "classify_intent",
         route_by_intent,
         {
             "retrieve_nutrition_context": "retrieve_nutrition_context",
             "retrieve_meal_plan_context": "retrieve_meal_plan_context",
+            "generate_response": "generate_response",
         },
     )
 

@@ -36,6 +36,7 @@ export interface DietaryPreferences {
   vegan: boolean;
   glutenFree: boolean;
   other: string;
+  medicalConditions: string[];
 }
 
 export interface OnboardingData {

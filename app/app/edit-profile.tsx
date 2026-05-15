@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
     View, Text, StyleSheet, ScrollView, TouchableOpacity,
-    ActivityIndicator, KeyboardAvoidingView, Platform,
+    ActivityIndicator, KeyboardAvoidingView, Platform, TextInput,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Stack, router } from 'expo-router';
@@ -15,6 +15,8 @@ import { validateName, validateHeight, validateWeight, validateAge } from '../ut
 import type { ActivityLevel, HealthGoal } from '../types/onboarding.types';
 import { Fonts } from '../constants/fonts';
 import { ConfirmModal } from '../components/ConfirmModal';
+
+const PRESET_CONDITIONS = ['Diabetes', 'Hypertension', 'High Cholesterol', 'PCOS', 'Thyroid'];
 
 /* ── Static data (mirrors onboarding screens) ── */
 const ACTIVITY_LEVELS: { value: ActivityLevel; label: string; desc: string; icon: any }[] = [
@@ -49,7 +51,8 @@ export default function EditProfileScreen() {
     const [activityLevel, setActivityLevel] = useState<ActivityLevel | ''>('');
     const [healthGoals, setHealthGoals] = useState<HealthGoal[]>([]);
     const [mealPreferences, setMealPreferences] = useState({ breakfast: true, lunch: true, dinner: true, snacks: false });
-    const [dietaryPreferences, setDietaryPreferences] = useState({ vegetarian: false, vegan: false, glutenFree: false, other: '' });
+    const [dietaryPreferences, setDietaryPreferences] = useState({ vegetarian: false, vegan: false, glutenFree: false, other: '', medicalConditions: [] as string[] });
+    const [customCondition, setCustomCondition] = useState('');
 
     const [errors, setErrors] = useState({ fullName: null as string | null, height: null as string | null, weight: null as string | null, age: null as string | null });
     const [loading, setLoading] = useState(false);
@@ -72,7 +75,10 @@ export default function EditProfileScreen() {
                     setActivityLevel(profile.activityLevel as any);
                     setHealthGoals(profile.healthGoals as any);
                     if (profile.mealPreferences) setMealPreferences(profile.mealPreferences);
-                    if (profile.dietaryPreferences) setDietaryPreferences(profile.dietaryPreferences);
+                    if (profile.dietaryPreferences) setDietaryPreferences({
+                        ...profile.dietaryPreferences,
+                        medicalConditions: profile.dietaryPreferences.medicalConditions ?? [],
+                    });
                 }
             } catch (err) {
                 console.error('Failed to load profile:', err);
@@ -298,6 +304,85 @@ export default function EditProfileScreen() {
                         </View>
                     </SectionCard>
 
+                    {/* ── Section: Medical Conditions (only when manage-condition selected) ── */}
+                    {healthGoals.includes('manage-condition') && (
+                        <SectionCard title="Medical Conditions" icon="medkit-outline">
+                            <Text style={styles.multiSelectHint}>Select presets or add your own</Text>
+                            <View style={styles.chipRow}>
+                                {PRESET_CONDITIONS.map((c) => {
+                                    const active = dietaryPreferences.medicalConditions.includes(c);
+                                    return (
+                                        <TouchableOpacity
+                                            key={c}
+                                            style={[styles.chip, active && styles.chipActive]}
+                                            onPress={() => setDietaryPreferences((prev) => ({
+                                                ...prev,
+                                                medicalConditions: active
+                                                    ? prev.medicalConditions.filter((x) => x !== c)
+                                                    : [...prev.medicalConditions, c],
+                                            }))}
+                                            activeOpacity={0.7}
+                                        >
+                                            <Text style={[styles.chipText, active && styles.chipTextActive]}>{c}</Text>
+                                        </TouchableOpacity>
+                                    );
+                                })}
+                            </View>
+
+                            <View style={styles.customRow}>
+                                <TextInput
+                                    style={styles.customInput}
+                                    placeholder="e.g. IBS, Crohn's, GERD…"
+                                    placeholderTextColor="#aaa"
+                                    value={customCondition}
+                                    onChangeText={setCustomCondition}
+                                    onSubmitEditing={() => {
+                                        const t = customCondition.trim();
+                                        if (t && !dietaryPreferences.medicalConditions.includes(t)) {
+                                            setDietaryPreferences((prev) => ({ ...prev, medicalConditions: [...prev.medicalConditions, t] }));
+                                        }
+                                        setCustomCondition('');
+                                    }}
+                                    returnKeyType="done"
+                                />
+                                <TouchableOpacity
+                                    style={[styles.addBtn, !customCondition.trim() && styles.addBtnDisabled]}
+                                    disabled={!customCondition.trim()}
+                                    onPress={() => {
+                                        const t = customCondition.trim();
+                                        if (t && !dietaryPreferences.medicalConditions.includes(t)) {
+                                            setDietaryPreferences((prev) => ({ ...prev, medicalConditions: [...prev.medicalConditions, t] }));
+                                        }
+                                        setCustomCondition('');
+                                    }}
+                                >
+                                    <Ionicons name="add" size={20} color="#fff" />
+                                </TouchableOpacity>
+                            </View>
+
+                            {dietaryPreferences.medicalConditions.filter((c) => !PRESET_CONDITIONS.includes(c)).length > 0 && (
+                                <View style={styles.chipRow}>
+                                    {dietaryPreferences.medicalConditions
+                                        .filter((c) => !PRESET_CONDITIONS.includes(c))
+                                        .map((c) => (
+                                            <TouchableOpacity
+                                                key={c}
+                                                style={[styles.chip, styles.chipActive]}
+                                                onPress={() => setDietaryPreferences((prev) => ({
+                                                    ...prev,
+                                                    medicalConditions: prev.medicalConditions.filter((x) => x !== c),
+                                                }))}
+                                                activeOpacity={0.7}
+                                            >
+                                                <Text style={[styles.chipText, styles.chipTextActive]}>{c}</Text>
+                                                <Ionicons name="close" size={13} color="#22c55e" style={{ marginLeft: 4 }} />
+                                            </TouchableOpacity>
+                                        ))}
+                                </View>
+                            )}
+                        </SectionCard>
+                    )}
+
                     {/* ── Section: Meal Preferences ── */}
                     <SectionCard title="Meal Preferences" icon="restaurant-outline">
                         <Text style={styles.multiSelectHint}>Which meals do you typically eat?</Text>
@@ -472,6 +557,19 @@ const styles = StyleSheet.create({
         position: 'absolute', top: 6, right: 6, width: 16, height: 16,
         borderRadius: 8, backgroundColor: '#22c55e', alignItems: 'center', justifyContent: 'center',
     },
+
+    /* Medical conditions custom input */
+    customRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 },
+    customInput: {
+        flex: 1, height: 42, borderRadius: 10, borderWidth: 1, borderColor: '#E5E7EB',
+        paddingHorizontal: 12, fontSize: 14, fontFamily: Fonts.regular, color: '#111',
+        backgroundColor: '#F9FAFB',
+    },
+    addBtn: {
+        width: 42, height: 42, borderRadius: 10, backgroundColor: '#22c55e',
+        alignItems: 'center', justifyContent: 'center',
+    },
+    addBtnDisabled: { backgroundColor: '#E5E7EB' },
 
     /* Save button */
     saveBtn: {

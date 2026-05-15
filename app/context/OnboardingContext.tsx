@@ -41,6 +41,7 @@ const initialOnboardingData: OnboardingData = {
     vegan: false,
     glutenFree: false,
     other: '',
+    medicalConditions: [],
   },
 };
 

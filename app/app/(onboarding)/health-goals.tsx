@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -10,6 +10,8 @@ import { useOnboarding } from '../../hooks/useOnboarding';
 import { HealthGoal } from '../../types/onboarding.types';
 import { Colors } from '../../constants/colors';
 import { Fonts } from '../../constants/fonts';
+
+const PRESET_CONDITIONS = ['Diabetes', 'Hypertension', 'High Cholesterol', 'PCOS', 'Thyroid'];
 
 const healthGoals = [
   {
@@ -46,8 +48,14 @@ const healthGoals = [
 
 export default function HealthGoalsScreen() {
   const router = useRouter();
-  const { onboardingData, updateHealthGoals } = useOnboarding();
+  const { onboardingData, updateHealthGoals, updateDietaryPreferences } = useOnboarding();
   const [selectedGoals, setSelectedGoals] = useState<HealthGoal[]>(onboardingData.healthGoals);
+  const [selectedConditions, setSelectedConditions] = useState<string[]>(
+    onboardingData.dietaryPreferences?.medicalConditions ?? []
+  );
+  const [customCondition, setCustomCondition] = useState('');
+
+  const isManageCondition = selectedGoals.includes('manage-condition');
 
   const toggleGoal = (goal: HealthGoal) => {
     if (selectedGoals.includes(goal)) {
@@ -57,12 +65,32 @@ export default function HealthGoalsScreen() {
     }
   };
 
-  const handleContinue = () => {
-    if (selectedGoals.length === 0) {
-      return;
+  const toggleCondition = (condition: string) => {
+    setSelectedConditions((prev) =>
+      prev.includes(condition) ? prev.filter((c) => c !== condition) : [...prev, condition]
+    );
+  };
+
+  const addCustomCondition = () => {
+    const trimmed = customCondition.trim();
+    if (trimmed && !selectedConditions.includes(trimmed)) {
+      setSelectedConditions((prev) => [...prev, trimmed]);
     }
+    setCustomCondition('');
+  };
+
+  const removeCondition = (condition: string) => {
+    setSelectedConditions((prev) => prev.filter((c) => c !== condition));
+  };
+
+  const handleContinue = () => {
+    if (selectedGoals.length === 0) return;
 
     updateHealthGoals(selectedGoals);
+    updateDietaryPreferences({
+      ...onboardingData.dietaryPreferences,
+      medicalConditions: isManageCondition ? selectedConditions : [],
+    });
     router.push('/(onboarding)/daily-intake');
   };
 
@@ -72,7 +100,8 @@ export default function HealthGoalsScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
         <TouchableOpacity onPress={handleBack} style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color={Colors.textPrimary} />
         </TouchableOpacity>
@@ -94,6 +123,69 @@ export default function HealthGoalsScreen() {
           ))}
         </View>
 
+        {/* Condition picker — shown only when manage-condition is selected */}
+        {isManageCondition && (
+          <View style={styles.conditionBox}>
+            <Text style={styles.conditionTitle}>What condition are you managing?</Text>
+            <Text style={styles.conditionSubtitle}>Select all that apply, or add your own</Text>
+
+            <View style={styles.chipRow}>
+              {PRESET_CONDITIONS.map((c) => {
+                const active = selectedConditions.includes(c);
+                return (
+                  <TouchableOpacity
+                    key={c}
+                    style={[styles.chip, active && styles.chipActive]}
+                    onPress={() => toggleCondition(c)}
+                    activeOpacity={0.7}
+                  >
+                    <Text style={[styles.chipText, active && styles.chipTextActive]}>{c}</Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+
+            {/* Custom condition input */}
+            <View style={styles.customRow}>
+              <TextInput
+                style={styles.customInput}
+                placeholder="e.g. IBS, Crohn's, GERD…"
+                placeholderTextColor={Colors.textSecondary}
+                value={customCondition}
+                onChangeText={setCustomCondition}
+                onSubmitEditing={addCustomCondition}
+                returnKeyType="done"
+              />
+              <TouchableOpacity
+                style={[styles.addBtn, !customCondition.trim() && styles.addBtnDisabled]}
+                onPress={addCustomCondition}
+                disabled={!customCondition.trim()}
+              >
+                <Ionicons name="add" size={20} color="#fff" />
+              </TouchableOpacity>
+            </View>
+
+            {/* Show custom conditions as removable tags */}
+            {selectedConditions.filter((c) => !PRESET_CONDITIONS.includes(c)).length > 0 && (
+              <View style={styles.chipRow}>
+                {selectedConditions
+                  .filter((c) => !PRESET_CONDITIONS.includes(c))
+                  .map((c) => (
+                    <TouchableOpacity
+                      key={c}
+                      style={[styles.chip, styles.chipActive]}
+                      onPress={() => removeCondition(c)}
+                      activeOpacity={0.7}
+                    >
+                      <Text style={[styles.chipText, styles.chipTextActive]}>{c}</Text>
+                      <Ionicons name="close" size={13} color={Colors.primary} style={{ marginLeft: 4 }} />
+                    </TouchableOpacity>
+                  ))}
+              </View>
+            )}
+          </View>
+        )}
+
         <CustomButton
           title="Continue"
           onPress={handleContinue}
@@ -101,6 +193,7 @@ export default function HealthGoalsScreen() {
           style={styles.continueButton}
         />
       </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
@@ -114,7 +207,7 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     paddingHorizontal: 20,
     paddingTop: 20,
-    paddingBottom: 20,
+    paddingBottom: 60,
   },
   backButton: {
     marginBottom: 16,
@@ -134,9 +227,88 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   optionsContainer: {
-    marginBottom: 24,
+    marginBottom: 12,
   },
   continueButton: {
     marginBottom: 20,
+  },
+  conditionBox: {
+    backgroundColor: Colors.backgroundLight,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    padding: 16,
+    marginBottom: 24,
+  },
+  conditionTitle: {
+    fontSize: 15,
+    fontWeight: '600',
+    fontFamily: Fonts.semibold,
+    color: Colors.textPrimary,
+    marginBottom: 4,
+  },
+  conditionSubtitle: {
+    fontSize: 13,
+    fontFamily: Fonts.regular,
+    color: Colors.textSecondary,
+    marginBottom: 14,
+  },
+  chipRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginBottom: 12,
+  },
+  chip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 14,
+    paddingVertical: 7,
+    borderRadius: 20,
+    borderWidth: 1.5,
+    borderColor: Colors.border,
+    backgroundColor: Colors.background,
+  },
+  chipActive: {
+    borderColor: Colors.primary,
+    backgroundColor: '#f0fdf4',
+  },
+  chipText: {
+    fontSize: 13,
+    fontFamily: Fonts.regular,
+    color: Colors.textSecondary,
+  },
+  chipTextActive: {
+    color: Colors.primary,
+    fontFamily: Fonts.semibold,
+  },
+  customRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 8,
+  },
+  customInput: {
+    flex: 1,
+    height: 42,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    paddingHorizontal: 12,
+    fontSize: 14,
+    fontFamily: Fonts.regular,
+    color: Colors.textPrimary,
+    backgroundColor: Colors.background,
+  },
+  addBtn: {
+    width: 42,
+    height: 42,
+    borderRadius: 10,
+    backgroundColor: Colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  addBtnDisabled: {
+    backgroundColor: Colors.border,
   },
 });
