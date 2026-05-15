@@ -99,6 +99,7 @@ PRACTICALITY RULES (strictly follow these):
 - Breakfast must be a quick-prep meal: e.g., anda (boiled/fried/omelette), paratha, bread with dahi or chutney, dalia (porridge), fruits.
 - Lunch should be a simple home-cooked meal: e.g., roti with daal, sabzi, aloo, chawal with a simple curry. For muscle-building goals, include a meat or chicken dish here.
 - Snacks must be light: e.g., fruits, dahi, nuts, lassi, roasted chana.
+- Unless the user is gluten-free, ANY curry dish (karahi, daal, sabzi, aloo, keema, nihari, etc.) at lunch or dinner MUST be paired with roti or chapati on the same dish line or as a companion dish on the next line. Do not serve a curry alone without bread. Example: "Chicken Karahi | 1 serving + 2 roti".
 - The overall plan should feel like something a real Pakistani household would eat in one day — not a restaurant menu.
 
 Use Urdu food names alongside English where helpful (e.g., "Dal Chawal (Lentils & Rice)").
