@@ -83,6 +83,8 @@ Example:
 
 Do NOT change this format. Do NOT use any other separators or layouts for dish lines.
 
+HEADING FORMAT (NON-NEGOTIABLE): Section headings MUST be EXACTLY one of these four — **Breakfast**, **Lunch**, **Dinner**, **Snacks** — on their own line with NOTHING else. No calorie hints, no colons, no descriptions, no parentheses. WRONG: "**Breakfast (~400 kcal)**" or "**Breakfast:**" or "## Breakfast". CORRECT: "**Breakfast**".
+
 At the bottom, include a **Daily Total** row with sum of all meals' calories, protein, carbs, fat.
 
 CALORIE RULE: If the user has a daily calorie target, the daily total MUST be within ±10% of that target.
