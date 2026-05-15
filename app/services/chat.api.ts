@@ -51,6 +51,11 @@ export const chatAPI = {
   }, dailyCalorieGoal?: number): UserContext => {
     const context: UserContext = {};
 
+    // Add name
+    if (onboardingData.basicInfo?.fullName) {
+      context.name = onboardingData.basicInfo.fullName;
+    }
+
     // Add health goals
     if (onboardingData.healthGoals && onboardingData.healthGoals.length > 0) {
       context.health_goals = onboardingData.healthGoals;
@@ -109,9 +114,24 @@ export const chatAPI = {
       if (onboardingData.dietaryPreferences.other) {
         restrictions.push(onboardingData.dietaryPreferences.other);
       }
+      // Medical conditions (from manage-condition goal)
+      const conditions = onboardingData.dietaryPreferences.medicalConditions;
+      if (conditions && conditions.length > 0) {
+        restrictions.push(...conditions);
+      }
     }
     if (restrictions.length > 0) {
       context.dietary_restrictions = restrictions;
+    }
+
+    // Build meal preferences list; default to all meals if none selected
+    if (onboardingData.mealPreferences) {
+      const meals: string[] = [];
+      if (onboardingData.mealPreferences.breakfast) meals.push('breakfast');
+      if (onboardingData.mealPreferences.lunch) meals.push('lunch');
+      if (onboardingData.mealPreferences.dinner) meals.push('dinner');
+      if (onboardingData.mealPreferences.snacks) meals.push('snacks');
+      context.meal_preferences = meals.length > 0 ? meals : ['breakfast', 'lunch', 'dinner', 'snacks'];
     }
 
     if (dailyCalorieGoal) {

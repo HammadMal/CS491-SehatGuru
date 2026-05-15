@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect, useContext, useMemo } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet,
   KeyboardAvoidingView, Platform, ActivityIndicator, Alert, Keyboard,
-  Modal, FlatList, Animated,
+  Modal, FlatList, Animated, Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -123,7 +123,8 @@ export default function ChatbotScreen() {
   };
 
   const handleDeleteSession = (id: string) => {
-    setPendingDeleteSessionId(id);
+    setHistoryVisible(false);
+    setTimeout(() => setPendingDeleteSessionId(id), 300);
   };
 
   const formatDate = (iso: string) => {
@@ -266,16 +267,8 @@ export default function ChatbotScreen() {
           </TouchableOpacity>
 
           <View style={styles.headerCenter}>
-            <View style={styles.headerAvatarWrap}>
-              <View style={styles.headerAvatar}>
-                <MaterialCommunityIcons name="robot-outline" size={19} color="#fff" />
-              </View>
-              <View style={styles.onlineDot} />
-            </View>
-            <View>
-              <Text style={styles.headerTitle}>SehatGuru</Text>
-              <Text style={styles.headerSub}>Nutrition Expert · AI</Text>
-            </View>
+            <Text style={styles.headerTitle}>SehatGuru</Text>
+            <Text style={styles.headerSub}>Nutrition Expert · AI</Text>
           </View>
 
           <TouchableOpacity style={styles.headerBtn} onPress={() => setHistoryVisible(true)}>
@@ -304,11 +297,10 @@ export default function ChatbotScreen() {
             <View style={styles.empty}>
               <View style={styles.emptyAvatarRing}>
                 <View style={styles.emptyAvatarInner}>
-                  <MaterialCommunityIcons name="robot-outline" size={46} color={Colors.primary} />
+                  <Image source={require('../../assets/images/Guru.png')} style={{ width: 64, height: 64 }} resizeMode="contain" />
                 </View>
               </View>
-              <Text style={styles.emptyTitle}>SehatGuru</Text>
-              <Text style={styles.emptySub}>Your Pakistani nutrition expert</Text>
+              <Text style={styles.emptySub}>Ask me anything about nutrition,{'\n'}meal plans, or Pakistani cuisine!</Text>
 
               <Text style={styles.tryLabel}>Try asking</Text>
               <ScrollView
@@ -351,7 +343,7 @@ export default function ChatbotScreen() {
           {isLoading && (
             <View style={styles.typingRow}>
               <View style={styles.typingAvatar}>
-                <MaterialCommunityIcons name="robot-outline" size={13} color="#fff" />
+                <Image source={require('../../assets/images/Guru.png')} style={{ width: 26, height: 26, borderRadius: 13 }} resizeMode="contain" />
               </View>
               <View style={styles.typingBubble}>
                 <View style={styles.dots}>
@@ -532,7 +524,7 @@ const styles = StyleSheet.create({
     backgroundColor: `${Colors.primary}12`,
     alignItems: 'center', justifyContent: 'center',
   },
-  headerCenter: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  headerCenter: { flex: 1, flexDirection: 'column', alignItems: 'center' },
   headerAvatarWrap: { position: 'relative' },
   headerAvatar: {
     width: 38, height: 38, borderRadius: 19,
@@ -599,7 +591,7 @@ const styles = StyleSheet.create({
   },
   typingAvatar: {
     width: 26, height: 26, borderRadius: 13,
-    backgroundColor: Colors.primary,
+    backgroundColor: 'transparent',
     alignItems: 'center', justifyContent: 'center',
     shadowColor: Colors.primary, shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3, shadowRadius: 4, elevation: 3,

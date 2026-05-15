@@ -1,6 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Animated } from 'react-native';
-import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
+import { View, Text, StyleSheet, Animated, Image } from 'react-native';
 import Markdown from 'react-native-markdown-display';
 import type { Message } from '../types/chat.types';
 import { Colors } from '../constants/colors';
@@ -33,7 +32,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
       {/* Bot avatar dot */}
       {!isUser && (
         <View style={styles.botAvatar}>
-          <MaterialCommunityIcons name="robot-outline" size={13} color="#fff" />
+          <Image source={require('../assets/images/Guru.png')} style={{ width: 22, height: 22, borderRadius: 11 }} resizeMode="contain" />
         </View>
       )}
 
@@ -86,7 +85,7 @@ const styles = StyleSheet.create({
 
   botAvatar: {
     width: 26, height: 26, borderRadius: 13,
-    backgroundColor: Colors.primary,
+    backgroundColor: 'transparent',
     alignItems: 'center', justifyContent: 'center',
     flexShrink: 0,
     shadowColor: Colors.primary, shadowOffset: { width: 0, height: 2 },

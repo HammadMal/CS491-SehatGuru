@@ -1,6 +1,6 @@
 import type { MealPlanItem, MealType } from "../types/meal.types";
 
-type ParsedDish = Omit<MealPlanItem, "id" | "userId" | "logged" | "createdAt">;
+type ParsedDish = Omit<MealPlanItem, "id" | "userId" | "planId" | "logged" | "createdAt">;
 
 /**
  * Parses the meal plan markdown produced by the backend.
@@ -13,14 +13,16 @@ type ParsedDish = Omit<MealPlanItem, "id" | "userId" | "logged" | "createdAt">;
 export function parseMealPlan(markdown: string): ParsedDish[] {
   const results: ParsedDish[] = [];
 
-  // Match section headers: **Breakfast**, **Lunch**, **Dinner**, **Snacks** / **Snack**
-  const sectionRegex = /\*\*(Breakfast|Lunch|Dinner|Snacks?)\*\*/gi;
+  // Match section headers in any of these forms the LLM might produce:
+  //   **Breakfast**  |  **Breakfast (~400 kcal)**  |  **Breakfast:**  |  ## Breakfast
+  const sectionRegex =
+    /\*\*(Breakfast|Lunch|Dinner|Snacks?)[^*]*\*\*|^#{1,3}\s*(Breakfast|Lunch|Dinner|Snacks?)\b/gim;
   const sectionMatches = [...markdown.matchAll(sectionRegex)];
   if (sectionMatches.length === 0) return [];
 
   for (let i = 0; i < sectionMatches.length; i++) {
     const match = sectionMatches[i];
-    const rawLabel = match[1].toLowerCase();
+    const rawLabel = (match[1] || match[2]).toLowerCase();
 
     let mealType: MealType;
     if (rawLabel === "breakfast") mealType = "Breakfast";

@@ -72,6 +72,18 @@ class Mem0Service:
             logger.warning("[MEM0] search failed for user=%s: %s", user_id, e)
             return []
 
+    async def delete_all(self, user_id: str) -> None:
+        """Delete all stored memories for a user (called on account deletion)."""
+        try:
+            loop = asyncio.get_event_loop()
+            await loop.run_in_executor(
+                None,
+                partial(self._memory.delete_all, user_id=user_id),
+            )
+            logger.info("[MEM0] All memories deleted for user=%s", user_id)
+        except Exception as e:
+            logger.warning("[MEM0] delete_all failed for user=%s: %s", user_id, e)
+
     @staticmethod
     def format_for_prompt(memories: list) -> str:
         """Convert Mem0 search results to a bullet-point string for prompt injection.

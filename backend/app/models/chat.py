@@ -5,6 +5,7 @@ from typing import Optional, List, Dict, Any
 class UserContext(BaseModel):
     """User context for personalized responses"""
 
+    name: Optional[str] = Field(None, description="User's full name")
     health_goals: Optional[List[str]] = Field(
         None,
         description="User's health goals (e.g., 'weight_loss', 'muscle_gain', 'diabetes_management')"
@@ -12,6 +13,10 @@ class UserContext(BaseModel):
     dietary_restrictions: Optional[List[str]] = Field(
         None,
         description="Dietary restrictions (e.g., 'vegetarian', 'diabetic', 'low_sodium')"
+    )
+    meal_preferences: Optional[List[str]] = Field(
+        None,
+        description="Meals the user typically eats (e.g., ['breakfast', 'dinner'])"
     )
     daily_calorie_target: Optional[int] = Field(
         None,
