@@ -91,19 +91,28 @@ CALORIE RULE: If the user has a daily calorie target, the daily total MUST be wi
 If no target is given, aim for a balanced 1800-2200 kcal day.
 
 PRACTICALITY RULES (strictly follow these):
-- Prioritize simple, everyday Pakistani home meals that a person can realistically cook and eat on a weekday — e.g., anda (eggs), daal, sabzi (vegetable curry), roti, paratha, dahi (yogurt), chawal, khichdi, aloo dishes.
-- If the user's health goal is muscle building or high protein AND they have no vegetarian/vegan restriction, you MUST include at least one meat or poultry dish per day (e.g., murgh/chicken curry, aloo gosht, keema, fish curry) at lunch or dinner. Simple home-cooked meat dishes are NOT elaborate — they are everyday Pakistani meals and are not subject to the one-elaborate-dish limit.
-- If the user is vegetarian or vegan, NEVER include meat, poultry, or fish regardless of their fitness goals. Use high-protein vegetarian options instead (e.g., chana, daal, paneer, eggs if ovo-vegetarian, dahi).
-- If the user has a "gluten_free" restriction, NEVER include wheat-based dishes: no paratha, roti, naan, chapati, keema paratha, dal paratha, or any wheat bread. Also AVOID dishes that are traditionally only eaten with roti/naan and do not work well with rice — specifically nihari, haleem, and paya (these are bread-dependent dishes). Any curry dish (karahi, daal, sabzi, aloo) MUST be explicitly paired with chawal/rice or khichdi as the carb base, not served alone. Use rice-based options as the staple carbohydrate throughout the plan.
-- Elaborate restaurant-style dishes (Nihari, Biryani, Haleem, Paya, etc.) are time-consuming to prepare and should appear AT MOST ONCE in the entire day plan, only at dinner if needed. Never suggest more than one such dish per day.
-- Breakfast must be a quick-prep meal: e.g., anda (boiled/fried/omelette), paratha, bread with dahi or chutney, dalia (porridge), fruits.
-- Lunch should be a simple home-cooked meal: e.g., roti with daal, sabzi, aloo, chawal with a simple curry. For muscle-building goals, include a meat or chicken dish here.
-- Snacks must be light: e.g., fruits, dahi, nuts, lassi, roasted chana.
-- Unless the user is gluten-free, ANY curry dish (karahi, daal, sabzi, aloo, keema, nihari, etc.) at lunch or dinner MUST be paired with roti or chapati on the same dish line or as a companion dish on the next line. Do not serve a curry alone without bread. Example: "Chicken Karahi | 1 serving + 2 roti".
-- The overall plan should feel like something a real Pakistani household would eat in one day — not a restaurant menu.
+
+EVERYDAY HOME FOOD ONLY. This plan must feel like a real Pakistani household's weekday meals — not a restaurant menu.
+
+ALLOWED at lunch/dinner: daal, sabzi, aloo dishes, simple chicken curry (murgh salan), keema, fish curry, aloo gosht, chana, pulao (plain or simple matar pulao). These are everyday meals.
+ALLOWED at dinner only (max ONE per plan): Karahi, Qorma. These are richer but still home-cooked.
+NEVER in any regular meal plan: Nihari, Charga, Biryani, Haleem, Paya. These are party/restaurant dishes. Do not include them even if they appear in the retrieved context.
+
+- Breakfast: quick-prep only — anda (boiled/fried/bhurji/omelette), paratha, bread with dahi, dalia, or fruits. No curries at breakfast.
+- Lunch: simple home meal — roti with daal, sabzi, aloo, or a simple meat curry (chicken salan, keema, fish).
+- Dinner: home meal — can include one richer dish (karahi or qorma) if it fits the calorie target, otherwise keep it simple.
+- Snacks: light only — fruits, dahi, lassi, roasted chana, nuts.
+
+ROTI RULE: Roti and chapati are universal staples — they do NOT need to appear in the retrieved context, they are always available. Unless the user is gluten-free, every curry dish at lunch or dinner MUST include roti in the portion. Write it as: "Chicken Curry | 1 katori + 2 roti | 450 kcal | ..."
+
+MUSCLE BUILDING: If the health goal is muscle building and user is not vegetarian, include one simple high-protein meat dish per day (chicken curry, keema, aloo gosht, fish curry) at lunch or dinner.
+
+VEGETARIAN/VEGAN: Never include meat, poultry, or fish. Use chana, daal, paneer, eggs (if not vegan), dahi.
+
+GLUTEN-FREE: No paratha, roti, naan, chapati, or any wheat bread. No Nihari, Haleem, or Paya (bread-dependent). Pair all curries with chawal/rice instead of roti.
 
 Use Urdu food names alongside English where helpful (e.g., "Dal Chawal (Lentils & Rice)").
-Only use dishes listed in the retrieved context. If no suitable option exists for a slot, use a simple staple (e.g., plain roti with daal).
+Only use dishes listed in the retrieved context. Exception: roti/chapati is always available as a staple and can always be added to any curry portion even if not in the retrieved context.
 Each dish must appear AT MOST ONCE across the entire meal plan — do not repeat the same dish in multiple meal slots.
 If the User Memory section lists any food dislikes, those foods are FORBIDDEN from the meal plan.
 
@@ -358,15 +367,18 @@ async def retrieve_meal_plan_context(state: RouterState) -> dict:
         is_vegetarian = any("vegetarian" in r.lower() or "vegan" in r.lower() for r in dietary_restrictions)
         use_meat_queries = is_muscle_goal and not is_vegetarian
 
+        is_gluten_free = any("gluten" in r.lower() for r in dietary_restrictions)
+        bread_suffix = "" if is_gluten_free else " roti chapati"
+
         lunch_query = (
-            f"chicken murgh meat gosht keema high protein lunch curry roti {base_query}{preference_suffix}"
+            f"chicken murgh meat gosht keema high protein lunch curry{bread_suffix} {base_query}{preference_suffix}"
             if use_meat_queries else
-            f"simple everyday home cooked lunch daal sabzi roti chawal {base_query}{preference_suffix}"
+            f"simple everyday home cooked lunch daal sabzi{bread_suffix} chawal {base_query}{preference_suffix}"
         )
         dinner_query = (
-            f"chicken murgh meat gosht fish high protein dinner curry {base_query}{preference_suffix}"
+            f"chicken murgh meat gosht fish high protein dinner curry{bread_suffix} {base_query}{preference_suffix}"
             if use_meat_queries else
-            f"simple home dinner curry roti daal sabzi {base_query}{preference_suffix}"
+            f"simple home dinner curry{bread_suffix} daal sabzi {base_query}{preference_suffix}"
         )
 
         # Only fetch RAG context for meal slots the user actually eats
