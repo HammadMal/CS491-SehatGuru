@@ -55,3 +55,5 @@ torchvision==0.16.2
 Pillow==10.2.0
 numpy<2.0.0
 timm==0.9.12
+scikit-learn
+joblib

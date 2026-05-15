@@ -11,7 +11,7 @@ import logging
 from app.config.settings import settings
 from app.config.firebase import firebase_client
 from app.routes import auth, food, user, chat, feedback
-from app.ml.food_detector import initialize_detector
+from app.ml.food_detector import initialize_detector, initialize_ensemble_detector
 from app.middleware.auth import get_current_active_user
 
 # Configure logging for ML module
@@ -20,15 +20,19 @@ ml_logger = logging.getLogger('app.ml.food_detector')
 ml_logger.setLevel(logging.DEBUG)
 
 
-def resolve_food_model_path() -> str:
-    """Resolve configured model path relative to the project root when needed."""
-    configured_path = settings.FOOD_MODEL_PATH
+def resolve_project_path(configured_path: str) -> str:
+    """Resolve configured paths relative to the project root when needed."""
     if os.path.isabs(configured_path):
-        model_path = configured_path
-    else:
-        project_root = os.path.dirname(os.path.dirname(__file__))
-        model_path = os.path.join(project_root, configured_path)
+        return configured_path
 
+    project_root = os.path.dirname(os.path.dirname(__file__))
+    return os.path.join(project_root, configured_path)
+
+
+def resolve_food_model_path() -> str:
+    """Resolve configured ConvNeXt model path with the historical fallback."""
+    configured_path = settings.FOOD_MODEL_PATH
+    model_path = resolve_project_path(configured_path)
     if os.path.exists(model_path):
         return model_path
 
@@ -66,11 +70,28 @@ async def lifespan(app: FastAPI):
     # Initialize Food Detection Model
     try:
         model_path = resolve_food_model_path()
-        print(f"Loading food detection model from: {model_path}")
-        initialize_detector(
-            model_path,
-            low_confidence_threshold=settings.FOOD_MODEL_LOW_CONFIDENCE_THRESHOLD,
-        )
+        if settings.FOOD_USE_ENSEMBLE:
+            dinov2_model_path = resolve_project_path(settings.FOOD_DINOV2_MODEL_PATH)
+            blender_path = resolve_project_path(settings.FOOD_STACKING_BLENDER_PATH)
+            print("Loading ensemble food detection model")
+            print(f"  ConvNeXt: {model_path}")
+            print(f"  DINOv2: {dinov2_model_path}")
+            print(f"  Blender: {blender_path}")
+            initialize_ensemble_detector(
+                convnext_model_path=model_path,
+                dinov2_model_path=dinov2_model_path,
+                blender_path=blender_path,
+                low_confidence_threshold=settings.FOOD_MODEL_LOW_CONFIDENCE_THRESHOLD,
+                ensemble_low_confidence_threshold=settings.FOOD_ENSEMBLE_LOW_CONFIDENCE_THRESHOLD,
+                cascade_threshold=settings.FOOD_CASCADE_THRESHOLD,
+                dinov2_img_size=settings.FOOD_DINOV2_IMG_SIZE,
+            )
+        else:
+            print(f"Loading food detection model from: {model_path}")
+            initialize_detector(
+                model_path,
+                low_confidence_threshold=settings.FOOD_MODEL_LOW_CONFIDENCE_THRESHOLD,
+            )
         print("Food detection model initialized successfully")
     except Exception as e:
         print(f"Warning: Food detection model initialization failed: {str(e)}")
