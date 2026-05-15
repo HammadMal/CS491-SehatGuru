@@ -6,6 +6,7 @@ import logging
 import os
 from typing import Any, Optional
 
+import numpy as np
 from PIL import Image
 import torch
 import torch.nn as nn
@@ -20,6 +21,21 @@ else:
     _TIMM_IMPORT_ERROR = None
 
 logger = logging.getLogger(__name__)
+
+ENSEMBLE_WATCHLIST = {
+    "Aloo Sabzi",
+    "Chapli Kebab",
+    "Chicken Biryani",
+    "Chicken Karahi",
+    "Chicken Pulao",
+    "Haleem",
+    "Nihari",
+    "Paya",
+    "Saag",
+    "Sajji",
+    "Seekh Kebab",
+    "Shami Kebab",
+}
 
 
 DEFAULT_CLASS_NAMES = [
@@ -99,20 +115,37 @@ LEGACY_20_CLASS_NAMES = [
 ]
 
 
-class SehatGuruConvNeXt(nn.Module):
-    """ConvNeXt-Tiny backbone with the training-time SehatGuru head."""
+class SehatGuruTimmClassifier(nn.Module):
+    """Timm backbone with the training-time SehatGuru classifier head."""
 
-    def __init__(self, num_classes: int, head_layout: str = "sehatguru_50"):
+    def __init__(
+        self,
+        architecture: str,
+        num_classes: int,
+        head_layout: str = "sehatguru_50",
+        img_size: Optional[int] = None,
+    ):
         super().__init__()
         if timm is None:
             raise ImportError("timm is required for food vision inference") from _TIMM_IMPORT_ERROR
 
-        self.model = timm.create_model(
-            "convnext_tiny",
-            pretrained=False,
-            num_classes=0,
-            global_pool="avg",
-        )
+        self.architecture = architecture
+        model_kwargs = {
+            "pretrained": False,
+            "num_classes": 0,
+            "global_pool": "avg",
+        }
+        if img_size is not None and self._supports_img_size_arg(architecture):
+            model_kwargs["img_size"] = img_size
+
+        try:
+            self.model = timm.create_model(architecture, **model_kwargs)
+        except TypeError:
+            model_kwargs.pop("global_pool", None)
+            self.model = timm.create_model(
+                architecture,
+                **model_kwargs,
+            )
         feature_dim = self.model.num_features
         if head_layout == "legacy_dropout_first":
             self.head = nn.Sequential(
@@ -136,6 +169,27 @@ class SehatGuruConvNeXt(nn.Module):
         features = self.model(x)
         return self.head(features)
 
+    @staticmethod
+    def _supports_img_size_arg(architecture: str) -> bool:
+        architecture = architecture.lower()
+        return (
+            architecture.startswith("vit_")
+            or "dinov2" in architecture
+            or architecture.startswith("deit_")
+            or architecture.startswith("beit_")
+        )
+
+
+class SehatGuruConvNeXt(SehatGuruTimmClassifier):
+    """Backward-compatible alias for older imports/tests."""
+
+    def __init__(self, num_classes: int, head_layout: str = "sehatguru_50"):
+        super().__init__(
+            architecture="convnext_tiny",
+            num_classes=num_classes,
+            head_layout=head_layout,
+        )
+
 
 class FoodDetector:
     """Loads the trusted SehatGuru checkpoint and performs top-k inference."""
@@ -145,6 +199,7 @@ class FoodDetector:
         model_path: str,
         device: Optional[str] = None,
         low_confidence_threshold: float = 0.60,
+        img_size_override: Optional[int] = None,
     ):
         self.model_path = model_path
         self.device = device or ("cuda" if torch.cuda.is_available() else "cpu")
@@ -155,13 +210,16 @@ class FoodDetector:
         checkpoint = self._load_checkpoint(model_path)
         state_dict = self._extract_state_dict(checkpoint)
         self.class_names = self._extract_class_names(checkpoint, state_dict)
-        self.img_size = int(self._metadata_value(checkpoint, "img_size", 260) or 260)
+        self.img_size = int(img_size_override or self._metadata_value(checkpoint, "img_size", 260) or 260)
         self.metadata = self._extract_metadata(checkpoint)
+        self.architecture = str(self._metadata_value(checkpoint, "architecture", "convnext_tiny") or "convnext_tiny")
 
         self.head_layout = self._detect_head_layout(state_dict)
-        self.model = SehatGuruConvNeXt(
+        self.model = SehatGuruTimmClassifier(
+            architecture=self.architecture,
             num_classes=len(self.class_names),
             head_layout=self.head_layout,
+            img_size=self.img_size,
         )
         missing, unexpected = self.model.load_state_dict(state_dict, strict=False)
         if missing:
@@ -184,9 +242,10 @@ class FoodDetector:
         )
 
         logger.info(
-            "Food detector loaded from %s with %s classes, img_size=%s, head_layout=%s, device=%s",
+            "Food detector loaded from %s with %s classes, architecture=%s, img_size=%s, head_layout=%s, device=%s",
             model_path,
             len(self.class_names),
+            self.architecture,
             self.img_size,
             self.head_layout,
             self.device,
@@ -280,20 +339,8 @@ class FoodDetector:
 
     def predict(self, image: Image.Image, top_k: int = 5) -> dict[str, Any]:
         top_k = max(1, min(top_k, len(self.class_names)))
-        input_tensor = self.preprocess_image(image)
-
-        with torch.no_grad():
-            logits = self.model(input_tensor)
-            probabilities = torch.softmax(logits, dim=1)
-            values, indices = torch.topk(probabilities, k=top_k, dim=1)
-
-        top_predictions = [
-            {
-                "class": self.class_names[int(index.item())],
-                "confidence": float(value.item()),
-            }
-            for value, index in zip(values[0], indices[0])
-        ]
+        probabilities = self.predict_probabilities(image)
+        top_predictions = self._top_predictions_from_probabilities(probabilities, top_k)
         best = top_predictions[0]
         self._log_safety_diagnostics(top_predictions)
 
@@ -305,6 +352,34 @@ class FoodDetector:
             "top5": top_predictions,
             "model": self.metadata,
         }
+
+    def predict_probabilities(self, image: Image.Image) -> np.ndarray:
+        input_tensor = self.preprocess_image(image)
+
+        with torch.no_grad():
+            logits = self.model(input_tensor)
+            probabilities = torch.softmax(logits, dim=1).detach().cpu().numpy()
+
+        return probabilities
+
+    def _top_predictions_from_probabilities(
+        self,
+        probabilities: np.ndarray,
+        top_k: int,
+        class_names: Optional[list[str]] = None,
+    ) -> list[dict[str, Any]]:
+        names = class_names or self.class_names
+        top_k = max(1, min(top_k, len(names)))
+        row = probabilities[0]
+        indices = np.argsort(row)[::-1][:top_k]
+        top_predictions = [
+            {
+                "class": names[int(index)],
+                "confidence": float(row[int(index)]),
+            }
+            for index in indices
+        ]
+        return top_predictions
 
     def _log_safety_diagnostics(self, top_predictions: list[dict[str, Any]]) -> None:
         """Log the old camera safety checks without changing the model result."""
@@ -379,10 +454,162 @@ class FoodDetector:
         return self.predict(image, top_k=top_k)
 
 
-_detector: Optional[FoodDetector] = None
+class EnsembleFoodDetector:
+    """Cascading ConvNeXt + DINOv2 stacking ensemble."""
+
+    def __init__(
+        self,
+        convnext_model_path: str,
+        dinov2_model_path: str,
+        blender_path: str,
+        device: Optional[str] = None,
+        low_confidence_threshold: float = 0.60,
+        ensemble_low_confidence_threshold: float = 0.10,
+        cascade_threshold: float = 0.92,
+        dinov2_img_size: Optional[int] = None,
+        watchlist: Optional[set[str]] = None,
+    ):
+        try:
+            import joblib
+        except ImportError as exc:
+            raise ImportError("joblib is required for ensemble food detection") from exc
+
+        self.convnext = FoodDetector(
+            model_path=convnext_model_path,
+            device=device,
+            low_confidence_threshold=low_confidence_threshold,
+        )
+        self.dinov2 = FoodDetector(
+            model_path=dinov2_model_path,
+            device=self.convnext.device,
+            low_confidence_threshold=low_confidence_threshold,
+            img_size_override=dinov2_img_size,
+        )
+        self.device = self.convnext.device
+        self.low_confidence_threshold = low_confidence_threshold
+        self.ensemble_low_confidence_threshold = ensemble_low_confidence_threshold
+        self.cascade_threshold = cascade_threshold
+        self.watchlist = watchlist or ENSEMBLE_WATCHLIST
+
+        if not os.path.exists(blender_path):
+            raise FileNotFoundError(f"Stacking blender file not found: {blender_path}")
+
+        try:
+            payload = joblib.load(blender_path)
+        except ModuleNotFoundError as exc:
+            raise ImportError(
+                "Could not load stacking blender. Install backend requirements so "
+                "scikit-learn/joblib are available."
+            ) from exc
+        if not isinstance(payload, dict) or "model" not in payload or "class_names" not in payload:
+            raise ValueError("Blender joblib must contain 'model' and 'class_names'")
+
+        self.blender = payload["model"]
+        self.class_names = [str(name) for name in payload["class_names"]]
+        self.convnext_indices = self._build_class_index(self.convnext.class_names, "ConvNeXt")
+        self.dinov2_indices = self._build_class_index(self.dinov2.class_names, "DINOv2")
+        self.img_size = self.convnext.img_size
+        self.metadata = {
+            "architecture": "cascading_stacking_ensemble",
+            "convnext": self.convnext.metadata,
+            "dinov2": self.dinov2.metadata,
+            "blender_path": blender_path,
+            "cascade_threshold": cascade_threshold,
+            "ensemble_low_confidence_threshold": ensemble_low_confidence_threshold,
+            "watchlist": sorted(self.watchlist),
+            "num_classes": len(self.class_names),
+        }
+
+        logger.info(
+            "Ensemble food detector loaded with %s classes, cascade_threshold=%.2f, device=%s",
+            len(self.class_names),
+            self.cascade_threshold,
+            self.device,
+        )
+
+    def _build_class_index(self, source_class_names: list[str], source_name: str) -> list[int]:
+        missing = [name for name in self.class_names if name not in source_class_names]
+        if missing:
+            raise ValueError(
+                f"{source_name} checkpoint is missing blender classes: {missing[:10]}"
+            )
+        return [source_class_names.index(name) for name in self.class_names]
+
+    def _format_result(
+        self,
+        probabilities: np.ndarray,
+        top_k: int,
+        inference_path: str,
+        low_confidence_threshold: float,
+        extra_model_metadata: Optional[dict[str, Any]] = None,
+    ) -> dict[str, Any]:
+        top_k = max(1, min(top_k, len(self.class_names)))
+        top_predictions = self.convnext._top_predictions_from_probabilities(
+            probabilities,
+            top_k,
+            class_names=self.class_names,
+        )
+        best = top_predictions[0]
+        model_metadata = {
+            **self.metadata,
+            "inference_path": inference_path,
+        }
+        if extra_model_metadata:
+            model_metadata.update(extra_model_metadata)
+
+        return {
+            "success": True,
+            "predicted_class": best["class"],
+            "confidence": best["confidence"],
+            "low_confidence": best["confidence"] < low_confidence_threshold,
+            "top5": top_predictions,
+            "model": model_metadata,
+        }
+
+    def predict(self, image: Image.Image, top_k: int = 5) -> dict[str, Any]:
+        conv_probs_raw = self.convnext.predict_probabilities(image)
+        conv_aligned = conv_probs_raw[:, self.convnext_indices]
+        conv_pred_idx = int(np.argmax(conv_aligned[0]))
+        conv_conf = float(conv_aligned[0, conv_pred_idx])
+        conv_class = self.class_names[conv_pred_idx]
+
+        if conv_conf >= self.cascade_threshold and conv_class not in self.watchlist:
+            return self._format_result(
+                conv_aligned,
+                top_k,
+                inference_path="convnext_fast_path",
+                low_confidence_threshold=self.low_confidence_threshold,
+                extra_model_metadata={
+                    "convnext_confidence": conv_conf,
+                    "convnext_class": conv_class,
+                },
+            )
+
+        dino_probs_raw = self.dinov2.predict_probabilities(image)
+        dino_aligned = dino_probs_raw[:, self.dinov2_indices]
+        stacked_features = np.concatenate([conv_aligned, dino_aligned], axis=1)
+        final_probs = self.blender.predict_proba(stacked_features)
+
+        return self._format_result(
+            final_probs,
+            top_k,
+            inference_path="dinov2_blender_path",
+            low_confidence_threshold=self.ensemble_low_confidence_threshold,
+            extra_model_metadata={
+                "convnext_confidence": conv_conf,
+                "convnext_class": conv_class,
+            },
+        )
+
+    def predict_from_bytes(self, image_bytes: bytes, top_k: int = 5) -> dict[str, Any]:
+        image = Image.open(BytesIO(image_bytes))
+        return self.predict(image, top_k=top_k)
 
 
-def get_detector() -> FoodDetector:
+_detector: Optional[FoodDetector | EnsembleFoodDetector] = None
+
+
+def get_detector() -> FoodDetector | EnsembleFoodDetector:
     if _detector is None:
         raise RuntimeError("Food detector not initialized. Call initialize_detector() first.")
     return _detector
@@ -398,6 +625,29 @@ def initialize_detector(
         model_path=model_path,
         device=device,
         low_confidence_threshold=low_confidence_threshold,
+    )
+
+
+def initialize_ensemble_detector(
+    convnext_model_path: str,
+    dinov2_model_path: str,
+    blender_path: str,
+    device: Optional[str] = None,
+    low_confidence_threshold: float = 0.60,
+    ensemble_low_confidence_threshold: float = 0.10,
+    cascade_threshold: float = 0.92,
+    dinov2_img_size: Optional[int] = None,
+) -> None:
+    global _detector
+    _detector = EnsembleFoodDetector(
+        convnext_model_path=convnext_model_path,
+        dinov2_model_path=dinov2_model_path,
+        blender_path=blender_path,
+        device=device,
+        low_confidence_threshold=low_confidence_threshold,
+        ensemble_low_confidence_threshold=ensemble_low_confidence_threshold,
+        cascade_threshold=cascade_threshold,
+        dinov2_img_size=dinov2_img_size,
     )
 
 

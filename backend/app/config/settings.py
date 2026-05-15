@@ -81,8 +81,14 @@ class Settings(BaseSettings):
     MEM0_CHROMA_DIR: str = "./chroma_db_mem0"
 
     # Food vision model
-    FOOD_MODEL_PATH: str = "model/SehatGuru_ConvNeXt_50_best_macroF1.pth"
+    FOOD_MODEL_PATH: str = "model/SehatGuru_ConvNeXt_50_capped300_best_macroF1.pth"
     FOOD_MODEL_LOW_CONFIDENCE_THRESHOLD: float = 0.60
+    FOOD_USE_ENSEMBLE: bool = True
+    FOOD_DINOV2_MODEL_PATH: str = "model/SehatGuru_DINOv2_50_capped300_best_macroF1.pth"
+    FOOD_STACKING_BLENDER_PATH: str = "model/stacked_convnext_dinov2_logreg_blender.joblib"
+    FOOD_DINOV2_IMG_SIZE: int = 252
+    FOOD_CASCADE_THRESHOLD: float = 0.92
+    FOOD_ENSEMBLE_LOW_CONFIDENCE_THRESHOLD: float = 0.10
 
     # Self-Validation Settings
     ENABLE_RESPONSE_VALIDATION: bool = True
